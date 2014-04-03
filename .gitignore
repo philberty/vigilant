@@ -20,23 +20,22 @@
 *.exe
 *.out
 *.app
+*.pyc
 
 Makefile
 Makefile.in
+
+*.log
+src/test
+src/watcher
+src/config.h.in~
 libtool
 config.h
 config.h.in
-
 configure
-picklectl
-test
-
-picklejarFlask.c
-picklejarFlask.h
-
+src/watchy.pc
 aclocal.m4
 autom4te.cache/
-config.log
 config.status
 config/compile
 config/config.guess
@@ -52,4 +51,3 @@ ltoptions.m4
 ltsugar.m4
 ltversion.m4
 lt~obsolete.m4
-picklejar.pc

@@ -1,27 +1,18 @@
-bin_PROGRAMS = test$(EXEEXT) picklectl$(EXEEXT)
-lib_LTLIBRARIES = libpicklejar.la
+bin_PROGRAMS = test$(EXEEXT) watcher$(EXEEXT)
+lib_LTLIBRARIES = libwatchy.la
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = picklejar.pc
+pkgconfig_DATA = watchy.pc
 
-libpicklejar_cindludedir = $(includedir)/picklejar
-libpicklejar_cindlude_HEADERS = picklejar.h
+libwatchy_cindludedir = $(includedir)/watchy
+libwatchy_cindlude_HEADERS = watchy.h
+libwatchy_la_LDFLAGS = -rpath '$(libdir)'
+libwatchy_la_SOURCES = \
+	libwatchy.c \
+	osdep-@PLATFORM@.c
 
-libpicklejar_la_YFLAGS = -d
-libpicklejar_la_CFLAGS = $(json_CFLAGS) $(event_CFLAGS) $(py_CFLAGS)
-libpicklejar_la_LDFLAGS = -rpath '$(libdir)' $(json_LIBS) $(event_LIBS) $(py_LIBS)
-libpicklejar_la_SOURCES = \
-	picklejarFlask.pyx \
-	picklejar-api.c \
-	picklejar-restful.c \
-	picklejar-unix.c
-
-picklectl_SOURCES = picklectl.c
-picklectl_LDADD = libpicklejar.la
+watcher_SOURCES = watcher.c
+watcher_LDADD = libwatchy.la
 
 test_SOURCES = test.c
-test_LDADD = libpicklejar.la
-
-SUFFIXES = .pyx
-.pyx.c:
-	cython -2 -o $@ $<
+test_LDADD = libwatchy.la

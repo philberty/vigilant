@@ -1,0 +1,2 @@
+flask==0.10.1
+flask-socketio==0.3.2

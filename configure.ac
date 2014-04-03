@@ -6,6 +6,7 @@ AC_CONFIG_SRCDIR([src/test.c])
 AC_CONFIG_HEADER([src/config.h])
 dnl keep the autoconf generated stuff neatly in a folder 
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 AM_SANITY_CHECK
 
 dnl Last slash shouldn't be stripped if prefix=/
@@ -30,16 +31,27 @@ AM_PROG_CC_C_O
 AC_C_INLINE
 AC_CANONICAL_HOST
 
-AC_CHECK_PROG(CYTHON_CHECK,cython,yes)
-if test x"$CYTHON_CHECK" != x"yes" ; then
-   AC_MSG_ERROR([Please install cython])
+# Figure out the platform for osdep-*.c and forkpty-*.c.
+AC_MSG_CHECKING(platform)
+case "$host_os" in
+	*darwin*)
+		AC_MSG_RESULT(darwin)
+		PLATFORM=darwin
+		;;
+	*linux*)
+		AC_MSG_RESULT(linux)
+		PLATFORM=linux
+		;;
+	*)
+		AC_MSG_RESULT(unknown)
+		PLATFORM=unknown
+		;;	
+esac
+AC_SUBST(PLATFORM)
+
+if test "x$PLATFORM" == "xunknown"; then
+   AC_MSG_ERROR("Host Platform $PLATFORM unknown")
 fi
-PKG_CHECK_MODULES([py], [python], [],
-[
-  AC_ERROR([Couldn't find libpython.so])
-])
-AC_SUBST(py_CFLAGS)
-AC_SUBST(py_LIBS)
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_FILES([Makefile
@@ -51,6 +63,7 @@ echo "---"
 echo "Configuration summary for $PACKAGE_NAME version $VERSION"
 echo ""
 echo "   * Installation prefix:       $prefix"
+echo "   * Platform osdep:            osdep-$PLATFORM.c"
 echo "   * C Compiler:                $CC"
 echo "   * C++ Compiler:              $CXX"
 echo "   * C Flags:                   $CFLAGS"

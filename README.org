@@ -1,7 +1,6 @@
-* picklejar
-Shared memory database for Serialized data structures
-
-** Dependancies
-
-sudo apt-get install build-essential autoconf automake \
-  libtool libjson-c-dev libmicrohttpd-dev libevent-dev
+* Watchy
+Inspried by StatsD, an embedable library that will automatically
+watch your process from a single function call and will stop when
+your process stops. No need to externally start a process to watch
+and send stats. Its efficient and simple and easy to use is 100% the
+goal of this project.

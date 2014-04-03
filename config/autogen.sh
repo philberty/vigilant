@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-autoreconf -v --install | exit 1
+autoreconf -v --force --install | exit 1

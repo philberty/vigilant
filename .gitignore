@@ -1,0 +1,55 @@
+# Object files
+*.o
+*.ko
+*.lo
+.
+# Libraries
+*.lib
+*.a
+*.la
+.deps
+.libs
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+Makefile
+Makefile.in
+libtool
+config.h
+config.h.in
+
+configure
+picklectl
+test
+
+picklejarFlask.c
+picklejarFlask.h
+
+aclocal.m4
+autom4te.cache/
+config.log
+config.status
+config/compile
+config/config.guess
+config/config.sub
+config/depcomp
+config/install-sh
+config/ltmain.sh
+config/missing
+config/ylwrap
+src/stamp-h1
+libtool.m4
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
+picklejar.pc

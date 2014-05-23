@@ -12,12 +12,12 @@ if pkgconfig.exists ('watchy') is False:
     sys.exit (1)
 watchy = pkgconfig.parse ('watchy')
 extensions = [
-    Extension ('watchy', ['bindings/python/watchy.pyx'],
+    Extension ('pywatchy', ['bindings/python/pywatchy.pyx'],
                include_dirs = list (watchy ['include_dirs']),
                libraries = list (watchy ['libraries']),
-               library_dirs = list (watchy ['library_dirs']))
+               library_dirs = list (watchy ['library_dirs']),
+               runtime_library_dirs = list (watchy ['library_dirs']))
 ]
-
 install_reqs = parse_requirements ('./requirements.txt')
 reqs = [str(ir.req) for ir in install_reqs]
 setup (

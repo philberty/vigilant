@@ -16,18 +16,23 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+// this is a very basic protocol thsi is the size of every object
+// means the server can simly .read (256) and you know you will
+// get all the data no need to keep reading etc..
 #define WTCY_PACKET_SIZE 256
 
 #ifndef nitems
 # define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
+static bool running = false;
 static int watchy_socket (const char *, const int, int * const, struct sockaddr_in * const);
 static const char * watchy_error_strings [] = {
   [WTCY_NO_ERROR]   = "no error",
   [WTCY_NEXIST_PID] = "specified pid does not exist",
   [WTCY_FORK_FAIL]  = "fork of runtime has failed",
   [WTCY_SOCK_FAIL]  = "create socket failed see errno",
+  [WTCY_IS_RUNNING] = "watch me is already running",
   [WTCY_UNKNOWN]    = "unknown error code",
 };
 
@@ -97,6 +102,10 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
 int
 watchy_watchme (const char * name, const char * bind, const int port)
 {
+  if (running)
+    return WTCY_IS_RUNNING;
+  running = true;
+
   int sockfd;
   struct sockaddr_in servaddr;
   memset (&servaddr, 0, sizeof (servaddr));

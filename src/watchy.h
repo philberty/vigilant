@@ -12,7 +12,8 @@
 #define WTCY_NEXIST_PID 1
 #define WTCY_FORK_FAIL  2
 #define WTCY_SOCK_FAIL  3
-#define WTCY_UNKNOWN    4
+#define WTCY_IS_RUNNING 4
+#define WTCY_UNKNOWN    5
 
 struct watchy_data {
   char pname [32];

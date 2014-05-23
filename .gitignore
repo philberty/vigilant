@@ -25,7 +25,7 @@
 Makefile
 Makefile.in
 build/
-bindings/python/watchy.c
+bindings/python/pywatchy.c
 *.log
 src/test
 src/watcher

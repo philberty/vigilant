@@ -29,6 +29,7 @@ Now the shared library is installed
 $ sudo pip install -r requirements.txt
 $ # the python setup.py will create the cython module but it requires pkg-config watchy to work
 $ python setup.py build
+$ # sudo -E so it will export PKG_CONFIG_PATH
 $ sudo -E python setup.py install
 #+END_SRC
 
@@ -142,6 +143,12 @@ a very minimal runtime going on and very tiny footprint.
 
 Currently there is work on a cython module, a java module is planned.
 
+#+BEGIN_SRC python
+import pywatchy
+help (pywatchy)
+
+pywatchy.PyWatchy_WatchMe ('name', 'host', port)
+#+END_SRC
 
 *** Platform Support
 

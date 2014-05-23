@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <errno.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -83,8 +84,8 @@ int main (int argc, char **argv)
       return -1;
     }
 
-  size_t offs = 0;
-  pid_t pids [argc - optind];
+  size_t offs = 0, plen = argc - optind;
+  pid_t pids [plen];
   memset (&pids, 0, sizeof (pids));
 
   while (optind < argc)
@@ -98,19 +99,26 @@ int main (int argc, char **argv)
       memset (value, 0, len);
 
       char * p = strchr (pair, ':');
-      size_t offs = p - pair + 1;
-      if (offs >= len || offs == 0)
+      size_t poffs = p - pair + 1;
+      if (poffs >= len || poffs == 0)
 	{
 	  fprintf (stderr, "Pid pair [%s] seems invalid\n", pair);
 	  continue;
 	}
 
-      strncpy (key, pair, offs - 1);
-      strncpy (value, pair + offs, len - offs);
+      strncpy (key, pair, poffs - 1);
+      strncpy (value, pair + poffs, len - poffs);
       const pid_t ipid = atoi (value);
 
       printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n",
 	      ipid, key, bind, port);
+      int rkill = kill (ipid, 0);
+      if (rkill != 0)
+	{
+	  fprintf (stderr, "pid [%i] invalid [%s]\n", ipid, strerror (errno));
+	  continue;
+	}
+
       pids [offs] = fork ();
       switch (pids [offs])
 	{
@@ -137,7 +145,7 @@ int main (int argc, char **argv)
 
   // don't care about error conditions here
   size_t i;
-  for (i = 0; i < offs; ++ i)
+  for (i = 0; i < plen; ++ i)
     waitpid (pids [i], NULL, 0);
   return 0;
 }

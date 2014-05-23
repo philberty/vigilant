@@ -1,6 +1,3 @@
-AC_PREREQ(2.59)
-AC_REVISION($Revision$)
-
 AC_INIT(watchy, 0.01, https://github.com/redbrain/watchy)
 AC_CONFIG_SRCDIR([src/test.c])
 AC_CONFIG_HEADER([src/config.h])
@@ -15,8 +12,6 @@ if test "$prefix" != "/"; then
 fi 
 
 dnl Checks for programs.
-AC_DEFINE_UNQUOTED([CONFIG_CC], "$CC", [C Compiler used])
-AC_PROG_INSTALL
 AC_PROG_CC
 AC_PROG_CXX
 
@@ -24,6 +19,7 @@ AC_EXEEXT
 AC_GNU_SOURCE
 AC_PROG_INSTALL
 
+AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 

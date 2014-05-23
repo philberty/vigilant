@@ -99,9 +99,14 @@ int main (int argc, char **argv)
 
       char * p = strchr (pair, ':');
       size_t offs = p - pair + 1;
+      if (offs >= len || offs == 0)
+	{
+	  fprintf (stderr, "Pid pair [%s] seems invalid\n", pair);
+	  continue;
+	}
+
       strncpy (key, pair, offs - 1);
       strncpy (value, pair + offs, len - offs);
-
       const pid_t ipid = atoi (value);
 
       printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n",

@@ -4,3 +4,167 @@ watch your process from a single function call and will stop when
 your process stops. No need to externally start a process to watch
 and send stats. Its efficient and simple and easy to use is 100% the
 goal of this project.
+
+** Compilation
+
+To compile and setup the system:
+
+#+BEGIN_SRC bash
+$ autoreconf --force --install
+$ ./configure CC=clang/gcc CFLAGS="-g -O2 -Wall" --prefix=/opt/watchy
+$ make
+$ make install
+#+END_SRC
+
+To compile using the library use:
+
+#+BEGIN_SRC bash
+$ export PKG_CONFIG_PATH=/opt/watchy/lib/pkgconfig:$PKG_CONFIG_PATH
+$ pkg-config watchy --cflags --libs
+#+END_SRC
+
+Now the shared library is installed
+
+#+BEGIN_SRC bash
+$ python setup.py build
+$ sudo python setup.py install
+#+END_SRC
+
+** Usage
+
+Firstly you should setup the server open /etc/watchy/watchy.cfg
+
+#+BEGIN_SRC bash
+[watchyd]
+web_bind = 0.0.0.0     # address to bind to for web app
+web_port = 7777        # port to serve the web app
+stats_bind = localhost # stats aggregator bind
+stats_port = 7878      # stats aggregator port
+backends = none        # This is in progress to store stats
+#+END_SRC
+
+Now you can run the web app:
+
+#+BEGIN_SRC bash
+$ /usr/local/bin/watchy.py --help
+Usage: watchy.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -v, --version         Print version
+  -l LOGFILE, --logfile=LOGFILE
+                        Ouput logfile
+  -c CONFIG, --config=CONFIG
+                        Config file location
+  -F, --fork            Fork as daemon
+  -N NAME, --name=NAME  Logging name
+  -d, --debug           Verbose Debugging on of off
+
+$ /usr/local/bin/watchy.py -F -N watchy1 -l ./watchy-server.log -c /etc/watchy/watchy.cfg
+$ tail -f watchy-server.log 
+[watchy1] INFO  * Running on http://0.0.0.0:7777/
+[watchy1] INFO Starting StatsAggregator on localhost:7878
+...
+$ kill pid
+#+END_SRC
+
+Now you should be able to point your browser to http://localhost:7777, this is
+a python flask web application. A /etc/init.d script would be nice here,
+and a way to run it via nginx or apache etc for a more real setup.
+
+To Start getting stats about programs you can use the watcher program to watch,
+specified pids:
+
+#+BEGIN_SRC bash
+$ /opt/watchy/bin/watcher --help
+Usage: /opt/watchy/bin/watcher [options] pids...
+Options:
+        --help|-h       Print this help
+        --version|-v    Print version string
+        --port|-p       Port of server
+        --hostname|-b   Hostname of server
+
+$ /opt/watchy/bin/watcher -p 7878 -b localhost test1:1234 test2:<pid>
+$ C-c to kill it, it does not fork as daemon
+#+END_SRC
+
+Via the api, the api is very simple look at the src/test.c:
+
+#+BEGIN_SRC c
+int main (int argc, char **argv)
+{
+  assert (watchy_watchme ("test", "localhost", 7878) == WTCY_NO_ERROR);
+  int i;
+  for (i = 0; i < 2; ++i)
+    {
+      printf ("Look Busy %i\n", i+1);
+      sleep (5);
+    }
+  return 0;
+}
+#+END_SRC
+
+The funcion call watchy_watchme (name, host, port) forks a process to watch it,
+and will stop when your calling process stops. It doesn't interfear with your
+application ever. It doesn't contest resources anything. This is the only call
+you need to do.
+
+Other api call that is useful is :
+
+#+BEGIN_SRC c
+/* name, host, port, pid*/
+extern int watchy_watchpid (const char *, const char *, const int, const pid_t);
+#+END_SRC
+
+With this you can specify a pid to watchy, but this is a blocking call, you will
+need to run it in a thread or process.
+
+Each of these calls return an error code if it doesn't equal:
+
+#+BEGIN_SRC c
+#define WTCY_NO_ERROR   0
+#+END_SRC
+
+You can then get the error string via:
+
+#+BEGIN_SRC c
+extern const char * watchy_strerror (const int);
+#+END_SRC
+
+The returned string is not allocated so no need to free this. Whats interesting
+is this uses UDP so if your server isn't listening you won't get errors. This
+means there is very very little overhead with this library it at all. There is
+a very minimal runtime going on and very tiny footprint.
+
+** Language bindings - Python
+
+Currently there is work on a cython module, a java module is planned.
+
+
+*** Platform Support
+
+Currently the python server should run on anywhere that has flask and python 2.7,
+but the library has only been ported to darwin (Mac OSX) and linux (Ubuntu/RedHat).
+
+*BSD and Solaris support is eventually going to pop along.
+
+*** Metrics
+
+Currently it only gets very minimal statistics (memory, process state, nthreads)
+
+*** RestApi
+
+The Flask web app exposes a very simple rest api, a web socket api is planned for
+real time stats per node. All rest calls are json no xml support.
+
+  * http://host:port/api/keys - Get all node key names
+  * http://host:port/api/data/<node-name>, Get the current session raw data
+  * http://host:port/api/graph/<node-name>, Get the current session graph data
+
+The web socket api is going to be very useful
+
+*** Backends
+
+Currently there is no storage of stats data but real time ganglia consumer,
+an sqlite backend and mongo backend are all planned to be implemented. So
+you can have historial stats data into existing systems.

@@ -4,16 +4,21 @@ import json
 import traceback
 import ServerUtil
 
+from datetime import datetime
+
 from flask import Flask
 from flask import jsonify
 from flask import render_template
+from flask_sockets import Sockets
 
-from datetime import datetime
+from gevent.pywsgi import WSGIServer
+from geventwebsocket.handler import WebSocketHandler
 
 StatSession = { }
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
 sfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'static')
 app = Flask ('WatchyServer', template_folder=tfolder, static_folder=sfolder)
+sockets = Sockets (app)
 
 from StatsAggregator import UDPStatsServer
 
@@ -46,7 +51,7 @@ def getData (key):
     return jsonify ({'data':StatSession [key], 'len':len (StatSession [key])})
 
 @app.route ("/deps/<path:path>")
-def staticJavaScript (path):
+def statics (path):
     return app.send_static_file (path)
 
 class WatchyDServer:
@@ -61,7 +66,13 @@ class WatchyDServer:
         try:
             self.udp_server.daemon = True
             self.udp_server.start ()
-            app.run (host=self.web_bind, port=self.web_port)
+            ServerUtil.info ('WSGIServer:[gevent] starting http://%s:%i/' \
+                             % (self.web_bind, self.web_port))
+            http_server = WSGIServer ((self.web_bind, self.web_port),
+                                      app, handler_class = WebSocketHandler)
+            http_server.serve_forever()
+        except KeyboardInterrupt:
+            ServerUtil.warning ('Caught keyboard interupt stopping')
         except:
             ServerUtil.error ("%s" % traceback.format_exc ())
             ServerUtil.error ("%s" % sys.exc_info ()[1])

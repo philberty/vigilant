@@ -22,7 +22,6 @@ class UDPStatsServer (threading.Thread):
         threading.Thread.__init__ (self)
 
     def consume (self, data):
-        print data
         key = data ['name']
         if key not in StatSession:
             StatSession [key] = []

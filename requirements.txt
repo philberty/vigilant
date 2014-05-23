@@ -1,4 +1,5 @@
 flask==0.10.1
-flask-socketio==0.3.2
+flask-sockets==0.1
+gevent-websocket==0.9.3
 pkgconfig==1.1.0
 cython==0.20.1

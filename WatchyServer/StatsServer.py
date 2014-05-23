@@ -18,7 +18,7 @@ StatSession = { }
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
 sfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'static')
 app = Flask ('WatchyServer', template_folder=tfolder, static_folder=sfolder)
-sockets = Sockets (app)
+sockets = Sockets (app) # TODO websocket api for realtime data per key
 
 from StatsAggregator import UDPStatsServer
 
@@ -41,8 +41,7 @@ def getGraph (key):
         gpair = (jts.isoformat (), i ['memory'])
         data.append (gpair)
     return jsonify ({ 'ready':True, 'data': data, 'len' : len (data),
-                      'label':'Memory Usage of %s' % key
-                  })
+                      'label':'Memory Usage of %s' % key })
 
 @app.route ("/api/data/<path:key>")
 def getData (key):
@@ -62,7 +61,6 @@ class WatchyDServer:
         self.udp_server = UDPStatsServer (host=ubind, port=uport)
 
     def listen (self):
-        global app
         try:
             self.udp_server.daemon = True
             self.udp_server.start ()

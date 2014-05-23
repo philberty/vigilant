@@ -1,2 +1,4 @@
 flask==0.10.1
 flask-socketio==0.3.2
+pkgconfig==1.1.0
+cython==0.20.1

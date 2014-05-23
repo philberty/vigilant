@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: picklejar
-Description: Shared memory database
+Name: watchy
+Description: Stats aggregation without the aggravation
 Version: @VERSION@
 Requires:
-Libs:  -L${libdir} -lpicklejar
-Cflags: -I${includedir}/picklejar
+Libs:  -L${libdir} -lwatchy
+Cflags: -I${includedir}/watchy

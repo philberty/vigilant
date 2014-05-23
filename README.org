@@ -26,8 +26,10 @@ $ pkg-config watchy --cflags --libs
 Now the shared library is installed
 
 #+BEGIN_SRC bash
+$ sudo pip install -r requirements.txt
+$ # the python setup.py will create the cython module but it requires pkg-config watchy to work
 $ python setup.py build
-$ sudo python setup.py install
+$ sudo -E python setup.py install
 #+END_SRC
 
 ** Usage

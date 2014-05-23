@@ -1,13 +1,25 @@
 import sys
 import pkgconfig
+
 from distutils.core import setup
+from distutils.extension import Extension
+
 from Cython.Build import cythonize
+from pip.req import parse_requirements
 
 if pkgconfig.exists ('watchy') is False:
     print >> sys.stderr, "Make sure pkg-config watchy --cflags --libs works."
     sys.exit (1)
 watchy = pkgconfig.parse ('watchy')
+extensions = [
+    Extension ('watchy', ['bindings/python/watchy.pyx'],
+               include_dirs = list (watchy ['include_dirs']),
+               libraries = list (watchy ['libraries']),
+               library_dirs = list (watchy ['library_dirs']))
+]
 
+install_reqs = parse_requirements ('./requirements.txt')
+reqs = [str(ir.req) for ir in install_reqs]
 setup (
     name = "Watchy",
     version = "0.1",
@@ -16,10 +28,10 @@ setup (
     author_email = 'redbrain@gcc.gnu.org',
     license = "MIT",
     description = 'A stats agregation daemon over UDP',
-    ext_modules = cythonize ('pywatchy', ['bindings/python/watchy.pyx'],
-                             include_dirs = watchy ['include_dirs'],
-                             libraries = watchy ['libraries'],
-                             library_dirs = watchy ['library_dirs'])
+    platforms = ('Any',),
+    #FIXME: requires = reqs,
+    keywords = ('stats', 'web', 'monitoring', 'udp'),
+    ext_modules = cythonize (extensions),
     packages = ['WatchyServer'],
     scripts = ['watchy.py'],
     package_dir = {'WatchyServer': 'WatchyServer'},

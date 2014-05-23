@@ -16,7 +16,7 @@ static void print_version (const char *);
 static void
 print_help (const char * arg)
 {
-  printf ("Usage: %s [options] pids...\nOptions:\n", arg);
+  printf ("Usage: %s [options] name:pid name:pid...\nOptions:\n", arg);
   printf ("\t--help|-h\tPrint this help\n");
   printf ("\t--version|-v\tPrint version string\n");
   printf ("\t--port|-p\tPort of server\n");
@@ -71,14 +71,15 @@ int main (int argc, char **argv)
         }
     }
 
-  if (optind >= argc)
-    {
-      fprintf (stderr, "Please specify pids to watch");
-      return -1;
-    }
   if ((bind == NULL) || (port == 0))
     {
-      fprintf (stderr, "Stats destination bind and port unset see --help");
+      fprintf (stderr, "Stats destination bind and port unset see --help\n");
+      return -1;
+    }
+
+  if (optind >= argc)
+    {
+      fprintf (stderr, "Please specify pids to watch\n");
       return -1;
     }
 
@@ -88,27 +89,40 @@ int main (int argc, char **argv)
 
   while (optind < argc)
     {
-      const char * pid = argv [optind++];
-      const pid_t ipid = atoi (pid);
-      printf ("Trying to watch pid [%i] posting to [udp://%s:%i]\n", ipid, bind, port);
-      
+      const char * pair = argv [optind++];
+
+      size_t len = strlen (pair);
+      char key [len];
+      char value [len];
+      memset (key, 0, len);
+      memset (value, 0, len);
+
+      char * p = strchr (pair, ':');
+      size_t offs = p - pair + 1;
+      strncpy (key, pair, offs - 1);
+      strncpy (value, pair + offs, len - offs);
+
+      const pid_t ipid = atoi (value);
+
+      printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n",
+	      ipid, key, bind, port);
       pids [offs] = fork ();
       switch (pids [offs])
 	{
 	case -1:
 	  fprintf (stderr, "Error forking watcher for %i\n", ipid);
 	  break;
-	  
+
 	case 0:
 	  {
-	    int retval = watchy_watchpid ("test", bind, port, ipid);
+	    int retval = watchy_watchpid (key, bind, port, ipid);
 	    if (retval != WTCY_NO_ERROR)
 	      fprintf (stderr, "Error watching pid %i - %s\n",
 		       ipid, watchy_strerror (retval));
 	    exit (0);
 	  }
 	  break;
-	  
+
 	default:
 	  break;
 	}

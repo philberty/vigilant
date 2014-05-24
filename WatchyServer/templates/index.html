@@ -14,8 +14,33 @@
 
     <script type="text/javascript">
      $(function() {
-       function fetchDataSidebar () {
+       function fetchData () {
 	 $('.nav.nav-sidebar').empty ()
+	 $('.table.table-body').empty ()
+
+	 function appendTableElement (key) {
+	   $.ajax({
+	     url: "api/data/" + key,
+	     type: "GET",
+	     dataType: "json",
+	     success: function genRow (data) {
+	       var lelem = data ['data'][data ['len'] - 1]
+	       var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
+	       var host = lelem ['host'] ['host']
+	       var state = lelem ['state']
+	       if (state.length == 0) {
+		 state = 'Stopped';
+	       }
+	       tmpl = tmpl.replace ("__key__", key)
+	       tmpl = tmpl.replace ("__host__", host)
+	       tmpl = tmpl.replace ("__state__", state)
+	       tmpl = tmpl.replace ("__pid__", lelem ['pid'])
+	       tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+	       $('.table.table-body').append (tmpl)
+	     }
+	   });
+	 }
+
 	 var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
 	 $('.nav.nav-sidebar').append (ovr)
 
@@ -26,6 +51,7 @@
 	     tab = tab.replace ("__key__", skey)
 	     tab = tab.replace ("__key__", skey)
 	     $('.nav.nav-sidebar').append (tab)
+	     appendTableElement (skey)
 	   }
 	 }
 
@@ -36,46 +62,9 @@
 	   success: keyFetch
 	 });
        }
-       function fillDataTable () {
-	 function fillTable (keys) {
-	   $('.table.table-body').empty ()
-	   for (var i in keys ['keys']) {
-	     var skey = keys ['keys'][i]
 
-	     function genRow (data) {
-	       var tmpl = "<tr><td>" + skey + "</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
-	       var length = data ['len']
-	       var lelem = data ['data'][length - 1]
-	       tmpl = tmpl.replace ("__pid__", lelem ['pid'])
-	       var state = lelem ['state']
-	       if (state.length == 0) {
-		 state = 'Stopped'
-	       }
-	       tmpl = tmpl.replace ("__state__", state)
-	       tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
-	       $('.table.table-body').append (tmpl)
-	     }
-	     
-	     $.ajax({
-	       url: "api/data/" + skey,
-	       type: "GET",
-	       dataType: "json",
-	       success: genRow
-	     });
-	   }
-	 }
-
-         $.ajax({
-	   url: "api/keys",
-	   type: "GET",
-	   dataType: "json",
-	   success: fillTable
-	 });
-       }
-       fetchDataSidebar ()
-       fillDataTable ()
-       setInterval (fetchDataSidebar, 10000)
-       setInterval (fillDataTable, 8000)
+       fetchData ()
+       setInterval (fetchData, 10000)
      });
     </script>
   </head>
@@ -110,6 +99,7 @@
             <thead>
               <tr>
                 <th>Node</th>
+		<th>Host</th>
                 <th>Pid</th>
 		<th>State</th>
 		<th>Time</th>

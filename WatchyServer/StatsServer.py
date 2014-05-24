@@ -32,20 +32,23 @@ def graph ():
 
 @app.route ("/api/keys")
 def getKeys ():
-    return jsonify ({'keys':StatSession.keys ()})
+    nodes = StatSession.keys ()
+    return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/graph/<path:key>")
 def getGraph (key):
     if key not in StatSession:
         return jsonify ({'ready':False})
     data = []
+    labels = []
     for i in StatSession [key]:
         ts = str (i ['timeStamp'])
         jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
-        gpair = (jts.isoformat (), i ['memory'])
-        data.append (gpair)
-    return jsonify ({ 'ready':True, 'data': data, 'len' : len (data),
-                      'label':'Memory Usage of %s' % key })
+        labels.append (jts.isoformat ())
+        data.append (i ['memory'])
+    return jsonify ({ 'ready':True, 'len' : len (StatSession [key]),
+                      'name':'Memory Usage of %s' % key,
+                      'data': { 'labels':labels, 'data':data }})
 
 @app.route ("/api/data/<path:key>")
 def getData (key):

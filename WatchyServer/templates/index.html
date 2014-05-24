@@ -11,6 +11,8 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.0/spin.min.js"></script>
+    <script src="//fgnass.github.io/spin.js/jquery.spin.js"></script>
 
     <script type="text/javascript">
      $(function() {
@@ -26,7 +28,7 @@
 	     success: function genRow (data) {
 	       var lelem = data ['data'][data ['len'] - 1]
 	       var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
-	       var state = (state.length == 0) ? 'Stopped' : lelem ['state']
+	       var state = (lelem ['state'].length == 0) ? 'Stopped' : lelem ['state']
 	       var host = lelem ['host'] ['host']
 	       tmpl = tmpl.replace ("__key__", key)
 	       tmpl = tmpl.replace ("__host__", host)
@@ -42,6 +44,12 @@
 	 $('.nav.nav-sidebar').append (ovr)
 
 	 function keyFetch (jkeys) {
+	   if (jkeys ['len'] == 0) {
+	     $('.table.table-body').spin ()
+	   } else {
+	     $('.table.table-body').spin (false)
+	   }
+	   
 	   for (var i in jkeys ["keys"]) {
 	     var skey = jkeys ["keys"][i]
 	     var tab = "<li><a href=\"__key__\">__key__</a></li>"
@@ -59,7 +67,6 @@
 	   success: keyFetch
 	 });
        }
-
        fetchData ()
        setInterval (fetchData, 10000)
      });

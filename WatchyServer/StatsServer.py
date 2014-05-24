@@ -26,6 +26,10 @@ from StatsAggregator import UDPStatsServer
 def index ():
     return render_template ('index.html')
 
+@app.route ("/graph")
+def graph ():
+    return render_template ('graph.html')
+
 @app.route ("/api/keys")
 def getKeys ():
     return jsonify ({'keys':StatSession.keys ()})

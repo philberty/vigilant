@@ -26,11 +26,8 @@
 	     success: function genRow (data) {
 	       var lelem = data ['data'][data ['len'] - 1]
 	       var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
+	       var state = (state.length == 0) ? 'Stopped' : lelem ['state']
 	       var host = lelem ['host'] ['host']
-	       var state = lelem ['state']
-	       if (state.length == 0) {
-		 state = 'Stopped';
-	       }
 	       tmpl = tmpl.replace ("__key__", key)
 	       tmpl = tmpl.replace ("__host__", host)
 	       tmpl = tmpl.replace ("__state__", state)

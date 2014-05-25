@@ -22,7 +22,7 @@
 
 	 function appendTableElement (key) {
 	   $.ajax({
-	     url: "api/data/" + key,
+	     url: "/api/metrics/data/" + key,
 	     type: "GET",
 	     dataType: "json",
 	     success: function genRow (data) {
@@ -52,7 +52,7 @@
 	   
 	   for (var i in jkeys ["keys"]) {
 	     var skey = jkeys ["keys"][i]
-	     var tab = "<li><a href=\"__key__\">__key__</a></li>"
+	     var tab = "<li><a href=\"/metrics/__key__\">Stats [__key__]</a></li>"
 	     tab = tab.replace ("__key__", skey)
 	     tab = tab.replace ("__key__", skey)
 	     $('.nav.nav-sidebar').append (tab)
@@ -61,7 +61,7 @@
 	 }
 
 	 $.ajax({
-	   url: "api/keys",
+	   url: "/api/metrics/keys",
 	   type: "GET",
 	   dataType: "json",
 	   success: keyFetch
@@ -98,20 +98,33 @@
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	  <h1 class="page-header">Dashboard</h1>
-	  
-	  <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Node</th>
-		<th>Host</th>
-                <th>Pid</th>
-		<th>State</th>
-		<th>Time</th>
-              </tr>
-            </thead>
-            <tbody class="table table-body">
-	    </tbody>
-	  </table>
+
+	  <ul class="nav nav-tabs">
+	    <li class="active"><a href="#metrics" data-toggle="tab">Metrics</a></li>
+	    <li><a href="#procs" data-toggle="tab">Proccesses</a></li>
+	  </ul>
+    
+	  <!-- Tab panes -->
+	  <div class="tab-content">
+	    <div class="tab-pane fade in active" id="metrics">
+	      <table class="table table-striped">
+		<thead>
+		  <tr>
+                    <th>Node</th>
+		    <th>Host</th>
+                    <th>Pid</th>
+		    <th>State</th>
+		    <th>Time</th>
+		  </tr>
+		</thead>
+		<tbody class="table table-body">
+		</tbody>
+	      </table>
+	    </div>
+	    <div class="tab-pane fade in " id="procs">
+	      
+	    </div>
+	  </div>
 	  
         </div>
       </div>

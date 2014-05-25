@@ -26,16 +26,25 @@ from StatsAggregator import UDPStatsServer
 def index ():
     return render_template ('index.html')
 
-@app.route ("/graph")
-def graph ():
-    return render_template ('graph.html')
+@app.route ("/metrics/<path:key>")
+def graph (key):
+    return render_template ('graph.html', node=key)
 
-@app.route ("/api/keys")
+@app.route ("/procs/<path:key>")
+def proc (key):
+    return render_template ('proc.html', node=key)
+
+@app.route ("/api/procs/keys")
+def getProcs ():
+    procs = []
+    return jsonify ({'len':len (procs), 'keys':procs})
+
+@app.route ("/api/metrics/keys")
 def getKeys ():
     nodes = StatSession.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
-@app.route ("/api/graph/<path:key>")
+@app.route ("/api/metrics/graph/<path:key>")
 def getGraph (key):
     if key not in StatSession:
         return jsonify ({'ready':False})
@@ -50,7 +59,7 @@ def getGraph (key):
                       'name':'Memory Usage of %s' % key,
                       'data': { 'labels':labels, 'data':data }})
 
-@app.route ("/api/data/<path:key>")
+@app.route ("/api/metrics/data/<path:key>")
 def getData (key):
     if key not in StatSession:
         return jsonify ({'data':None, 'len':0})

@@ -20,6 +20,7 @@ print_help (const char * arg)
 {
   printf ("Usage: %s [options] name:pid name:pid...\nOptions:\n", arg);
   printf ("\t--help|-h\tPrint this help\n");
+  printf ("\t--key|-k\tKey to send host stats to\n");
   printf ("\t--version|-v\tPrint version string\n");
   printf ("\t--port|-p\tPort of server\n");
   printf ("\t--hostname|-b\tHostname of server\n");
@@ -34,8 +35,8 @@ print_version (const char * arg)
 
 int main (int argc, char **argv)
 {
-  char * bind = NULL;
   int c, port = 0;
+  char * bind = NULL, * key = NULL;
   while (1)
     {
       static struct option long_options [] = {
@@ -43,10 +44,11 @@ int main (int argc, char **argv)
         { "version",  no_argument,       0, 'v' },
         { "hostname", required_argument, 0, 'b' },
         { "port",     required_argument, 0, 'p' },
+	{ "key",      required_argument, 0, 'k' },
         { 0, 0, 0, 0 }
       };
       int option_index = 0;
-      c = getopt_long (argc, argv, "hvb:p:i:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hvb:p:i:k:", long_options, &option_index);
       if (c == -1)
         break;
 
@@ -68,6 +70,10 @@ int main (int argc, char **argv)
           port = atoi (optarg);
           break;
 
+	case 'k':
+	  key = strdup (optarg);
+	  break;
+
         default:
           break;
         }
@@ -81,8 +87,7 @@ int main (int argc, char **argv)
 
   if (optind >= argc)
     {
-      fprintf (stderr, "Please specify pids to watch\n");
-      return -1;
+      fprintf (stderr, "No proccess to watch will attempt to watch host if key is specified\n");
     }
 
   size_t offs = 0, plen = argc - optind;
@@ -142,7 +147,11 @@ int main (int argc, char **argv)
 	}
       offs++;
     }
+
+  if (key != NULL)
+    watchy_watchHost (key, bind, port);
   free (bind);
+  free (key);
 
   // don't care about error conditions here
   size_t i;

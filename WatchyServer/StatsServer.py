@@ -14,7 +14,8 @@ from flask_sockets import Sockets
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 
-StatSession = { }
+StatSession_Hosts = { }
+StatSession_Metrics = { }
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
 sfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'static')
 app = Flask ('WatchyServer', template_folder=tfolder, static_folder=sfolder)
@@ -30,40 +31,42 @@ def index ():
 def graph (key):
     return render_template ('graph.html', node=key)
 
-@app.route ("/procs/<path:key>")
-def proc (key):
-    return render_template ('proc.html', node=key)
-
-@app.route ("/api/procs/keys")
-def getProcs ():
-    procs = []
-    return jsonify ({'len':len (procs), 'keys':procs})
+@app.route ("/api/hosts/keys")
+def getHosts ():
+    nodes = StatSession_Hosts.keys ()
+    return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/metrics/keys")
 def getKeys ():
-    nodes = StatSession.keys ()
+    nodes = StatSession_Metrics.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/metrics/graph/<path:key>")
 def getGraph (key):
-    if key not in StatSession:
+    if key not in StatSession_Metrics:
         return jsonify ({'ready':False})
     data = []
     labels = []
-    for i in StatSession [key]:
+    for i in StatSession_Metrics [key]:
         ts = str (i ['timeStamp'])
         jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
         labels.append (jts.isoformat ())
         data.append (i ['memory'])
-    return jsonify ({ 'ready':True, 'len' : len (StatSession [key]),
+    return jsonify ({ 'ready':True, 'len' : len (StatSession_Metrics [key]),
                       'name':'Memory Usage of %s' % key,
                       'data': { 'labels':labels, 'data':data }})
 
 @app.route ("/api/metrics/data/<path:key>")
 def getData (key):
-    if key not in StatSession:
+    if key not in StatSession_Metrics:
         return jsonify ({'data':None, 'len':0})
-    return jsonify ({'data':StatSession [key], 'len':len (StatSession [key])})
+    return jsonify ({'data':StatSession_Metrics [key], 'len':len (StatSession_Metrics [key])})
+
+@app.route ("/api/hosts/data/<path:key>")
+def getHostData (key):
+    if key not in StatSession_Hosts:
+        return jsonify ({'data':None, 'len':0})
+    return jsonify ({'data':StatSession_Hosts [key], 'len':len (StatSession_Hosts [key])})
 
 @app.route ("/deps/<path:path>")
 def statics (path):

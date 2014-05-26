@@ -15,7 +15,9 @@
 #define WTCY_IS_RUNNING 4
 #define WTCY_UNKNOWN    5
 
+typedef enum { METRIC, HOST } WATCHY_TYPE;
 struct watchy_data {
+  WATCHY_TYPE T;
   char pname [32];
   char tsp [32];
   char status [16];
@@ -37,5 +39,7 @@ extern const char * watchy_strerror (const int);
 extern int watchy_watchme  (const char *, const char *, const int);
 // watch a specified pid [name, host, port, pid] - blocking
 extern int watchy_watchpid (const char *, const char *, const int, const pid_t);
+// watch the host system [name, host, port] - blocking
+extern int watchy_watchHost (const char *, const char *, const int);
 
 #endif //__WATCHY_H__

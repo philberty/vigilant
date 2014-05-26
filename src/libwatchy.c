@@ -25,6 +25,11 @@
 # define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
+/* OSDEP */
+extern void watchy_getStats (struct watchy_data * const, const pid_t);
+extern void watchy_getHostStats (struct watchy_data * const);
+/* -- -- -- */
+
 static bool running = false;
 static int watchy_socket (const char *, const int, int * const, struct sockaddr_in * const);
 static const char * watchy_error_strings [] = {
@@ -40,7 +45,7 @@ static const char * watchy_error_strings [] = {
 char *
 watchy_trim (const char * buffer, const size_t len)
 {
-  register char * rbuf = calloc (sizeof (char), len + 1);
+  char * rbuf = calloc (sizeof (char), len + 1);
 
   size_t s, e;
   for (s = 0; s < len; ++s)
@@ -86,14 +91,24 @@ watchy_socket (const char * bind, const int port, int * const sockfd,
 inline int
 watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, char * const buffer)
 {
+  char type [10];
+  memset (type, 0, sizeof (type));
+  if (stats->T == METRIC)
+    strcpy (type, "metric");
+  else if (stats->T == HOST)
+    strcpy (type, "host");
+  else
+    strcpy (type, "unknown");
+
   return snprintf (buffer, blen, "{ "
+		   "\"type\" : \"%s\", "
 		   "\"name\" : \"%s\", "
 		   "\"timeStamp\" : \"%s\", "
 		   "\"state\" : \"%s\", "
 		   "\"pid\" : %i, "
 		   "\"threads\" : %zi, "
 		   "\"memory\" : %i"
-		   " }",
+		   " }", type,
 		   stats->pname, stats->tsp,
 		   stats->status, stats->cpid,
 		   stats->nthreads, stats->memory);
@@ -198,5 +213,37 @@ watchy_watchpid (const char * name, const char * bind, const int port, const pid
     }
   close (sockfd);
 
+  return WTCY_NO_ERROR;
+}
+
+/* This blocks */
+int
+watchy_watchHost (const char * name, const char * bind, const int port)
+{
+  int sockfd;
+  struct sockaddr_in servaddr;
+  memset (&servaddr, 0, sizeof (servaddr));
+
+  int retval = watchy_socket (bind, port, &sockfd, &servaddr);
+  if (retval != WTCY_NO_ERROR)
+    return retval;
+
+  while (true)
+    {
+      struct watchy_data stats;
+      memset (&stats, 0, sizeof (stats));
+
+      watchy_getHostStats (&stats);
+      strncpy (stats.pname, name, sizeof (stats.pname));
+
+      char buffer [WTCY_PACKET_SIZE];
+      memset (buffer, 0, sizeof (buffer));
+      watchy_statsToJson (&stats, WTCY_PACKET_SIZE, buffer);
+      sendto (sockfd, buffer, WTCY_PACKET_SIZE, 0,
+	      (const struct sockaddr *) &servaddr, sizeof (servaddr));
+
+      sleep (1);
+    }
+  close (sockfd);
   return WTCY_NO_ERROR;
 }

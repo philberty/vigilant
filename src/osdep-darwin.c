@@ -5,10 +5,14 @@
 #include <time.h>
 #include <libproc.h>
 
+#include <sys/sysctl.h>
+#include <mach/vm_param.h>
+
 #include "watchy.h"
 
 void watchy_getStats (struct watchy_data * const stats, const pid_t ipid)
 {
+  stats->T = METRIC;
   stats->cpid = ipid;
 
   time_t ltime = time (NULL);
@@ -29,5 +33,22 @@ void watchy_getStats (struct watchy_data * const stats, const pid_t ipid)
 
   stats->memory = tinfo.pti_resident_size / 1024;
   stats->nthreads = tinfo.pti_threadnum;
+  strncpy (stats->status, "running", sizeof (stats->status));
+}
+
+void watchy_getHostStats (struct watchy_data * const stats)
+{
+  stats->T = HOST;
+
+  time_t ltime = time (NULL);
+  struct tm *tm;
+  tm = localtime (&ltime);
+
+  snprintf (stats->tsp, sizeof (stats->tsp),"%04d%02d%02d%02d%02d%02d",
+	    tm->tm_year+1900, tm->tm_mon, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+  // TODO sysctl is a fucking nightmare retarded api just too generic
+  stats->memory = 0;
   strncpy (stats->status, "running", sizeof (stats->status));
 }

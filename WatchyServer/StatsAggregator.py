@@ -5,7 +5,17 @@ import select
 import threading
 import traceback
 import ServerUtil
-from StatsServer import StatSession
+
+from StatsServer import StatSession_Hosts
+from StatsServer import StatSession_Metrics
+
+def consume (func):
+    def decorated (*args, **kwargs):
+        if hasattr (args [0], 'backend'):
+            # TODO consume to backend
+            pass
+        return func (*args, **kwargs)
+    return decorated
 
 class UDPStatsServer (threading.Thread):
     def __init__ (self, host='localhost', port=8080, climit=20, backend=None):
@@ -21,15 +31,34 @@ class UDPStatsServer (threading.Thread):
         self.serverSocket.setblocking (0)
         threading.Thread.__init__ (self)
 
+    @consume
+    def consumeMetric (self, key, data):
+        if key not in StatSession_Metrics:
+            StatSession_Metrics [key] = []
+        if len (StatSession_Metrics [key]) >= self.climit:
+            StatSession_Metrics [key] = StatSession_Metrics [key][1:]
+        StatSession_Metrics [key].append (data)
+    
+    @consume
+    def consumeHost (self, key, data):
+        if key not in StatSession_Hosts:
+            StatSession_Hosts [key] = []
+        if len (StatSession_Hosts [key]) >= self.climit:
+            StatSession_Hosts [key] = StatSession_Hosts [key][1:]
+        StatSession_Hosts [key].append (data)
+
     def consume (self, data):
-        key = data ['name']
-        if key not in StatSession:
-            StatSession [key] = []
-        if len (StatSession [key]) >= self.climit:
-            StatSession [key] = StatSession [key][1:]
-        StatSession [key].append (data)
-        if self.backend is not None:
-            self.backend.consume (key, data)
+        try:
+            key = data ['name']
+            which = data ['type']
+            if which == 'host':
+                self.consumeHost (key, data)
+            elif which == 'metric':
+                self.consumeMetric (key, data)
+            else:
+                ServerUtil.warning ('Invalid type [%s]' % which)
+        except:
+            pass
 
     def run (self):
         ServerUtil.info ("Starting StatsAggregator on %s:%s" % (self.host, self.port))

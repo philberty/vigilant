@@ -16,59 +16,109 @@
 
     <script type="text/javascript">
      $(function() {
-       function fetchData () {
-	 $('.nav.nav-sidebar').empty ()
-	 $('.table.table-body').empty ()
+       var timer = null
+       function fillSideBar_Metrics () {
+	 function metricsWrapper () {
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
+	   $('.table.table-body.metric').empty ()
+	   $('.nav.nav-sidebar').empty ()
+	   $('.nav.nav-sidebar').append (ovr)
 
-	 function appendTableElement (key) {
+	   function keyFetch (keys) {
+	     for (var i in keys ['keys']) {
+	       var key = keys ['keys'] [i]
+	       var tab = "<li><a href=\"/metrics/__key__\">Stats [__key__]</a></li>"
+	       tab = tab.replace ("__key__", key)
+	       tab = tab.replace ("__key__", key)
+	       $('.nav.nav-sidebar').append (tab)
+	       $.ajax({
+		 url: "/api/metrics/data/" + key,
+		 type: "GET",
+		 dataType: "json",
+		 success: function generateTableRow (data) {
+		   var lelem = data ['data'][data ['len'] - 1]
+		   var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
+		   var state = (lelem ['state'].length == 0) ? 'Stopped' : lelem ['state']
+		   var host = lelem ['host'] ['host']
+		   tmpl = tmpl.replace ("__key__", key)
+		   tmpl = tmpl.replace ("__host__", host)
+		   tmpl = tmpl.replace ("__state__", state)
+		   tmpl = tmpl.replace ("__pid__", lelem ['pid'])
+		   tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+		   $('.table.table-body.metric').append (tmpl)
+		 }
+	       });
+	     }
+	   }
 	   $.ajax({
-	     url: "/api/metrics/data/" + key,
+	     url: "/api/metrics/keys",
 	     type: "GET",
 	     dataType: "json",
-	     success: function genRow (data) {
-	       var lelem = data ['data'][data ['len'] - 1]
-	       var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
-	       var state = (lelem ['state'].length == 0) ? 'Stopped' : lelem ['state']
-	       var host = lelem ['host'] ['host']
-	       tmpl = tmpl.replace ("__key__", key)
-	       tmpl = tmpl.replace ("__host__", host)
-	       tmpl = tmpl.replace ("__state__", state)
-	       tmpl = tmpl.replace ("__pid__", lelem ['pid'])
-	       tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
-	       $('.table.table-body').append (tmpl)
-	     }
+	     success: keyFetch
 	   });
 	 }
-
-	 var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
-	 $('.nav.nav-sidebar').append (ovr)
-
-	 function keyFetch (jkeys) {
-	   if (jkeys ['len'] == 0) {
-	     $('.table.table-body').spin ()
-	   } else {
-	     $('.table.table-body').spin (false)
-	   }
-	   
-	   for (var i in jkeys ["keys"]) {
-	     var skey = jkeys ["keys"][i]
-	     var tab = "<li><a href=\"/metrics/__key__\">Stats [__key__]</a></li>"
-	     tab = tab.replace ("__key__", skey)
-	     tab = tab.replace ("__key__", skey)
-	     $('.nav.nav-sidebar').append (tab)
-	     appendTableElement (skey)
-	   }
-	 }
-
-	 $.ajax({
-	   url: "/api/metrics/keys",
-	   type: "GET",
-	   dataType: "json",
-	   success: keyFetch
-	 });
+	 metricsWrapper ()
+	 timer = setInterval (metricsWrapper, 8000)
        }
-       fetchData ()
-       setInterval (fetchData, 10000)
+       function fillSideBar_Hosts () {
+	 function hostsWrapper () {
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
+	   $('.table.table-body.hosts').empty ()
+	   $('.nav.nav-sidebar').empty ()
+	   $('.nav.nav-sidebar').append (ovr)
+
+	   function keyFetch (keys) {
+	     for (var i in keys ['keys']) {
+	       var key = keys ['keys'][i]
+	       var tab = "<li><a href=\"/host/__key__\">Stats [__key__]</a></li>"
+	       tab = tab.replace ("__key__", key)
+	       tab = tab.replace ("__key__", key)
+	       $('.nav.nav-sidebar').append (tab)
+	       $.ajax({
+		 url: "/api/hosts/data/" + key,
+		 type: "GET",
+		 dataType: "json",
+		 success: function generateTableRow (data){
+		   var lelem = data ['data'][data ['len'] - 1]
+		   var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__ts__</td></tr>"
+		   var host = lelem ['host'] ['host']
+		   tmpl = tmpl.replace ("__key__", key)
+		   tmpl = tmpl.replace ("__host__", host)
+		   tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+		   $('table.table-body.hosts').append (tmpl)
+		 }
+	       })
+	     }
+	   }
+
+	   $.ajax({
+	     url: "/api/hosts/keys",
+	     type: "GET",
+	     dataType: "json",
+	     success: keyFetch
+	   })
+	 }
+	 hostsWrapper ()
+	 timer = setInterval (hostsWrapper, 8000)
+       }
+       
+       // initially we are on index screen
+       fillSideBar_Metrics ()
+       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+	 clearInterval (timer)
+	 var func = null
+	 switch (e.target.text) {
+	   case "Metrics":
+	     func = fillSideBar_Metrics
+	     break;
+	   case "Hosts":
+	     func = fillSideBar_Hosts
+	     break;
+	   default:
+	     break;
+	 }
+	 func ()
+       })
      });
     </script>
   </head>
@@ -92,20 +142,19 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-            
-          </ul>
+          <ul class="nav nav-sidebar"></ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	  <h1 class="page-header">Dashboard</h1>
 
 	  <ul class="nav nav-tabs">
 	    <li class="active"><a href="#metrics" data-toggle="tab">Metrics</a></li>
-	    <li><a href="#procs" data-toggle="tab">Proccesses</a></li>
+	    <li><a href="#hosts" data-toggle="tab">Hosts</a></li>
 	  </ul>
     
 	  <!-- Tab panes -->
 	  <div class="tab-content">
+
 	    <div class="tab-pane fade in active" id="metrics">
 	      <table class="table table-striped">
 		<thead>
@@ -114,18 +163,29 @@
 		    <th>Host</th>
                     <th>Pid</th>
 		    <th>State</th>
-		    <th>Time</th>
+		    <th>Time Stamp</th>
 		  </tr>
 		</thead>
-		<tbody class="table table-body">
+		<tbody class="table table-body metric">
 		</tbody>
 	      </table>
 	    </div>
-	    <div class="tab-pane fade in " id="procs">
-	      
+
+	    <div class="tab-pane fade in" id="hosts">
+	      <table class="table table-striped">
+		<thead>
+		  <tr>
+                    <th>Node</th>
+		    <th>Host</th>
+		    <th>Time Stamp</th>
+		  </tr>
+		</thead>
+		<tbody class="table table-body hosts">
+		</tbody>
+	      </table>
 	    </div>
-	  </div>
-	  
+
+	  </div>	  
         </div>
       </div>
     </div>

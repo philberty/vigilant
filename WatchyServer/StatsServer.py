@@ -28,8 +28,12 @@ def index ():
     return render_template ('index.html')
 
 @app.route ("/metrics/<path:key>")
-def graph (key):
+def metricsGraph (key):
     return render_template ('graph.html', node=key)
+
+@app.route ("/hosts/<path:key>")
+def hostsGraph (key):
+    return render_template ('host.html', node=key)
 
 @app.route ("/api/hosts/keys")
 def getHosts ():
@@ -42,22 +46,31 @@ def getKeys ():
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/metrics/graph/<path:key>")
-def getGraph (key):
+def getMetricGraph (key):
     if key not in StatSession_Metrics:
         return jsonify ({'ready':False})
     data = []
-    labels = []
     for i in StatSession_Metrics [key]:
         ts = str (i ['timeStamp'])
         jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
-        labels.append (jts.isoformat ())
-        data.append (i ['memory'])
+        data.append ((jts.isoformat (), i ['memory']))
     return jsonify ({ 'ready':True, 'len' : len (StatSession_Metrics [key]),
-                      'name':'Memory Usage of %s' % key,
-                      'data': { 'labels':labels, 'data':data }})
+                      'label':'Memory Usage of %s' % key, 'data': data})
+
+@app.route ("/api/hosts/graph/<path:key>")
+def getHostGraph (key):
+    if key not in StatSession_Hosts:
+        return jsonify ({'ready':False})
+    data = []
+    for i in StatSession_Hosts [key]:
+        ts = str (i ['timeStamp'])
+        jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
+        data.append ((jts.isoformat (), i ['memory']))
+    return jsonify ({ 'ready':True, 'len' : len (StatSession_Hosts [key]),
+                      'label':'Memory Usage of %s' % key, 'data': data})
 
 @app.route ("/api/metrics/data/<path:key>")
-def getData (key):
+def getMetricData (key):
     if key not in StatSession_Metrics:
         return jsonify ({'data':None, 'len':0})
     return jsonify ({'data':StatSession_Metrics [key], 'len':len (StatSession_Metrics [key])})

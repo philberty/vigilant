@@ -138,6 +138,7 @@ int main (int argc, char **argv)
 	    if (retval != WTCY_NO_ERROR)
 	      fprintf (stderr, "Error watching pid %i - %s\n",
 		       ipid, watchy_strerror (retval));
+	    free (bind);
 	    exit (0);
 	  }
 	  break;
@@ -148,10 +149,11 @@ int main (int argc, char **argv)
       offs++;
     }
 
-  if (key != NULL)
+  if (key != NULL) {
     watchy_watchHost (key, bind, port);
+    free (key);
+  }
   free (bind);
-  free (key);
 
   // don't care about error conditions here
   size_t i;

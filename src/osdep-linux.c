@@ -78,6 +78,7 @@ void watchy_getStats (struct watchy_data * const stats, const pid_t ipid)
 void watchy_getHostStats (struct watchy_data * const stats)
 {
   stats->T = HOST;
+  strncpy (stats->status, "running", sizeof (stats->status));
 
   time_t ltime = time (NULL);
   struct tm *tm;
@@ -87,8 +88,49 @@ void watchy_getHostStats (struct watchy_data * const stats)
 	    tm->tm_year+1900, tm->tm_mon, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-  // TODO sysctl is a fucking nightmare retarded api just too generic
-  stats->memory = 0;
-  strncpy (stats->status, "running", sizeof (stats->status));
+  FILE * fd = fopen ("/proc/meminfo", "rb");
+  if (fd == NULL)
+    return;
+
+  size_t len = 0;
+  ssize_t read;
+  char * line = NULL;
+
+  int total = 0, tfree = 0;
+  while ((read = getline (&line, &len, fd)) != -1)
+    {
+      char key [len], value [len];
+      memset (key, 0, sizeof (key));
+      memset (value, 0, sizeof (value));
+
+      size_t i;
+      for (i = 0; i < len; ++i)
+	{
+	  if (line [i] == ':')
+	    break;
+	}
+      strncpy (key, line, i);
+
+      for (i += 1; i < len; ++i)
+	{
+	  if (isgraph (line [i]) && !isspace (line [i]))
+	    break;
+	}
+
+      size_t vlen = len - i;
+      strncpy (value, line + i, vlen);
+      char * tval = watchy_trim (value, vlen);
+      
+      if (!strcmp (key, "MemTotal"))
+	total = atoi (tval);
+      else if (!strcmp (key, "MemFree"))
+	tfree = atoi (tval);
+
+      free (tval);
+    }
+  if (line)
+    free (line);
+  fclose (fd);
+  stats->memory = total - tfree;
 }
 

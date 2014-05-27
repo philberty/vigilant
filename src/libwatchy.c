@@ -25,13 +25,7 @@
 # define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
-/* OSDEP */
-extern void watchy_getStats (struct watchy_data * const, const pid_t);
-extern void watchy_getHostStats (struct watchy_data * const);
-/* -- -- -- */
-
 static bool running = false;
-static int watchy_socket (const char *, const int, int * const, struct sockaddr_in * const);
 static const char * watchy_error_strings [] = {
   [WTCY_NO_ERROR]   = "no error",
   [WTCY_NEXIST_PID] = "specified pid does not exist",
@@ -68,7 +62,7 @@ watchy_strerror (const int code)
   return watchy_error_strings [WTCY_UNKNOWN];
 }
 
-static int
+int
 watchy_socket (const char * bind, const int port, int * const sockfd,
 	       struct sockaddr_in * const servaddr)
 {

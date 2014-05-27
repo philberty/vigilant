@@ -11,7 +11,6 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.0/spin.min.js"></script>
     <script src="//fgnass.github.io/spin.js/jquery.spin.js"></script>
 
     <script type="text/javascript">
@@ -19,15 +18,29 @@
        var timer = null
        function fillSideBar_Metrics () {
 	 function metricsWrapper () {
-	   var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview - Metrics</a></li>"
 	   $('.table.table-body.metric').empty ()
 	   $('.nav.nav-sidebar').empty ()
 	   $('.nav.nav-sidebar').append (ovr)
 
+	   function generateTableRow (key, data) {
+	     var lelem = data ['data'][data ['len'] - 1]
+	     var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
+	     var state = (lelem ['state'].length == 0) ? 'Stopped' : lelem ['state']
+	     var host = lelem ['host'] ['host']
+	     var key = lelem ['name']
+	     tmpl = tmpl.replace ("__key__", key)
+	     tmpl = tmpl.replace ("__host__", host)
+	     tmpl = tmpl.replace ("__state__", state)
+	     tmpl = tmpl.replace ("__pid__", lelem ['pid'])
+	     tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+	     $('.table.table-body.metric').append (tmpl)
+	   }
+
 	   function keyFetch (keys) {
 	     for (var i in keys ['keys']) {
 	       var key = keys ['keys'] [i]
-	       var tab = "<li><a href=\"/metrics/__key__\">Stats [__key__]</a></li>"
+	       var tab = "<li><a href=\"/metrics/__key__\">__key__</a></li>"
 	       tab = tab.replace ("__key__", key)
 	       tab = tab.replace ("__key__", key)
 	       $('.nav.nav-sidebar').append (tab)
@@ -35,17 +48,8 @@
 		 url: "/api/metrics/data/" + key,
 		 type: "GET",
 		 dataType: "json",
-		 success: function generateTableRow (data) {
-		   var lelem = data ['data'][data ['len'] - 1]
-		   var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__pid__</td><td>__state__</td><td>__ts__</td></tr>"
-		   var state = (lelem ['state'].length == 0) ? 'Stopped' : lelem ['state']
-		   var host = lelem ['host'] ['host']
-		   tmpl = tmpl.replace ("__key__", key)
-		   tmpl = tmpl.replace ("__host__", host)
-		   tmpl = tmpl.replace ("__state__", state)
-		   tmpl = tmpl.replace ("__pid__", lelem ['pid'])
-		   tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
-		   $('.table.table-body.metric').append (tmpl)
+		 success: function doit (data) {
+		   generateTableRow (key, data)
 		 }
 	       });
 	     }
@@ -62,15 +66,26 @@
        }
        function fillSideBar_Hosts () {
 	 function hostsWrapper () {
-	   var ovr = "<li class=\"active\"><a href=\"/\">Overview</a></li>"
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview - Hosts</a></li>"
 	   $('.table.table-body.hosts').empty ()
 	   $('.nav.nav-sidebar').empty ()
 	   $('.nav.nav-sidebar').append (ovr)
 
+	   function generateTableRow (data){
+	     var lelem = data ['data'][data ['len'] - 1]
+	     var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__ts__</td></tr>"
+	     var host = lelem ['host'] ['host']
+	     var key = lelem ['name']
+	     tmpl = tmpl.replace ("__key__", key)
+	     tmpl = tmpl.replace ("__host__", host)
+	     tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+	     $('.table.table-body.hosts').append (tmpl)
+	   }
+
 	   function keyFetch (keys) {
 	     for (var i in keys ['keys']) {
 	       var key = keys ['keys'][i]
-	       var tab = "<li><a href=\"/host/__key__\">Stats [__key__]</a></li>"
+	       var tab = "<li><a href=\"/hosts/__key__\">__key__</a></li>"
 	       tab = tab.replace ("__key__", key)
 	       tab = tab.replace ("__key__", key)
 	       $('.nav.nav-sidebar').append (tab)
@@ -78,15 +93,7 @@
 		 url: "/api/hosts/data/" + key,
 		 type: "GET",
 		 dataType: "json",
-		 success: function generateTableRow (data){
-		   var lelem = data ['data'][data ['len'] - 1]
-		   var tmpl = "<tr><td>__key__</td><td>__host__</td><td>__ts__</td></tr>"
-		   var host = lelem ['host'] ['host']
-		   tmpl = tmpl.replace ("__key__", key)
-		   tmpl = tmpl.replace ("__host__", host)
-		   tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
-		   $('table.table-body.hosts').append (tmpl)
-		 }
+		 success: generateTableRow
 	       })
 	     }
 	   }

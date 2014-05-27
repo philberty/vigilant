@@ -25,6 +25,9 @@
 // get all the data no need to keep reading etc..
 #define WTCY_PACKET_SIZE 256
 
+// hardcoded /tmp
+#define WTCY_DEFAULT_FIFO "/tmp/watchy.fifo"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

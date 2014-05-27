@@ -14,8 +14,10 @@ from flask_sockets import Sockets
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 
+StatSession_Logs = { }
 StatSession_Hosts = { }
 StatSession_Metrics = { }
+
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
 sfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'static')
 app = Flask ('WatchyServer', template_folder=tfolder, static_folder=sfolder)
@@ -35,14 +37,23 @@ def metricsGraph (key):
 def hostsGraph (key):
     return render_template ('host.html', node=key)
 
+@app.route ("/logs/<path:key>")
+def logsView (key):
+    return render_template ('logs.html', node=key)
+
 @app.route ("/api/hosts/keys")
 def getHosts ():
     nodes = StatSession_Hosts.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/metrics/keys")
-def getKeys ():
+def getMetrics ():
     nodes = StatSession_Metrics.keys ()
+    return jsonify ({'keys':nodes, 'len':len (nodes)})
+
+@app.route ("/api/logs/keys")
+def getLogs ():
+    nodes = StatSession_Logs.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/metrics/graph/<path:key>")
@@ -80,6 +91,12 @@ def getHostData (key):
     if key not in StatSession_Hosts:
         return jsonify ({'data':None, 'len':0})
     return jsonify ({'data':StatSession_Hosts [key], 'len':len (StatSession_Hosts [key])})
+
+@app.route ("/api/logs/data/<path:key>")
+def getLogData (key):
+    if key not in StatSession_Logs:
+        return jsonify ({'data':None, 'len':0})
+    return jsonify ({'data':StatSession_Logs [key], 'len':len (StatSession_Logs [key])})
 
 @app.route ("/deps/<path:path>")
 def statics (path):

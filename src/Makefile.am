@@ -1,4 +1,4 @@
-bin_PROGRAMS = test$(EXEEXT) watcher$(EXEEXT)
+bin_PROGRAMS = test$(EXEEXT) log$(EXEEXT) watcher$(EXEEXT)
 lib_LTLIBRARIES = libwatchy.la
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -16,3 +16,6 @@ watcher_LDADD = libwatchy.la
 
 test_SOURCES = test.c
 test_LDADD = libwatchy.la
+
+log_SOURCES = log.c
+log_LDADD = libwatchy.la

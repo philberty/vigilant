@@ -16,11 +16,6 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-// this is a very basic protocol thsi is the size of every object
-// means the server can simly .read (256) and you know you will
-// get all the data no need to keep reading etc..
-#define WTCY_PACKET_SIZE 256
-
 #ifndef nitems
 # define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
@@ -32,8 +27,21 @@ static const char * watchy_error_strings [] = {
   [WTCY_FORK_FAIL]  = "fork of runtime has failed",
   [WTCY_SOCK_FAIL]  = "create socket failed see errno",
   [WTCY_IS_RUNNING] = "watch me is already running",
+  [WTCY_PACKET_ERR] = "Error converting to json",
   [WTCY_UNKNOWN]    = "unknown error code",
 };
+
+inline int
+watchy_setTimeStamp (char * const buffer, const size_t len)
+{
+  time_t ltime = time (NULL);
+  struct tm *tm;
+  tm = localtime (&ltime);
+
+  return snprintf (buffer, len,"%04d%02d%02d%02d%02d%02d",
+		   tm->tm_year+1900, tm->tm_mon, tm->tm_mday,
+		   tm->tm_hour, tm->tm_min, tm->tm_sec);
+}
 
 /* Utility trim function */
 char *
@@ -52,6 +60,16 @@ watchy_trim (const char * buffer, const size_t len)
 
   strncpy (rbuf, buffer + s, e - s + 1);
   return rbuf;
+}
+
+inline int
+watchy_logPacket (struct watchy_data * const data, const char * message, const char * key)
+{
+  data->T = LOG;
+  strncpy (data->key, key, sizeof (data->key));
+  watchy_setTimeStamp (data->tsp, sizeof (data->tsp));
+  memset (data->value.buffer, 0, sizeof (data->value.buffer));
+  return snprintf (data->value.buffer, sizeof (data->value.buffer) - 1, "%s", message);
 }
 
 const char *
@@ -82,30 +100,46 @@ watchy_socket (const char * bind, const int port, int * const sockfd,
 /**
  * this is a dirty method but its handy for now and we only need a very simply json object
  **/
-inline int
+int
 watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, char * const buffer)
 {
   char type [10];
   memset (type, 0, sizeof (type));
-  if (stats->T == METRIC)
-    strcpy (type, "metric");
-  else if (stats->T == HOST)
-    strcpy (type, "host");
-  else
-    strcpy (type, "unknown");
 
-  return snprintf (buffer, blen, "{ "
-		   "\"type\" : \"%s\", "
-		   "\"name\" : \"%s\", "
-		   "\"timeStamp\" : \"%s\", "
-		   "\"state\" : \"%s\", "
-		   "\"pid\" : %i, "
-		   "\"threads\" : %zi, "
-		   "\"memory\" : %i"
-		   " }", type,
-		   stats->pname, stats->tsp,
-		   stats->status, stats->cpid,
-		   stats->nthreads, stats->memory);
+  if (stats->T == METRIC || stats->T == HOST)
+    {
+      if (stats->T == METRIC)
+	strncpy (type, "metric", sizeof (type));
+      else
+	strncpy (type, "host", sizeof (type));
+      return snprintf (buffer, blen, "{ "
+		       "\"type\" : \"%s\", "
+		       "\"name\" : \"%s\", "
+		       "\"timeStamp\" : \"%s\", "
+		       "\"state\" : \"%s\", "
+		       "\"pid\" : %i, "
+		       "\"threads\" : %zi, "
+		       "\"memory\" : %i"
+		       " }", type,
+		       stats->key, stats->tsp,
+		       stats->value.metric.status,
+		       stats->value.metric.cpid,
+		       stats->value.metric.nthreads,
+		       stats->value.metric.memory);
+    }
+  else if (stats->T == LOG)
+    {
+      strncpy (type, "log", sizeof (type));
+      return snprintf (buffer, blen, "{ "
+		       "\"type\" : \"%s\", "
+		       "\"name\" : \"%s\", "
+		       "\"timeStamp\" : \"%s\", "
+		       "\"message\" : \"%s\""
+		       " }", type,
+		       stats->key, stats->tsp,
+		       stats->value.buffer);
+    }
+  return WTCY_PACKET_ERR;
 }
 
 int
@@ -147,9 +181,12 @@ watchy_watchme (const char * name, const char * bind, const int port)
     {
       struct watchy_data stats;
       memset (&stats, 0, sizeof (stats));
-      
-      watchy_getStats (&stats, cpid);
-      strncpy (stats.pname, name, sizeof (stats.pname));
+
+      stats.T = METRIC;
+      strncpy (stats.key, name, sizeof (stats.key));
+      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
+
+      watchy_getStats (&stats.value.metric, cpid);
 
       char buffer [WTCY_PACKET_SIZE];
       memset (buffer, 0, sizeof (buffer));
@@ -194,8 +231,11 @@ watchy_watchpid (const char * name, const char * bind, const int port, const pid
       struct watchy_data stats;
       memset (&stats, 0, sizeof (stats));
 
-      watchy_getStats (&stats, iproc);
-      strncpy (stats.pname, name, sizeof (stats.pname));
+      stats.T = METRIC;
+      strncpy (stats.key, name, sizeof (stats.key));
+      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
+
+      watchy_getStats (&stats.value.metric, iproc);
 
       char buffer [WTCY_PACKET_SIZE];
       memset (buffer, 0, sizeof (buffer));
@@ -227,8 +267,11 @@ watchy_watchHost (const char * name, const char * bind, const int port)
       struct watchy_data stats;
       memset (&stats, 0, sizeof (stats));
 
-      watchy_getHostStats (&stats);
-      strncpy (stats.pname, name, sizeof (stats.pname));
+      stats.T = HOST;
+      strncpy (stats.key, name, sizeof (stats.key));
+      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
+
+      watchy_getHostStats (&stats.value.metric);
 
       char buffer [WTCY_PACKET_SIZE];
       memset (buffer, 0, sizeof (buffer));

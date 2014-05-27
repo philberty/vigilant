@@ -6,14 +6,15 @@ import threading
 import traceback
 import ServerUtil
 
+from StatsServer import StatSession_Logs
 from StatsServer import StatSession_Hosts
 from StatsServer import StatSession_Metrics
 
-def consume (func):
+def consumer (func):
     def decorated (*args, **kwargs):
         if hasattr (args [0], 'backend'):
-            # TODO consume to backend
-            pass
+            if args [0].backend is not None:
+                args [0].backend.consume (*args, **kwargs)
         return func (*args, **kwargs)
     return decorated
 
@@ -31,7 +32,7 @@ class UDPStatsServer (threading.Thread):
         self.serverSocket.setblocking (0)
         threading.Thread.__init__ (self)
 
-    @consume
+    @consumer
     def consumeMetric (self, key, data):
         if key not in StatSession_Metrics:
             StatSession_Metrics [key] = []
@@ -39,7 +40,7 @@ class UDPStatsServer (threading.Thread):
             StatSession_Metrics [key] = StatSession_Metrics [key][1:]
         StatSession_Metrics [key].append (data)
     
-    @consume
+    @consumer
     def consumeHost (self, key, data):
         if key not in StatSession_Hosts:
             StatSession_Hosts [key] = []
@@ -47,18 +48,25 @@ class UDPStatsServer (threading.Thread):
             StatSession_Hosts [key] = StatSession_Hosts [key][1:]
         StatSession_Hosts [key].append (data)
 
+    @consumer
+    def consumeLog (self, key, data):
+        if key not in StatSession_Logs:
+            StatSession_Logs [key] = []
+        if len (StatSession_Logs [key]) >= self.climit:
+            StatSession_Logs [key] = StatSession_Logs [key][1:]
+        StatSession_Logs [key].append (data)
+
     def consume (self, data):
-        try:
-            key = data ['name']
-            which = data ['type']
-            if which == 'host':
-                self.consumeHost (key, data)
-            elif which == 'metric':
-                self.consumeMetric (key, data)
-            else:
-                ServerUtil.warning ('Invalid type [%s]' % which)
-        except:
-            pass
+        key = data ['name']
+        which = data ['type']
+        if which == 'host':
+            self.consumeHost (key, data)
+        elif which == 'metric':
+            self.consumeMetric (key, data)
+        elif which == 'log':
+            self.consumeLog (key, data)
+        else:
+            ServerUtil.warning ('Invalid type [%s]' % which)
 
     def run (self):
         ServerUtil.info ("Starting StatsAggregator on %s:%s" % (self.host, self.port))
@@ -78,8 +86,9 @@ class UDPStatsServer (threading.Thread):
                         sobject ['host'] = { 'host': rdata [1][0],
                                              'port': rdata [1][1]
                                          }
-                        ServerUtil.info ('Recieved stats from [%s:%i] for [%s]' \
-                                         % (sobject ['host']['host'],
+                        ServerUtil.info ('Recieved [%s] from [%s:%i] for [%s]' \
+                                         % (sobject ['type'],
+                                            sobject ['host']['host'],
                                             sobject ['host']['port'],
                                             sobject ['name']))
                         self.consume (sobject)

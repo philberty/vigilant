@@ -11,7 +11,6 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script src="//fgnass.github.io/spin.js/jquery.spin.js"></script>
 
     <script type="text/javascript">
      $(function() {
@@ -108,6 +107,50 @@
 	 hostsWrapper ()
 	 timer = setInterval (hostsWrapper, 8000)
        }
+
+       function fillSideBar_Logs () {
+	 function logsWrapper () {
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview - Logs</a></li>"
+	   $('.table.table-body.logs').empty ()
+	   $('.nav.nav-sidebar').empty ()
+	   $('.nav.nav-sidebar').append (ovr)
+
+	   function generateTableRow (data){
+	     var lelem = data ['data'][data ['len'] - 1]
+	     var tmpl = "<tr><td>__key__</td><td>__ts__</td></tr>"
+	     var host = lelem ['host'] ['host']
+	     var key = lelem ['name']
+	     tmpl = tmpl.replace ("__key__", key)
+	     tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
+	     $('.table.table-body.logs').append (tmpl)
+	   }
+
+	   function keyFetch (keys) {
+	     for (var i in keys ['keys']) {
+	       var key = keys ['keys'][i]
+	       var tab = "<li><a href=\"/logs/__key__\">__key__</a></li>"
+	       tab = tab.replace ("__key__", key)
+	       tab = tab.replace ("__key__", key)
+	       $('.nav.nav-sidebar').append (tab)
+	       $.ajax({
+		 url: "/api/logs/data/" + key,
+		 type: "GET",
+		 dataType: "json",
+		 success: generateTableRow
+	       })
+	     }
+	   }
+
+	   $.ajax({
+	     url: "/api/logs/keys",
+	     type: "GET",
+	     dataType: "json",
+	     success: keyFetch
+	   })
+	 }
+	 logsWrapper ()
+	 timer = setInterval (logsWrapper, 8000)
+       }
        
        // initially we are on index screen
        fillSideBar_Metrics ()
@@ -120,6 +163,9 @@
 	     break;
 	   case "Hosts":
 	     func = fillSideBar_Hosts
+	     break;
+	   case "Logs":
+	     func = fillSideBar_Logs
 	     break;
 	   default:
 	     break;
@@ -157,6 +203,7 @@
 	  <ul class="nav nav-tabs">
 	    <li class="active"><a href="#metrics" data-toggle="tab">Metrics</a></li>
 	    <li><a href="#hosts" data-toggle="tab">Hosts</a></li>
+	    <li><a href="#logs" data-toggle="tab">Logs</a></li>
 	  </ul>
     
 	  <!-- Tab panes -->
@@ -188,6 +235,19 @@
 		  </tr>
 		</thead>
 		<tbody class="table table-body hosts">
+		</tbody>
+	      </table>
+	    </div>
+
+	    <div class="tab-pane fade in" id="logs">
+	      <table class="table table-striped">
+		<thead>
+		  <tr>
+                    <th>Node</th>
+		    <th>Time Stamp</th>
+		  </tr>
+		</thead>
+		<tbody class="table table-body logs">
 		</tbody>
 	      </table>
 	    </div>

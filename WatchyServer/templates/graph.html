@@ -37,7 +37,7 @@
 	   }
 	 }
 	  $.ajax({
-	   url: "/api/metrics/keys",
+	   url: "/api/process/keys",
 	   type: "GET",
 	   dataType: "json",
 	   success: keyFetch
@@ -58,7 +58,7 @@
 	     }});
 	 }
 	 $.ajax({
-	   url: "/api/metrics/graph/" + gkey,
+	   url: "/api/process/graph/" + gkey,
 	   type: "GET",
 	   dataType: "json",
 	   success: graph

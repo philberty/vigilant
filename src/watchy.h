@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-  typedef enum { METRIC, HOST, LOG } WATCHY_TYPE;
+  typedef enum { METRIC, HOST, PROCESS, LOG } WATCHY_TYPE;
 
   struct watchy_metric {
     char status [16];

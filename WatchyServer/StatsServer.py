@@ -16,6 +16,7 @@ from geventwebsocket.handler import WebSocketHandler
 
 StatSession_Logs = { }
 StatSession_Hosts = { }
+StatSession_Process = { }
 StatSession_Metrics = { }
 
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
@@ -29,8 +30,8 @@ from StatsAggregator import UDPStatsServer
 def index ():
     return render_template ('index.html')
 
-@app.route ("/metrics/<path:key>")
-def metricsGraph (key):
+@app.route ("/process/<path:key>")
+def processGraph (key):
     return render_template ('graph.html', node=key)
 
 @app.route ("/hosts/<path:key>")
@@ -46,9 +47,9 @@ def getHosts ():
     nodes = StatSession_Hosts.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
-@app.route ("/api/metrics/keys")
-def getMetrics ():
-    nodes = StatSession_Metrics.keys ()
+@app.route ("/api/process/keys")
+def getProcess ():
+    nodes = StatSession_Process.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
 @app.route ("/api/logs/keys")
@@ -56,16 +57,16 @@ def getLogs ():
     nodes = StatSession_Logs.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
 
-@app.route ("/api/metrics/graph/<path:key>")
-def getMetricGraph (key):
-    if key not in StatSession_Metrics:
+@app.route ("/api/process/graph/<path:key>")
+def getProcessGraph (key):
+    if key not in StatSession_Process:
         return jsonify ({'ready':False})
     data = []
-    for i in StatSession_Metrics [key]:
+    for i in StatSession_Process [key]:
         ts = str (i ['timeStamp'])
         jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
         data.append ((jts.isoformat (), i ['memory']))
-    return jsonify ({ 'ready':True, 'len' : len (StatSession_Metrics [key]),
+    return jsonify ({ 'ready':True, 'len' : len (StatSession_Process [key]),
                       'label':'Memory Usage of %s' % key, 'data': data})
 
 @app.route ("/api/hosts/graph/<path:key>")
@@ -80,11 +81,11 @@ def getHostGraph (key):
     return jsonify ({ 'ready':True, 'len' : len (StatSession_Hosts [key]),
                       'label':'Memory Usage of %s' % key, 'data': data})
 
-@app.route ("/api/metrics/data/<path:key>")
-def getMetricData (key):
-    if key not in StatSession_Metrics:
+@app.route ("/api/process/data/<path:key>")
+def getProcessData (key):
+    if key not in StatSession_Process:
         return jsonify ({'data':None, 'len':0})
-    return jsonify ({'data':StatSession_Metrics [key], 'len':len (StatSession_Metrics [key])})
+    return jsonify ({'data':StatSession_Process [key], 'len':len (StatSession_Process [key])})
 
 @app.route ("/api/hosts/data/<path:key>")
 def getHostData (key):

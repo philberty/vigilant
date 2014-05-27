@@ -8,6 +8,7 @@ import ServerUtil
 
 from StatsServer import StatSession_Logs
 from StatsServer import StatSession_Hosts
+from StatsServer import StatSession_Process
 from StatsServer import StatSession_Metrics
 
 def consumer (func):
@@ -33,12 +34,12 @@ class UDPStatsServer (threading.Thread):
         threading.Thread.__init__ (self)
 
     @consumer
-    def consumeMetric (self, key, data):
-        if key not in StatSession_Metrics:
-            StatSession_Metrics [key] = []
-        if len (StatSession_Metrics [key]) >= self.climit:
-            StatSession_Metrics [key] = StatSession_Metrics [key][1:]
-        StatSession_Metrics [key].append (data)
+    def consumeProcess (self, key, data):
+        if key not in StatSession_Process:
+            StatSession_Process [key] = []
+        if len (StatSession_Process [key]) >= self.climit:
+            StatSession_Process [key] = StatSession_Process [key][1:]
+        StatSession_Process [key].append (data)
     
     @consumer
     def consumeHost (self, key, data):
@@ -61,8 +62,8 @@ class UDPStatsServer (threading.Thread):
         which = data ['type']
         if which == 'host':
             self.consumeHost (key, data)
-        elif which == 'metric':
-            self.consumeMetric (key, data)
+        elif which == 'process':
+            self.consumeProcess (key, data)
         elif which == 'log':
             self.consumeLog (key, data)
         else:

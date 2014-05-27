@@ -8,7 +8,7 @@
 
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="/deps/css/index.css" rel="stylesheet" type="text/css">
-    <link href="/deps/css/graph.css" rel="stylesheet" type="text/css">
+    <link href="/deps/css/log.css" rel="stylesheet" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
@@ -34,7 +34,7 @@
 	     $('.nav.nav-sidebar').append (tab)
 	   }
 	 }
-	  $.ajax({
+	 $.ajax({
 	   url: "/api/logs/keys",
 	   type: "GET",
 	   dataType: "json",
@@ -42,8 +42,30 @@
 	 });
        }
 
+       function renderLog () {
+	 function logify (data) {
+	   $('.log-container').empty ()
+	   for (var i in data ['data']) {
+	     var elem = data ['data'] [i]
+	     $('.log-container').append ('<p>derp</p>')
+	   }
+	 }
+
+	 function wrapper () {
+	   $.ajax ({
+	     url: "/api/logs/data/"+ gkey,
+	     type: "GET",
+	     dataType: "json",
+	     success: logify
+	   });
+	 }
+	 wrapper ();
+	 setInterval (wrapper, 1000);
+       }
+
        fillSideBar ();
-       setInterval (fillSideBar, 10000)
+       setInterval (fillSideBar, 10000);
+       renderLog ();
      });
     </script>
 
@@ -75,7 +97,9 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	  <h1 class="page-header">Dashboard {{ node }}</h1>
 	  
-	  DO SOMETHING HERE
+	  <div class="log-container">
+	    
+	  </div>
 	  
         </div>
       </div>

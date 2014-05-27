@@ -106,10 +106,10 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
   char type [10];
   memset (type, 0, sizeof (type));
 
-  if (stats->T == METRIC || stats->T == HOST)
+  if (stats->T == PROCESS || stats->T == HOST)
     {
-      if (stats->T == METRIC)
-	strncpy (type, "metric", sizeof (type));
+      if (stats->T == PROCESS)
+	strncpy (type, "process", sizeof (type));
       else
 	strncpy (type, "host", sizeof (type));
       return snprintf (buffer, blen, "{ "
@@ -182,7 +182,7 @@ watchy_watchme (const char * name, const char * bind, const int port)
       struct watchy_data stats;
       memset (&stats, 0, sizeof (stats));
 
-      stats.T = METRIC;
+      stats.T = PROCESS;
       strncpy (stats.key, name, sizeof (stats.key));
       watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
 
@@ -231,7 +231,7 @@ watchy_watchpid (const char * name, const char * bind, const int port, const pid
       struct watchy_data stats;
       memset (&stats, 0, sizeof (stats));
 
-      stats.T = METRIC;
+      stats.T = PROCESS;
       strncpy (stats.key, name, sizeof (stats.key));
       watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
 

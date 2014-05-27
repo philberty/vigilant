@@ -15,10 +15,10 @@
     <script type="text/javascript">
      $(function() {
        var timer = null
-       function fillSideBar_Metrics () {
-	 function metricsWrapper () {
-	   var ovr = "<li class=\"active\"><a href=\"/\">Overview - Metrics</a></li>"
-	   $('.table.table-body.metric').empty ()
+       function fillSideBar_Process () {
+	 function processWrapper () {
+	   var ovr = "<li class=\"active\"><a href=\"/\">Overview - Process</a></li>"
+	   $('.table.table-body.process').empty ()
 	   $('.nav.nav-sidebar').empty ()
 	   $('.nav.nav-sidebar').append (ovr)
 
@@ -33,18 +33,18 @@
 	     tmpl = tmpl.replace ("__state__", state)
 	     tmpl = tmpl.replace ("__pid__", lelem ['pid'])
 	     tmpl = tmpl.replace ("__ts__", Date (lelem ['timeStamp']))
-	     $('.table.table-body.metric').append (tmpl)
+	     $('.table.table-body.process').append (tmpl)
 	   }
 
 	   function keyFetch (keys) {
 	     for (var i in keys ['keys']) {
 	       var key = keys ['keys'] [i]
-	       var tab = "<li><a href=\"/metrics/__key__\">__key__</a></li>"
+	       var tab = "<li><a href=\"/process/__key__\">__key__</a></li>"
 	       tab = tab.replace ("__key__", key)
 	       tab = tab.replace ("__key__", key)
 	       $('.nav.nav-sidebar').append (tab)
 	       $.ajax({
-		 url: "/api/metrics/data/" + key,
+		 url: "/api/process/data/" + key,
 		 type: "GET",
 		 dataType: "json",
 		 success: function doit (data) {
@@ -54,14 +54,14 @@
 	     }
 	   }
 	   $.ajax({
-	     url: "/api/metrics/keys",
+	     url: "/api/process/keys",
 	     type: "GET",
 	     dataType: "json",
 	     success: keyFetch
 	   });
 	 }
-	 metricsWrapper ()
-	 timer = setInterval (metricsWrapper, 8000)
+	 processWrapper ()
+	 timer = setInterval (processWrapper, 8000)
        }
        function fillSideBar_Hosts () {
 	 function hostsWrapper () {
@@ -153,13 +153,13 @@
        }
        
        // initially we are on index screen
-       fillSideBar_Metrics ()
+       fillSideBar_Process ()
        $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
 	 clearInterval (timer)
 	 var func = null
 	 switch (e.target.text) {
-	   case "Metrics":
-	     func = fillSideBar_Metrics
+	   case "Process":
+	     func = fillSideBar_Process
 	     break;
 	   case "Hosts":
 	     func = fillSideBar_Hosts
@@ -201,7 +201,7 @@
 	  <h1 class="page-header">Dashboard</h1>
 
 	  <ul class="nav nav-tabs">
-	    <li class="active"><a href="#metrics" data-toggle="tab">Metrics</a></li>
+	    <li class="active"><a href="#process" data-toggle="tab">Process</a></li>
 	    <li><a href="#hosts" data-toggle="tab">Hosts</a></li>
 	    <li><a href="#logs" data-toggle="tab">Logs</a></li>
 	  </ul>
@@ -209,7 +209,7 @@
 	  <!-- Tab panes -->
 	  <div class="tab-content">
 
-	    <div class="tab-pane fade in active" id="metrics">
+	    <div class="tab-pane fade in active" id="process">
 	      <table class="table table-striped">
 		<thead>
 		  <tr>
@@ -220,7 +220,7 @@
 		    <th>Time Stamp</th>
 		  </tr>
 		</thead>
-		<tbody class="table table-body metric">
+		<tbody class="table table-body process">
 		</tbody>
 	      </table>
 	    </div>

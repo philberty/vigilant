@@ -11,21 +11,22 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 
-  // error codes...
+// error codes...
 #define WTCY_NO_ERROR   0
 #define WTCY_NEXIST_PID 1
 #define WTCY_FORK_FAIL  2
 #define WTCY_SOCK_FAIL  3
 #define WTCY_IS_RUNNING 4
 #define WTCY_PACKET_ERR 5
-#define WTCY_UNKNOWN    6
+#define WTCY_DAEMON_ERR 6
+#define WTCY_UNKNOWN    7
 
 // this is a very basic protocol thsi is the size of every object
 // means the server can simly .read (256) and you know you will
 // get all the data no need to keep reading etc..
 #define WTCY_PACKET_SIZE 256
 
-// hardcoded /tmp
+// hardcoded /tmp ok for now... autoconf can fix this and command line option
 #define WTCY_DEFAULT_FIFO "/tmp/watchy.fifo"
 
 #ifdef __cplusplus
@@ -70,6 +71,13 @@ extern "C" {
 
   // return the error string for the error code (string is not allocated)
   extern const char * watchy_strerror (const int);
+
+  // runtime functions
+  extern int watchy_writePacketSync (struct watchy_data * const, const int,
+				     const struct sockaddr_in * const);
+  extern int watchy_writePacket (struct watchy_data * const, const int);
+  extern int watchy_cAttachRuntime (const char *, const char *, const int, int * const);
+  extern void watchy_detachRuntime (void);
 
   // FIXME fork/daemon issues
   extern int watchy_watchme  (const char *, const char *, const int);

@@ -28,6 +28,7 @@ static const char * watchy_error_strings [] = {
   [WTCY_SOCK_FAIL]  = "create socket failed see errno",
   [WTCY_IS_RUNNING] = "watch me is already running",
   [WTCY_PACKET_ERR] = "Error converting to json",
+  [WTCY_DAEMON_ERR] = "Error forking daemon watchy",
   [WTCY_UNKNOWN]    = "unknown error code",
 };
 
@@ -269,15 +270,9 @@ watchy_watchHost (const char * name, const char * bind, const int port)
 
       stats.T = HOST;
       strncpy (stats.key, name, sizeof (stats.key));
-      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
 
       watchy_getHostStats (&stats.value.metric);
-
-      char buffer [WTCY_PACKET_SIZE];
-      memset (buffer, 0, sizeof (buffer));
-      watchy_statsToJson (&stats, WTCY_PACKET_SIZE, buffer);
-      sendto (sockfd, buffer, WTCY_PACKET_SIZE, 0,
-	      (const struct sockaddr *) &servaddr, sizeof (servaddr));
+      watchy_writePacketSync (&stats, sockfd, &servaddr);
 
       sleep (1);
     }

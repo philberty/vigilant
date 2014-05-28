@@ -44,11 +44,13 @@
 
        function renderLog () {
 	 function logify (data) {
-	   $('.log-container').empty ()
+	   $('.table.table-body.log').empty ()
+	   var ent = ''
 	   for (var i in data ['data']) {
 	     var elem = data ['data'] [i]
-	     $('.log-container').append ('<p>derp</p>')
+	     ent += '<tr><td>' + elem ['message'] + '</td></tr>'
 	   }
+	   $('.table.table-body.log').append (ent)
 	 }
 
 	 function wrapper () {
@@ -97,9 +99,15 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 	  <h1 class="page-header">Dashboard {{ node }}</h1>
 	  
-	  <div class="log-container">
-	    
-	  </div>
+	  <table class="table table-striped">
+	    <thead>
+	      <tr>
+		<th>Message</th>
+	      </tr>
+	    </thead>
+	    <tbody class="table table-body log">
+	    </tbody>
+	  </table>
 	  
         </div>
       </div>

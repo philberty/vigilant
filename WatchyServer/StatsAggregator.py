@@ -77,7 +77,7 @@ class UDPStatsServer (threading.Thread):
         try:
             while len (inputs) > 0 and self.running is True:
                 (reads, writes, errors) = select.select (
-                    inputs, [], inputs, 1
+                    inputs, [], inputs
                 )
                 for i in reads:
                     rdata = i.recvfrom (256)

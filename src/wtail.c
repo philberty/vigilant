@@ -49,14 +49,15 @@ tail (const int fd, const char * key)
   ssize_t read;
   char * line = NULL;
 
+  struct watchy_data packet;
   while (running)
-    while ((read = getline (&line, &len, stdin)) != -1)
-      {
-	struct watchy_data packet;
-	memset (&packet, 0, sizeof (packet));
-	watchy_logPacket (&packet, line, key);
-	watchy_writePacket (&packet, fd);
-      }
+    {
+      read = getline (&line, &len, stdin);
+      memset (&packet, 0, sizeof (packet));
+
+      watchy_logPacket (&packet, line, key);
+      watchy_writePacket (&packet, fd);
+    }
   if (line != NULL)
     free (line);
 }

@@ -3,13 +3,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include <getopt.h>
+#include <signal.h>
 
 #include <watchy.h>
 
+static bool running;
 static void tail (const int, const char *);
 static void print_help    (const char *);
 static void print_version (const char *);
+
+static void
+shandler (int signo)
+{
+  running = false;
+}
 
 static void
 print_help (const char * arg)
@@ -32,17 +42,21 @@ print_version (const char * arg)
 static void
 tail (const int fd, const char * key)
 {
+  signal (SIGINT, shandler);
+  running = true;
+
   size_t len = 0;
   ssize_t read;
   char * line = NULL;
 
-  while ((read = getline (&line, &len, stdin)) != -1)
-    {
-      struct watchy_data packet;
-      memset (&packet, 0, sizeof (packet));
-      watchy_logPacket (&packet, line, key);
-      watchy_writePacket (&packet, fd);
-    }
+  while (running)
+    while ((read = getline (&line, &len, stdin)) != -1)
+      {
+	struct watchy_data packet;
+	memset (&packet, 0, sizeof (packet));
+	watchy_logPacket (&packet, line, key);
+	watchy_writePacket (&packet, fd);
+      }
   if (line != NULL)
     free (line);
 }
@@ -109,13 +123,12 @@ int main (int argc, char **argv)
   int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
   if (fifo != WTCY_DEFAULT_FIFO)
     free (fifo);
+
   if (ret != WTCY_NO_ERROR)
     {
       fprintf (stderr, "Unable to attach to runtime [%i:%s]", ret, watchy_strerror (ret));
       return -1;
     }
-
-  // do work...
   tail (fd, key);
 
   watchy_detachRuntime (fd);

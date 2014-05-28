@@ -16,8 +16,10 @@
 
 static void shandler           (int);
 static void watchy_runtimeLoop (int, const int, const struct sockaddr_in * const);
+static int  watchy_forkdaemon  (const char *, const int, const struct sockaddr_in * const);
 
-static bool running;
+static pid_t opener, spid;
+static volatile bool running;
 static char buffer [WTCY_PACKET_SIZE];
 
 static void
@@ -70,11 +72,61 @@ watchy_runtimeLoop (int fd, const int sockfd,
 	  memset (&data, 0, sizeof (data));
 	  int c = read (fd, &data, sizeof (data));
 	  if (c >= 0)
-	    watchy_writePacketSync (&data, sockfd, servaddr);
+	    {
+	      char type [12];
+	      memset (type, 0, sizeof (type));
+
+	      switch (data.T)
+		{
+		case METRIC:
+		  strcpy (type, "metric");
+		  break;
+
+		case HOST:
+		  strcpy (type, "host");
+		  break;
+
+		case PROCESS:
+		  strcpy (type, "process");
+		  break;
+
+		case LOG:
+		  strcpy (type, "log");
+		  break;
+
+		default:
+		  strcpy (type, "unknown");
+		  break;
+		}
+	      syslog (LOG_INFO, "Got data packet [%s]", type);
+	      watchy_writePacketSync (&data, sockfd, servaddr);
+	    }
 	}
-      sleep (1);
     }
   closelog ();
+}
+
+static int
+watchy_forkdaemon (const char * fifo, const int sockfd,
+		   const struct sockaddr_in * const servaddr)
+{
+  //unmask the file mode
+  umask (0);
+  //set new session
+  setsid ();
+  // Change the current working directory to root.
+  chdir ("/");
+  // Close stdin. stdout and stderr
+  close (STDIN_FILENO);
+  close (STDOUT_FILENO);
+  close (STDERR_FILENO);
+
+  int fd = open (fifo, O_RDONLY);
+  watchy_runtimeLoop (fd, sockfd, servaddr);
+  close (fd);
+  unlink (fifo);
+
+  return 0;
 }
 
 int
@@ -89,25 +141,18 @@ watchy_cAttachRuntime (const char * fifo, const char * bind,
     return ret;
 
   if (access (fifo, R_OK) == 0)
-    *fd = open (fifo, O_WRONLY | O_NDELAY);
+    *fd = open (fifo, O_WRONLY);
   else
     {
+      opener = getpid ();
       mknod (fifo, S_IFIFO | 0666, 0);
-      switch (fork ())
+      switch ((spid = fork ()))
 	{
 	case -1:
 	  return WTCY_DAEMON_ERR;
 
 	case 0:
-	  {
-	    int ffd = open (fifo, O_RDONLY);
-	    if (daemon (0, 0) != 0)
-	      exit (1);
-	    watchy_runtimeLoop (ffd, sockfd, &servaddr);
-	    close (ffd);
-	    unlink (fifo);
-	    exit (0);
-	  }
+	  exit (watchy_forkdaemon (fifo, sockfd, &servaddr));
 	  break;
 
 	default:
@@ -122,4 +167,6 @@ void
 watchy_detachRuntime (int fd)
 {
   close (fd);
+  if (getpid () == opener)
+    kill (spid, SIGTERM);
 }

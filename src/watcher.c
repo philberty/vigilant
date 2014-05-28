@@ -18,7 +18,7 @@ static void print_help    (const char *);
 static void print_version (const char *);
 static void shandler      (int);
 
-static bool running;
+static volatile bool running;
 
 static void
 shandler (int signo)
@@ -35,6 +35,7 @@ print_help (const char * arg)
   printf ("\t--version|-v\tPrint version string\n");
   printf ("\t--port|-p\tPort of server\n");
   printf ("\t--hostname|-b\tHostname of server\n");
+  printf ("\t--daemon|-F\tDaemonize this\n");
   printf ("\n");
 }
 
@@ -48,18 +49,20 @@ int main (int argc, char **argv)
 {
   int c, port = 0;
   char * bind = NULL, * key = NULL;
+  bool forkme = false;
   while (1)
     {
       static struct option long_options [] = {
         { "help",     no_argument,       0, 'h' },
         { "version",  no_argument,       0, 'v' },
+	{ "daemon",   no_argument,       0, 'F' },
         { "hostname", required_argument, 0, 'b' },
         { "port",     required_argument, 0, 'p' },
 	{ "key",      required_argument, 0, 'k' },
         { 0, 0, 0, 0 }
       };
       int option_index = 0;
-      c = getopt_long (argc, argv, "hvb:p:i:k:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hvFb:p:i:k:", long_options, &option_index);
       if (c == -1)
         break;
 
@@ -85,6 +88,10 @@ int main (int argc, char **argv)
 	  key = strdup (optarg);
 	  break;
 
+	case 'F':
+	  forkme = true;
+	  break;
+
         default:
           break;
         }
@@ -95,6 +102,10 @@ int main (int argc, char **argv)
       fprintf (stderr, "Stats destination bind and port unset see --help\n");
       return -1;
     }
+
+  // TODO
+  if (forkme)
+    ; // daemonize here...
 
   // add option to new fifo
   char * dfifo = WTCY_DEFAULT_FIFO;

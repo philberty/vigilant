@@ -60,7 +60,7 @@ extern "C" {
 
   // utility functions
   extern int watchy_setTimeStamp (char * const, const size_t);
-  extern int watchy_logPacket (struct watchy_data * const, const char *, const char *);
+  extern void watchy_logPacket (struct watchy_data * const, const char *, const char *);
 
   // get the stats this function is osdep-*.c depends at compile time
   extern void watchy_getStats (struct watchy_metric * const, const pid_t);

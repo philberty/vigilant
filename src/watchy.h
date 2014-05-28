@@ -12,14 +12,16 @@
 #include <netinet/ip.h>
 
 // error codes...
-#define WTCY_NO_ERROR   0
-#define WTCY_NEXIST_PID 1
-#define WTCY_FORK_FAIL  2
-#define WTCY_SOCK_FAIL  3
-#define WTCY_IS_RUNNING 4
-#define WTCY_PACKET_ERR 5
-#define WTCY_DAEMON_ERR 6
-#define WTCY_UNKNOWN    7
+#define WTCY_NO_ERROR    0
+#define WTCY_NEXIST_PID  1
+#define WTCY_FORK_FAIL   2
+#define WTCY_SOCK_FAIL   3
+#define WTCY_IS_RUNNING  4
+#define WTCY_PACKET_ERR  5
+#define WTCY_DAEMON_ERR  6
+#define WTCY_USOCK_FAIL  7
+#define WTCY_ATIMEOUT    8
+#define WTCY_UNKNOWN     9
 
 // this is a very basic protocol thsi is the size of every object
 // means the server can simly .read (256) and you know you will
@@ -27,7 +29,7 @@
 #define WTCY_PACKET_SIZE 256
 
 // hardcoded /tmp ok for now... autoconf can fix this and command line option
-#define WTCY_DEFAULT_FIFO "/tmp/watchy.fifo"
+#define WTCY_DEFAULT_FIFO "/tmp/watchy.sock"
 
 #ifdef __cplusplus
 extern "C" {

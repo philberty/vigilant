@@ -9,6 +9,8 @@ pkgconfig_DATA = watchy.pc
 
 libwatchy_cindludedir = $(includedir)/watchy
 libwatchy_cindlude_HEADERS = watchy.h
+libwatchy_la_CFLAGS = $(EV_CFLAGS)
+libwatchy_la_LIBADD = $(EV_LIBS)
 libwatchy_la_LDFLAGS = -rpath '$(libdir)'
 libwatchy_la_SOURCES = \
 	libwatchy.c \

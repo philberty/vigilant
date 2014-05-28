@@ -29,6 +29,8 @@ static const char * watchy_error_strings [] = {
   [WTCY_IS_RUNNING] = "watch me is already running",
   [WTCY_PACKET_ERR] = "Error converting to json",
   [WTCY_DAEMON_ERR] = "Error forking daemon watchy",
+  [WTCY_USOCK_FAIL] = "Error connecting to unix socket",
+  [WTCY_ATIMEOUT]   = "Error timeout waiting for server",
   [WTCY_UNKNOWN]    = "unknown error code",
 };
 

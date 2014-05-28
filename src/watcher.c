@@ -118,8 +118,9 @@ int main (int argc, char **argv)
 
   if (ret != WTCY_NO_ERROR)
     {
-      fprintf (stderr, "Error initilizing watchy runtime [%i:%s]\n",
-	       ret, watchy_strerror (ret));
+      fprintf (stderr, "Error initilizing watchy runtime [%s]\n",
+	       watchy_strerror (ret));
+      printf ("errno = [%s]\n", strerror (errno));
       return -1;
     }
 

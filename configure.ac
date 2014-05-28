@@ -49,6 +49,10 @@ if test "x$PLATFORM" == "xunknown"; then
    AC_MSG_ERROR("Host Platform $PLATFORM unknown")
 fi
 
+PKG_CHECK_MODULES([EV], [libevent])
+AC_SUBST([EV_CFLAGS])
+AC_SUBST([EV_LIBS])
+
 AM_INIT_AUTOMAKE
 AC_CONFIG_FILES([Makefile
                  src/Makefile
@@ -61,9 +65,9 @@ echo ""
 echo "   * Installation prefix:       $prefix"
 echo "   * Platform osdep:            osdep-$PLATFORM.c"
 echo "   * C Compiler:                $CC"
-echo "   * C++ Compiler:              $CXX"
 echo "   * C Flags:                   $CFLAGS"
-echo "   * C++ Flags:                 $CXXFLAGS"
+echo "   * libevent CFLAGS            $EV_CFLAGS"
+echo "   * libevent LIBS              $EV_LIBS"
 echo "   * LD Flags:                  $LDFLAGS"
 echo ""
 echo "---"

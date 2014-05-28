@@ -10,17 +10,20 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include <syslog.h>
+
 #include "watchy.h"
 
-static void shandler (int);
-static int setnonblock (int);
-static void watchy_runtimeLoop (int, const int, const struct sockaddr_in *);
+static void shandler           (int);
+static void watchy_runtimeLoop (int, const int, const struct sockaddr_in * const);
 
 static bool running;
+static char buffer [WTCY_PACKET_SIZE];
 
 static void
 shandler (int signo)
 {
+  syslog (LOG_INFO, "Caught sigterm stopping runtime!");
   running = false;
 }
 
@@ -28,12 +31,10 @@ int
 watchy_writePacketSync (struct watchy_data * const data, const int sockfd,
 			const struct sockaddr_in * const servaddr)
 {
-  char buffer [WTCY_PACKET_SIZE];
   memset (buffer, 0, sizeof (buffer));
-  watchy_setTimeStamp (data->tsp, sizeof (data->tsp));
   watchy_statsToJson (data, WTCY_PACKET_SIZE, buffer);
   return sendto (sockfd, buffer, WTCY_PACKET_SIZE, 0,
-		 (const struct sockaddr *) servaddr, sizeof (servaddr));
+		 (const struct sockaddr *) servaddr, sizeof (struct sockaddr_in));
 }
 
 int watchy_writePacket (struct watchy_data * const data, const int fd)
@@ -41,49 +42,39 @@ int watchy_writePacket (struct watchy_data * const data, const int fd)
   return write (fd, data, sizeof (struct watchy_data));
 }
 
-static int
-setnonblock (int fd)
-{
-  int flags;
-
-  flags = fcntl (fd, F_GETFL);
-  if (flags < 0)
-    return flags;
-
-  flags |= O_NONBLOCK;
-  if (fcntl(fd, F_SETFL, flags) < 0)
-    return -1;
-
-  return 0;
-}
-
 static void
-watchy_runtimeLoop (int fd, const int sockfd, const struct sockaddr_in * servaddr)
+watchy_runtimeLoop (int fd, const int sockfd,
+		    const struct sockaddr_in * const servaddr)
 {
-  signal (SIGINT, shandler);
-  setnonblock (fd);
+  signal (SIGTERM, shandler);
+  setlogmask (LOG_UPTO (LOG_INFO));
+  openlog ("WatchyBus", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 
-  fd_set inputs, read_fd_set;
+  syslog (LOG_NOTICE, "Watchy Server started by User %d", getuid ());
+
+  struct timeval timeout;
+  timeout.tv_sec  = 10;
+  timeout.tv_usec = 0;
+
+  fd_set inputs;
   FD_ZERO (&inputs);
   FD_SET (fd, &inputs);
 
   running = true;
   while (running)
     {
-      read_fd_set = inputs;
-      int result = select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
-      if (result > 0)
+      int n = select (fd + 1, &inputs, NULL, NULL, &timeout);
+      if (n > 0)
 	{
-	  if (FD_ISSET (fd, &read_fd_set))
-	    {
-	      struct watchy_data data;
-	      memset (&data, 0, sizeof (data));
-	      read (fd, &data, sizeof (data));
-	      watchy_writePacketSync (&data, sockfd, servaddr);
-	    }
+	  struct watchy_data data;
+	  memset (&data, 0, sizeof (data));
+	  int c = read (fd, &data, sizeof (data));
+	  if (c >= 0)
+	    watchy_writePacketSync (&data, sockfd, servaddr);
 	}
       sleep (1);
     }
+  closelog ();
 }
 
 int
@@ -93,17 +84,15 @@ watchy_cAttachRuntime (const char * fifo, const char * bind,
   int sockfd;
   struct sockaddr_in servaddr;
   memset (&servaddr, 0, sizeof (servaddr));
-
-  int retval = watchy_socket (bind, port, &sockfd, &servaddr);
-  if (retval != WTCY_NO_ERROR)
-    return retval;
+  int ret = watchy_socket (bind, port, &sockfd, &servaddr);
+  if (ret != WTCY_NO_ERROR)
+    return ret;
 
   if (access (fifo, R_OK) == 0)
-    *fd = open (fifo, O_RDONLY | O_NDELAY);
+    *fd = open (fifo, O_WRONLY | O_NDELAY);
   else
     {
       mknod (fifo, S_IFIFO | 0666, 0);
-      *fd = open (fifo, O_RDONLY | O_NDELAY);
       switch (fork ())
 	{
 	case -1:
@@ -111,14 +100,18 @@ watchy_cAttachRuntime (const char * fifo, const char * bind,
 
 	case 0:
 	  {
+	    int ffd = open (fifo, O_RDONLY);
 	    if (daemon (0, 0) != 0)
 	      exit (1);
-	    watchy_runtimeLoop (*fd, sockfd, &servaddr);
+	    watchy_runtimeLoop (ffd, sockfd, &servaddr);
+	    close (ffd);
+	    unlink (fifo);
 	    exit (0);
 	  }
 	  break;
 
 	default:
+	  *fd = open (fifo, O_WRONLY);
 	  break;
 	}
     }
@@ -126,7 +119,7 @@ watchy_cAttachRuntime (const char * fifo, const char * bind,
 }
 
 void
-watchy_detachRuntime (void)
+watchy_detachRuntime (int fd)
 {
-  return;
+  close (fd);
 }

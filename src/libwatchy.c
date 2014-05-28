@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -20,7 +21,6 @@
 # define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
-static bool running = false;
 static const char * watchy_error_strings [] = {
   [WTCY_NO_ERROR]   = "no error",
   [WTCY_NEXIST_PID] = "specified pid does not exist",
@@ -141,141 +141,4 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
 		       stats->value.buffer);
     }
   return WTCY_PACKET_ERR;
-}
-
-int
-watchy_watchme (const char * name, const char * bind, const int port)
-{
-  if (running)
-    return WTCY_IS_RUNNING;
-  running = true;
-
-  int sockfd;
-  struct sockaddr_in servaddr;
-  memset (&servaddr, 0, sizeof (servaddr));
-
-  int retval = watchy_socket (bind, port, &sockfd, &servaddr);
-  if (retval != WTCY_NO_ERROR)
-    return retval;
-
-  pid_t cpid = fork ();
-  switch (cpid)
-    {
-    case -1:
-      return WTCY_FORK_FAIL;
-
-    case 0:
-      // turn the caller into the child and watch it!
-      return WTCY_NO_ERROR;
-
-    default:
-      {
-	setsid ();
-	umask (022);
-      }
-      break;
-    }
-
-  sleep (1);
-  int status = 0;
-  while (waitpid (cpid, &status, WNOHANG) != -1)
-    {
-      struct watchy_data stats;
-      memset (&stats, 0, sizeof (stats));
-
-      stats.T = PROCESS;
-      strncpy (stats.key, name, sizeof (stats.key));
-      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
-
-      watchy_getStats (&stats.value.metric, cpid);
-
-      char buffer [WTCY_PACKET_SIZE];
-      memset (buffer, 0, sizeof (buffer));
-      watchy_statsToJson (&stats, WTCY_PACKET_SIZE, buffer);
-      sendto (sockfd, buffer, WTCY_PACKET_SIZE, 0,
-	      (const struct sockaddr *) &servaddr, sizeof (servaddr));
-
-      sleep (1);
-    }
-  close (sockfd);
-
-  // exit with the same code as the child to preserve correct $?
-  exit (status);
-
-  // just to stop the warning and correctness
-  return WTCY_NO_ERROR;
-}
-
-/**
- * Calls to this will block until the pid to watch is finished
- **/
-int
-watchy_watchpid (const char * name, const char * bind, const int port, const pid_t iproc)
-{
-  // check if pid exsits
-  int rkill = kill (iproc, 0);
-  if (rkill != 0)
-    return WTCY_NEXIST_PID;
-
-  int sockfd;
-  struct sockaddr_in servaddr;
-  memset (&servaddr, 0, sizeof (servaddr));
-
-  int retval = watchy_socket (bind, port, &sockfd, &servaddr);
-  if (retval != WTCY_NO_ERROR)
-    return retval;
-
-  // kind of inefficient would be nice to use libevent here if poss
-  // or look for some more efficient interface
-  while (!(rkill = kill (iproc, 0)))
-    {
-      struct watchy_data stats;
-      memset (&stats, 0, sizeof (stats));
-
-      stats.T = PROCESS;
-      strncpy (stats.key, name, sizeof (stats.key));
-      watchy_setTimeStamp (stats.tsp, sizeof (stats.tsp));
-
-      watchy_getStats (&stats.value.metric, iproc);
-
-      char buffer [WTCY_PACKET_SIZE];
-      memset (buffer, 0, sizeof (buffer));
-      watchy_statsToJson (&stats, WTCY_PACKET_SIZE, buffer);
-      sendto (sockfd, buffer, WTCY_PACKET_SIZE, 0,
-	      (const struct sockaddr *) &servaddr, sizeof (servaddr));
-
-      sleep (1);
-    }
-  close (sockfd);
-
-  return WTCY_NO_ERROR;
-}
-
-/* This blocks */
-int
-watchy_watchHost (const char * name, const char * bind, const int port)
-{
-  int sockfd;
-  struct sockaddr_in servaddr;
-  memset (&servaddr, 0, sizeof (servaddr));
-
-  int retval = watchy_socket (bind, port, &sockfd, &servaddr);
-  if (retval != WTCY_NO_ERROR)
-    return retval;
-
-  while (true)
-    {
-      struct watchy_data stats;
-      memset (&stats, 0, sizeof (stats));
-
-      stats.T = HOST;
-      strncpy (stats.key, name, sizeof (stats.key));
-
-      watchy_getHostStats (&stats.value.metric);
-      watchy_writePacketSync (&stats, sockfd, &servaddr);
-
-      sleep (1);
-    }
-  close (sockfd);
-  return WTCY_NO_ERROR;
 }

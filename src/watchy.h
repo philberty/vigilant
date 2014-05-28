@@ -74,17 +74,10 @@ extern "C" {
 
   // runtime functions
   extern int watchy_writePacketSync (struct watchy_data * const, const int,
-				     const struct sockaddr_in * const);
+				     const struct sockaddr_in * const );
   extern int watchy_writePacket (struct watchy_data * const, const int);
   extern int watchy_cAttachRuntime (const char *, const char *, const int, int * const);
-  extern void watchy_detachRuntime (void);
-
-  // FIXME fork/daemon issues
-  extern int watchy_watchme  (const char *, const char *, const int);
-  // watch a specified pid [name, host, port, pid] - blocking
-  extern int watchy_watchpid (const char *, const char *, const int, const pid_t);
-  // watch the host system [name, host, port] - blocking
-  extern int watchy_watchHost (const char *, const char *, const int);
+  extern void watchy_detachRuntime (int);
   
 #ifdef __cplusplus
 }

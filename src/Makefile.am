@@ -1,6 +1,5 @@
 bin_PROGRAMS = \
-	proTest$(EXEEXT) \
-	logTest$(EXEEXT) \
+	test$(EXEEXT) \
 	wtail$(EXEEXT) \
 	watcher$(EXEEXT)
 lib_LTLIBRARIES = libwatchy.la
@@ -16,14 +15,11 @@ libwatchy_la_SOURCES = \
 	runtime.c \
 	osdep-@PLATFORM@.c
 
+test_SOURCES = test.c
+test_LDADD = libwatchy.la
+
 watcher_SOURCES = watcher.c
 watcher_LDADD = libwatchy.la
 
 wtail_SOURCES = wtail.c
 wtail_LDADD = libwatchy.la
-
-proTest_SOURCES = test.c
-proTest_LDADD = libwatchy.la
-
-logTest_SOURCES = log.c
-logTest_LDADD = libwatchy.la

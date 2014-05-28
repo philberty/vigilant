@@ -118,6 +118,6 @@ int main (int argc, char **argv)
   // do work...
   tail (fd, key);
 
-  watchy_detachRuntime ();
+  watchy_detachRuntime (fd);
   return 0;
 }

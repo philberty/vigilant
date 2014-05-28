@@ -156,7 +156,16 @@ int main (int argc, char **argv)
     }
   signal (SIGINT, shandler);
 
-  running = true;
+  if (key != NULL)
+    running = true;
+  else if (offs > 0)
+    running = true;
+  else
+    {
+      fprintf (stderr, "Nothing to watch closing..\n");
+      running = false;
+    }
+
   size_t i;
   while (running)
     {
@@ -180,6 +189,7 @@ int main (int argc, char **argv)
 
 	  data.T = HOST;
 	  strncpy (data.key, key, sizeof (data.key));
+	  watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
 	  watchy_getHostStats (&data.value.metric);
 
 	  watchy_writePacket (&data, fd);
@@ -190,7 +200,7 @@ int main (int argc, char **argv)
 
   for (i = 0; i < offs; ++i)
     free (nodes [i].key);
-  watchy_detachRuntime ();
+  watchy_detachRuntime (fd);
 
   return 0;
 }

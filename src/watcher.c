@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include <getopt.h>
 #include <errno.h>
 
@@ -14,6 +16,15 @@
 
 static void print_help    (const char *);
 static void print_version (const char *);
+static void shandler      (int);
+
+static bool running;
+
+static void
+shandler (int signo)
+{
+  running = false;
+}
 
 static void
 print_help (const char * arg)
@@ -85,14 +96,28 @@ int main (int argc, char **argv)
       return -1;
     }
 
-  if (optind >= argc)
+  char * dfifo = WTCY_DEFAULT_FIFO;
+  char * fifo = dfifo;
+
+  int fd = 0;
+  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
+  if (fifo != dfifo)
+    free (fifo);
+
+  if (ret != WTCY_NO_ERROR)
     {
-      fprintf (stderr, "No proccess to watch will attempt to watch host if key is specified\n");
+      fprintf (stderr, "Error initilizing watchy runtime [%i:%s]\n",
+	       ret, watchy_strerror (ret));
+      return -1;
     }
 
+  struct watch_node {
+    pid_t pid;
+    char * key;
+  };
   size_t offs = 0, plen = argc - optind;
-  pid_t pids [plen];
-  memset (&pids, 0, sizeof (pids));
+  struct watch_node nodes [plen];
+  memset (&nodes, 0, sizeof (nodes));
 
   while (optind < argc)
     {
@@ -116,48 +141,55 @@ int main (int argc, char **argv)
       strncpy (value, pair + poffs, len - poffs);
       const pid_t ipid = atoi (value);
 
-      printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n",
-	      ipid, key, bind, port);
       int rkill = kill (ipid, 0);
       if (rkill != 0)
 	{
 	  fprintf (stderr, "pid [%i] invalid [%s]\n", ipid, strerror (errno));
 	  continue;
 	}
+      printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n", ipid, key, bind, port);
 
-      pids [offs] = fork ();
-      switch (pids [offs])
-	{
-	case -1:
-	  fprintf (stderr, "Error forking watcher for %i\n", ipid);
-	  break;
-
-	case 0:
-	  {
-	    int retval = watchy_watchpid (key, bind, port, ipid);
-	    if (retval != WTCY_NO_ERROR)
-	      fprintf (stderr, "Error watching pid %i - %s\n",
-		       ipid, watchy_strerror (retval));
-	    free (bind);
-	    exit (0);
-	  }
-	  break;
-
-	default:
-	  break;
-	}
+      nodes [offs].pid = ipid;
+      nodes [offs].key = strdup (key);
       offs++;
     }
+  signal (SIGINT, shandler);
 
-  if (key != NULL) {
-    watchy_watchHost (key, bind, port);
-    free (key);
-  }
-  free (bind);
-
-  // don't care about error conditions here
+  running = true;
   size_t i;
-  for (i = 0; i < plen; ++ i)
-    waitpid (pids [i], NULL, 0);
+  while (running)
+    {
+      struct watchy_data data;
+      for (i = 0; i < offs; ++i)
+	{
+	  memset (&data, 0, sizeof (data));
+	  if (kill (nodes [i].pid, 0) == 0)
+	    {
+	      data.T = PROCESS;
+	      strncpy (data.key, nodes [i].key, sizeof (data.key));
+	      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
+	      watchy_getStats (&data.value.metric, nodes [i].pid);
+
+	      watchy_writePacket (&data, fd);
+	    }
+	}
+      if (key != NULL)
+	{
+	  memset (&data, 0, sizeof (data));
+
+	  data.T = HOST;
+	  strncpy (data.key, key, sizeof (data.key));
+	  watchy_getHostStats (&data.value.metric);
+
+	  watchy_writePacket (&data, fd);
+	}
+
+      sleep (1);
+    }
+
+  for (i = 0; i < offs; ++i)
+    free (nodes [i].key);
+  watchy_detachRuntime ();
+
   return 0;
 }

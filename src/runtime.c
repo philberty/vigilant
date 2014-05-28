@@ -66,7 +66,8 @@ watchy_runtimeLoop (int fd, const int sockfd, const struct sockaddr_in * servadd
 }
 
 int
-watchy_cAttachRuntime (const char * fifo, const char * bind, const int port, int * const fd)
+watchy_cAttachRuntime (const char * fifo, const char * bind,
+		       const int port, int * const fd)
 {
   int sockfd;
   struct sockaddr_in servaddr;

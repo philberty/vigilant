@@ -96,6 +96,7 @@ int main (int argc, char **argv)
       return -1;
     }
 
+  // add option to new fifo
   char * dfifo = WTCY_DEFAULT_FIFO;
   char * fifo = dfifo;
 

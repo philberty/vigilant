@@ -8,11 +8,21 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "watchy.h"
 
+static void shandler (int);
 static int setnonblock (int);
 static void watchy_runtimeLoop (int, const int, const struct sockaddr_in *);
+
+static bool running;
+
+static void
+shandler (int signo)
+{
+  running = false;
+}
 
 int
 watchy_writePacketSync (struct watchy_data * const data, const int sockfd,
@@ -28,7 +38,7 @@ watchy_writePacketSync (struct watchy_data * const data, const int sockfd,
 
 int watchy_writePacket (struct watchy_data * const data, const int fd)
 {
-  return 0;
+  return write (fd, data, sizeof (struct watchy_data));
 }
 
 static int
@@ -50,17 +60,28 @@ setnonblock (int fd)
 static void
 watchy_runtimeLoop (int fd, const int sockfd, const struct sockaddr_in * servaddr)
 {
+  signal (SIGINT, shandler);
   setnonblock (fd);
 
   fd_set inputs, read_fd_set;
   FD_ZERO (&inputs);
   FD_SET (fd, &inputs);
 
-  while (1)
+  running = true;
+  while (running)
     {
       read_fd_set = inputs;
-      select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
-     
+      int result = select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
+      if (result > 0)
+	{
+	  if (FD_ISSET (fd, &read_fd_set))
+	    {
+	      struct watchy_data data;
+	      memset (&data, 0, sizeof (data));
+	      read (fd, &data, sizeof (data));
+	      watchy_writePacketSync (&data, sockfd, servaddr);
+	    }
+	}
       sleep (1);
     }
 }

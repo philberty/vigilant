@@ -27,9 +27,10 @@ Makefile.in
 build/
 bindings/python/pywatchy.c
 *.log
-src/test
-src/log
+src/proTest
+src/logTest
 src/watcher
+src/wtail
 src/config.h.in~
 libtool
 config.h

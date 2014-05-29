@@ -20,7 +20,7 @@ def consumer (func):
     return decorated
 
 class UDPStatsServer (threading.Thread):
-    def __init__ (self, host='localhost', port=8080, climit=20, backend=None):
+    def __init__ (self, host='localhost', port=8080, climit=40, backend=None):
         """
         Initilize Server keywords host default localhost and port 8080
         """

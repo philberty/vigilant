@@ -45,6 +45,12 @@ def serverMain ():
     except:
         print >> sys.stderr, "\nError Parsing config!"
         sys.exit (1)
+    # default
+    limit = 40
+    try:
+        limit = int (parseConfig.get ("watchyd", "cache"))
+    except:
+        pass
     if options.fork is True:
         pid = os.fork ()
         if pid == -1:
@@ -66,7 +72,7 @@ def serverMain ():
         formatter = logging.Formatter (form)
         consoleHandler.setFormatter (formatter)
         rootLogger.addHandler (consoleHandler)
-    StatsServer.WatchyDServer (wbind=rbind, wport=rport,
+    StatsServer.WatchyDServer (limit, wbind=rbind, wport=rport,
                                ubind=abind, uport=aport,
                                debug=options.debug).listen ()
 

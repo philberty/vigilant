@@ -10,18 +10,9 @@
 
 #include "watchy.h"
 
-void watchy_getStats (struct watchy_data * const stats, const pid_t ipid)
+void watchy_getStats (struct watchy_metric * const stats, const pid_t ipid)
 {
-  stats->T = METRIC;
   stats->cpid = ipid;
-
-  time_t ltime = time (NULL);
-  struct tm *tm;
-  tm = localtime (&ltime);
-
-  snprintf (stats->tsp, sizeof (stats->tsp),"%04d%02d%02d%02d%02d%02d",
-	    tm->tm_year+1900, tm->tm_mon, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
   struct proc_taskinfo tinfo;
   memset (&tinfo, 0, sizeof (tinfo));
@@ -36,18 +27,8 @@ void watchy_getStats (struct watchy_data * const stats, const pid_t ipid)
   strncpy (stats->status, "running", sizeof (stats->status));
 }
 
-void watchy_getHostStats (struct watchy_data * const stats)
+void watchy_getHostStats (struct watchy_metric * const stats)
 {
-  stats->T = HOST;
-
-  time_t ltime = time (NULL);
-  struct tm *tm;
-  tm = localtime (&ltime);
-
-  snprintf (stats->tsp, sizeof (stats->tsp),"%04d%02d%02d%02d%02d%02d",
-	    tm->tm_year+1900, tm->tm_mon, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min, tm->tm_sec);
-
   // TODO sysctl is a fucking nightmare retarded api just too generic
   stats->memory = 0;
   strncpy (stats->status, "running", sizeof (stats->status));

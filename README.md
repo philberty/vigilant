@@ -1,54 +1,57 @@
-* Watchy
+# Watchy
+
+[![Build Status](https://travis-ci.org/redbrain/watchy.svg?branch=master)](https://travis-ci.org/redbrain/watchy)
+
 Inspried by StatsD, an embedable library that will automatically
 watch your process from a single function call and will stop when
 your process stops. No need to externally start a process to watch
 and send stats. Its efficient and simple and easy to use is 100% the
 goal of this project.
 
-** Compilation
+## Compilation
 
 To compile and setup the system:
 
-#+BEGIN_SRC bash
+```bash
 $ autoreconf --force --install
 $ ./configure CC=clang/gcc CFLAGS="-g -O2 -Wall" --prefix=/opt/watchy
 $ make
 $ make install
-#+END_SRC
+```
 
 To compile using the library use:
 
-#+BEGIN_SRC bash
+```bash
 $ export PKG_CONFIG_PATH=/opt/watchy/lib/pkgconfig:$PKG_CONFIG_PATH
 $ pkg-config watchy --cflags --libs
-#+END_SRC
+```
 
 Now the shared library is installed
 
-#+BEGIN_SRC bash
+```bash
 $ sudo pip install -r requirements.txt
 $ # the python setup.py will create the cython module but it requires pkg-config watchy to work
 $ python setup.py build
 $ # sudo -E so it will export PKG_CONFIG_PATH
 $ sudo -E python setup.py install
-#+END_SRC
+```
 
-** Usage
+## Usage
 
 Firstly you should setup the server open /etc/watchy/watchy.cfg
 
-#+BEGIN_SRC bash
+```bash
 [watchyd]
 web_bind = 0.0.0.0     # address to bind to for web app
 web_port = 7777        # port to serve the web app
 stats_bind = localhost # stats aggregator bind
 stats_port = 7878      # stats aggregator port
 backends = none        # This is in progress to store stats
-#+END_SRC
+```
 
 Now you can run the web app:
 
-#+BEGIN_SRC bash
+```bash
 $ /usr/local/bin/watchy.py --help
 Usage: watchy.py [options]
 
@@ -69,7 +72,7 @@ $ tail -f watchy-server.log
 [watchy1] INFO Starting StatsAggregator on localhost:7878
 ...
 $ kill pid
-#+END_SRC
+```
 
 Now you should be able to point your browser to http://localhost:7777, this is
 a python flask web application. A /etc/init.d script would be nice here,
@@ -77,28 +80,24 @@ and a way to run it via nginx or apache etc for a more real setup.
 
 Sending stats can be done via:
 
-#+BEGIN_SRC bash
+```bash
 $ /opt/watchy/bin/watcher -k `hostname` -b localhost -p 7878 process1:<pid> process2:<pid>
-#+END_SRC
+```
 
 Or you can tail a log:
 
-#+BEGIN_SRC bash
+```bash
 $ tail -f /var/log/syslog | /opt/watchy/bin/wtail -k syslog -p 7878 -b localhost
-#+END_SRC
+```
 
-*** Platform Support
+##Platform Support
 
 Currently the python server should run on anywhere that has flask and python 2.7,
 but the library has only been ported to darwin (Mac OSX) and linux (Ubuntu/RedHat).
 
 *BSD and Solaris support is eventually going to pop along.
 
-*** Metrics
-
-Currently it only gets very minimal statistics (memory, process state, nthreads)
-
-*** RestApi
+## RestApi
 
 The Flask web app exposes a very simple rest api, a web socket api is planned for
 real time stats per node. All rest calls are json no xml support.
@@ -108,9 +107,3 @@ real time stats per node. All rest calls are json no xml support.
   * http://host:port/api/{process/hosts}/graph/<node-name>, Get the current session graph data
 
 The web socket api is going to be very useful here and a zeromq a rabbit amqp backend too.
-
-*** Backends
-
-Currently there is no storage of stats data but real time ganglia consumer,
-an sqlite backend and mongo backend are all planned to be implemented. So
-you can have historial stats data into existing systems.

@@ -124,7 +124,7 @@ int main (int argc, char **argv)
 
   int fd;
   int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
-  if (fifo != WTCY_DEFAULT_FIFO)
+  if (strcmp (fifo, WTCY_DEFAULT_FIFO))
     free (fifo);
 
   if (ret != WTCY_NO_ERROR)

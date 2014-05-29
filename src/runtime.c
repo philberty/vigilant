@@ -1,4 +1,3 @@
-#include <Python.h>
 #include "config.h"
 
 #include <stdio.h>
@@ -23,7 +22,6 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
-#include "server.h"
 #include "watchy.h"
 
 static void shandler (int);
@@ -189,7 +187,7 @@ callback_client_read (struct bufferevent *bev, void *arg)
 		for (item = TAILQ_FIRST (&watchy_pids_head); item != NULL; item = tmp_item)
 		  {
 		    tmp_item = TAILQ_NEXT (item, entries);
-		    if (item->pid == node->pid)
+		    if (item->pid == ipid)
 		      {
 			exists = true;
 			if (watch == false)
@@ -257,8 +255,6 @@ static void
 watchy_runtimeLoop (int fd)
 {
   running = true;
-  Py_Initialize ();
-
   TAILQ_INIT(&watchy_pids_head);
 
   signal (SIGTERM, shandler);
@@ -286,7 +282,6 @@ watchy_runtimeLoop (int fd)
       TAILQ_REMOVE (&watchy_pids_head, item, entries);
       free (item);
     }
-  Py_Finalize ();
 }
 
 int

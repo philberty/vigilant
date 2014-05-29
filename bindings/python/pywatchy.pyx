@@ -14,24 +14,6 @@ DEF WTCY_USOCK_FAIL  = 7
 DEF WTCY_ATIMEOUT    = 8
 DEF WTCY_UNKNOWN     = 9
 
-class Singleton:
-    def __init__(self, decorated):
-        self._decorated = decorated
-
-    def Instance(self):
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
-
-    def __call__(self):
-        raise TypeError('Singletons must be accessed through `Instance()`.')
-
-    def __instancecheck__(self, inst):
-        return isinstance(inst, self._decorated)
-
-@Singleton
 class WatchyDaemon:
     def __init__ (self, host, port, fifo=WTCY_DEFAULT_FIFO):
         cdef int fd

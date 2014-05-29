@@ -10,7 +10,7 @@
 
 #include <watchy.h>
 
-static bool running;
+static volatile bool running;
 static void tail (const int, const char *);
 static void print_help    (const char *);
 static void print_version (const char *);
@@ -45,18 +45,20 @@ tail (const int fd, const char * key)
   signal (SIGINT, shandler);
   running = true;
 
-  size_t len = 0;
   ssize_t read;
-  char * line = NULL;
+  size_t len = 128;
+  char * line = calloc (len, sizeof (char));
 
   struct watchy_data packet;
   while (running)
     {
       read = getline (&line, &len, stdin);
-      memset (&packet, 0, sizeof (packet));
-
-      watchy_logPacket (&packet, line, key);
-      watchy_writePacket (&packet, fd);
+      if (read != -1 && len > 0)
+	{
+	  memset (&packet, 0, sizeof (packet));
+	  watchy_logPacket (&packet, line, key);
+	  watchy_writePacket (&packet, fd);
+	}
     }
   if (line != NULL)
     free (line);

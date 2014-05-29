@@ -1,3 +1,4 @@
+#include <Python.h>
 #include "config.h"
 
 #include <stdio.h>
@@ -14,13 +15,15 @@
 #include <signal.h>
 #include <errno.h>
 
+#include <syslog.h>
+#include <sys/queue.h>
+
 #include <event2/event.h>
 #include <event2/event_struct.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
-#include <syslog.h>
-
+#include "server.h"
 #include "watchy.h"
 
 static void shandler (int);
@@ -28,10 +31,20 @@ static struct event_base *evbase;
 static pid_t opener, spid;
 static int sockfd;
 static struct sockaddr_in servaddr;
-
-static volatile bool running = false;
+static bool running = false;
+static bool watch_host = false;
+static size_t sessions = 0;
 static volatile bool ready = false;
 static char buffer [WTCY_PACKET_SIZE];
+static struct timeval one_sec = { 1, 0 };
+
+struct watchy_pid {
+  pid_t pid;
+  struct watchy_data node;
+  struct event * ev;
+  TAILQ_ENTRY(watchy_pid) entries;
+};
+TAILQ_HEAD(, watchy_pid) watchy_pids_head;
 
 static void
 shandler (int signo)
@@ -41,6 +54,7 @@ shandler (int signo)
     case SIGTERM:
       {
 	syslog (LOG_INFO, "Caught sigterm stopping runtime!");
+	event_base_loopbreak (evbase);
 	running = false;
       }
       break;
@@ -85,6 +99,54 @@ int setnonblock (int fd)
   return 0;
 }
 
+void callback_doStats (int fd, short event, void * arg)
+{
+  struct watchy_pid * node = arg;
+  syslog (LOG_INFO, "Watch pid [%i]", node->pid);
+
+  if (kill (node->pid, 0) == -1)
+    {
+      syslog (LOG_INFO, "pid [%i] is no longer alive", node->pid);
+      struct watchy_pid * item, * tmp_item;
+      for (item = TAILQ_FIRST (&watchy_pids_head); item != NULL; item = tmp_item)
+	{
+	  tmp_item = TAILQ_NEXT (item, entries);
+	  if (item->pid == node->pid)
+	    {
+	      TAILQ_REMOVE (&watchy_pids_head, item, entries);
+	      event_del (item->ev);
+	      free (item);
+	    }
+	}
+    }
+  else
+    { 
+      struct watchy_data data;
+      memset (&data, 0, sizeof (data));
+
+      data.T = PROCESS;
+      strncpy (data.key, node->node.key, sizeof (data.key));
+      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
+      watchy_getStats (&data.value.metric, node->pid);
+      
+      watchy_writePacketSync (&data, sockfd, &servaddr);
+    }
+}
+
+void callback_doHostStats (int fd, short event, void * arg)
+{
+  struct watchy_pid * node = arg;
+  struct watchy_data data;
+  memset (&data, 0, sizeof (data));
+
+  data.T = HOST;
+  strncpy (data.key, node->node.key, sizeof (data.key));
+  watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
+  watchy_getHostStats (&data.value.metric);
+      
+  watchy_writePacketSync (&data, sockfd, &servaddr);
+}
+
 void
 callback_client_read (struct bufferevent *bev, void *arg)
 {
@@ -94,40 +156,79 @@ callback_client_read (struct bufferevent *bev, void *arg)
   int c = bufferevent_read (bev, &data, sizeof (data));
   if (c >= 0)
     {
-      char type [12];
-      memset (type, 0, sizeof (type));
-
       switch (data.T)
 	{
-	case METRIC:
-	  strcpy (type, "metric");
+	  // shutdown message
+	case SDOWN:
+	  kill (getpid (), SIGTERM);
 	  break;
 
-	case HOST:
-	  strcpy (type, "host");
-	  break;
+	case INTERNAL:
+	  {
+	    struct watchy_pid * item;
+	    pid_t ipid = data.value.intern.pid;
+	    bool watch = data.value.intern.watch;
+	    bool exists = false;
 
-	case PROCESS:
-	  strcpy (type, "process");
-	  break;
+	    if (data.value.intern.host == true)
+	      {
+		if (watch_host)
+		  return;
+		watch_host = true;
 
-	case LOG:
-	  strcpy (type, "log");
+		item = malloc (sizeof (struct watchy_pid));
+		memset (item, 0, sizeof (struct watchy_pid));
+		memcpy (&item->node, &data, sizeof (struct watchy_data));
+
+	        item->ev = event_new (evbase, 0, EV_PERSIST, callback_doHostStats, item);
+		evtimer_add (item->ev, &one_sec);
+	      }
+	    else
+	      {
+		struct watchy_pid * tmp_item;
+		for (item = TAILQ_FIRST (&watchy_pids_head); item != NULL; item = tmp_item)
+		  {
+		    tmp_item = TAILQ_NEXT (item, entries);
+		    if (item->pid == node->pid)
+		      {
+			exists = true;
+			if (watch == false)
+			  {
+			    TAILQ_REMOVE (&watchy_pids_head, item, entries);
+			    event_del (item->ev);
+			    free (item);
+			  }
+		      }
+		  }
+		if (!exists && (watch == true))
+		  {
+		    item = malloc (sizeof (struct watchy_pid));
+		    memset (item, 0, sizeof (struct watchy_pid));
+
+		    item->pid = ipid;
+		    memcpy (&item->node, &data, sizeof (struct watchy_data));
+		    TAILQ_INSERT_TAIL (&watchy_pids_head, item, entries);
+		    
+		    item->ev = event_new (evbase, 0, EV_PERSIST, callback_doStats, item);
+		    evtimer_add (item->ev, &one_sec);
+		  }
+	      }
+	  }
 	  break;
 
 	default:
-	  strcpy (type, "unknown");
+	  watchy_writePacketSync (&data, sockfd, &servaddr);
 	  break;
 	}
-      syslog (LOG_INFO, "Got data packet [%s]", type);
-      watchy_writePacketSync (&data, sockfd, &servaddr);
     }
 }
+
 void callback_client_error (struct bufferevent *bev, short what, void *arg)
 {
   bufferevent_free (bev);
   int *fd = (int *) arg;
   close (*fd);
+  sessions--;
 }
 
 void callback_client_connect (int fd, short ev, void *arg)
@@ -149,11 +250,17 @@ void callback_client_connect (int fd, short ev, void *arg)
 		     &callback_client_error, // on error
 		     &client_fd);            // argument
   bufferevent_enable (bev, EV_READ);
+  sessions++;
 }
 
 static void
 watchy_runtimeLoop (int fd)
 {
+  running = true;
+  Py_Initialize ();
+
+  TAILQ_INIT(&watchy_pids_head);
+
   signal (SIGTERM, shandler);
   setlogmask (LOG_UPTO (LOG_INFO));
   openlog ("WatchyBus", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
@@ -167,8 +274,19 @@ watchy_runtimeLoop (int fd)
 		NULL);
 
   event_add (&ev_accept, NULL);
-  event_base_dispatch (evbase);
+  while (running)
+    event_base_loop (evbase, EVLOOP_NONBLOCK);
+
+  event_base_free (evbase);
   closelog ();
+
+  struct watchy_pid * item;
+  while ((item = TAILQ_FIRST (&watchy_pids_head)))
+    {
+      TAILQ_REMOVE (&watchy_pids_head, item, entries);
+      free (item);
+    }
+  Py_Finalize ();
 }
 
 int
@@ -214,8 +332,6 @@ watchy_cAttachRuntime (const char * fifo, const char * host,
 
 	    close (sfd);
 	    unlink (fifo);
-	    remove (fifo);
-
 	    exit (0);
 	  }
 	  break;
@@ -250,6 +366,4 @@ void
 watchy_detachRuntime (int fd)
 {
   close (fd);
-  if (getpid () == opener)
-    kill (spid, SIGTERM);
 }

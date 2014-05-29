@@ -1,6 +1,8 @@
 #ifndef __WATCHY_H__
 #define __WATCHY_H__
 
+//for bool
+#include <stdbool.h>
 // for struct tm
 #include <time.h>
 // for pid_t
@@ -35,7 +37,7 @@
 extern "C" {
 #endif
 
-  typedef enum { METRIC, HOST, PROCESS, LOG } WATCHY_TYPE;
+  typedef enum { INTERNAL, METRIC, HOST, PROCESS, LOG, SDOWN } WATCHY_TYPE;
 
   struct watchy_metric {
     char status [16];
@@ -44,12 +46,20 @@ extern "C" {
     unsigned int memory;
   };
 
+  struct watchy_intern {
+    bool host;
+    char key [32];
+    bool watch;
+    pid_t pid;
+  };
+
   struct watchy_data {
     WATCHY_TYPE T;
     char key [32];
     char tsp [32];
     union {
       struct watchy_metric metric;
+      struct watchy_intern intern;
       char buffer [WTCY_PACKET_SIZE-25];
     } value ;
   };

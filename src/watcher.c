@@ -16,15 +16,6 @@
 
 static void print_help    (const char *);
 static void print_version (const char *);
-static void shandler      (int);
-
-static volatile bool running;
-
-static void
-shandler (int signo)
-{
-  running = false;
-}
 
 static void
 print_help (const char * arg)
@@ -35,7 +26,6 @@ print_help (const char * arg)
   printf ("\t--version|-v\tPrint version string\n");
   printf ("\t--port|-p\tPort of server\n");
   printf ("\t--hostname|-b\tHostname of server\n");
-  printf ("\t--daemon|-F\tDaemonize this\n");
   printf ("\n");
 }
 
@@ -49,20 +39,18 @@ int main (int argc, char **argv)
 {
   int c, port = 0;
   char * bind = NULL, * key = NULL;
-  bool forkme = false;
   while (1)
     {
       static struct option long_options [] = {
         { "help",     no_argument,       0, 'h' },
         { "version",  no_argument,       0, 'v' },
-	{ "daemon",   no_argument,       0, 'F' },
         { "hostname", required_argument, 0, 'b' },
         { "port",     required_argument, 0, 'p' },
 	{ "key",      required_argument, 0, 'k' },
         { 0, 0, 0, 0 }
       };
       int option_index = 0;
-      c = getopt_long (argc, argv, "hvFb:p:i:k:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hvb:p:i:k:", long_options, &option_index);
       if (c == -1)
         break;
 
@@ -88,10 +76,6 @@ int main (int argc, char **argv)
 	  key = strdup (optarg);
 	  break;
 
-	case 'F':
-	  forkme = true;
-	  break;
-
         default:
           break;
         }
@@ -103,35 +87,22 @@ int main (int argc, char **argv)
       return -1;
     }
 
-  // TODO
-  if (forkme)
-    ; // daemonize here...
-
   // add option to new fifo
   char * dfifo = WTCY_DEFAULT_FIFO;
   char * fifo = dfifo;
 
   int fd = 0;
   int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
+  if (ret != WTCY_NO_ERROR)
+    {
+      fprintf (stderr, "Error initilizing watchy runtime [%s][%s]\n\t%s\n",
+	       fifo, watchy_strerror (ret), strerror (errno));
+      return -1;
+    }
   if (fifo != dfifo)
     free (fifo);
 
-  if (ret != WTCY_NO_ERROR)
-    {
-      fprintf (stderr, "Error initilizing watchy runtime [%s]\n",
-	       watchy_strerror (ret));
-      printf ("errno = [%s]\n", strerror (errno));
-      return -1;
-    }
-
-  struct watch_node {
-    pid_t pid;
-    char * key;
-  };
-  size_t offs = 0, plen = argc - optind;
-  struct watch_node nodes [plen];
-  memset (&nodes, 0, sizeof (nodes));
-
+  struct watchy_data data;
   while (optind < argc)
     {
       const char * pair = argv [optind++];
@@ -160,59 +131,36 @@ int main (int argc, char **argv)
 	  fprintf (stderr, "pid [%i] invalid [%s]\n", ipid, strerror (errno));
 	  continue;
 	}
+
       printf ("Trying to watch pid [%i] posting to [udp://%s@%s:%i]\n", ipid, key, bind, port);
+      memset (&data, 0, sizeof (data));
+      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
 
-      nodes [offs].pid = ipid;
-      nodes [offs].key = strdup (key);
-      offs++;
+      data.T = INTERNAL;
+      strncpy (data.key, key, sizeof (data.key));
+      data.value.intern.pid = ipid;
+      data.value.intern.watch = true;
+      data.value.intern.host = false;
+
+      watchy_writePacket (&data, fd);
     }
-  signal (SIGINT, shandler);
-
   if (key != NULL)
-    running = true;
-  else if (offs > 0)
-    running = true;
-  else
     {
-      fprintf (stderr, "Nothing to watch closing..\n");
-      running = false;
+      printf ("Tryign to watch host posting to [udp://%s@%s:%i]\n", key, bind, port);
+
+      memset (&data, 0, sizeof (data));
+      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
+
+      data.T = INTERNAL;
+      strncpy (data.key, key, sizeof (data.key));
+      data.value.intern.pid = 0;
+      data.value.intern.watch = false;
+      data.value.intern.host = true;
+
+      watchy_writePacket (&data, fd);
+      free (key);
     }
 
-  size_t i;
-  while (running)
-    {
-      struct watchy_data data;
-      for (i = 0; i < offs; ++i)
-	{
-	  memset (&data, 0, sizeof (data));
-	  if (kill (nodes [i].pid, 0) == 0)
-	    {
-	      data.T = PROCESS;
-	      strncpy (data.key, nodes [i].key, sizeof (data.key));
-	      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
-	      watchy_getStats (&data.value.metric, nodes [i].pid);
-
-	      watchy_writePacket (&data, fd);
-	    }
-	}
-      if (key != NULL)
-	{
-	  memset (&data, 0, sizeof (data));
-
-	  data.T = HOST;
-	  strncpy (data.key, key, sizeof (data.key));
-	  watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
-	  watchy_getHostStats (&data.value.metric);
-
-	  watchy_writePacket (&data, fd);
-	}
-
-      sleep (1);
-    }
-
-  for (i = 0; i < offs; ++i)
-    free (nodes [i].key);
   watchy_detachRuntime (fd);
-
   return 0;
 }

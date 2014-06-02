@@ -6,5 +6,5 @@ class Backend_Rabbit:
         self.connection = pika.BlockingConnection (params)
         self.channel = self.connection.channel ()
 
-    def consume (self, key, name, data):
+    def consume (self, (key, name, data)):
         pass

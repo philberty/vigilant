@@ -1,3 +1,7 @@
+import Queue
+import threading
+import ServerUtil
+
 import WatchyServer.backends.Backend_MongoDB as mongo
 import WatchyServer.backends.Backend_RabbitMQ as rabbit
 
@@ -29,3 +33,18 @@ def Backend (node, config):
         return RabbitBackendInit (node, config)
     else:
         raise BackendInitException ('Unknown backend type %s' % btype)
+
+BackendDispatch = Queue.Queue ()
+class AsyncBackend (threading.Thread):
+    def __init__ (self, backends):
+        threading.Thread.__init__ (self)
+        self.running = False
+        self.backends = backends
+
+    def run (self):
+        ServerUtil.info ('Starting Async Backend handler')
+        self.running = True
+        while self.running:
+            data = BackendDispatch.get ()
+            for i in self.backends:
+                i.consume (data)

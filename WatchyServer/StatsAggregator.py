@@ -6,10 +6,13 @@ import threading
 import traceback
 import ServerUtil
 
+from BackendUtil import AsyncBackend
+from BackendUtil import BackendDispatch
 from StatsServer import StatSession_Logs
 from StatsServer import StatSession_Hosts
 from StatsServer import StatSession_Process
 from StatsServer import StatSession_Metrics
+
 
 def consumer (func):
     def decorated (*args, **kwargs):
@@ -17,12 +20,8 @@ def consumer (func):
         data = kwargs ['data']
         dtype = data ['type']
         rdata = json.dumps (data, sort_keys=True, indent=4, separators=(',', ': '))
-        for i in args [0].backends:
-            try:
-                i.consume (dtype, key, rdata)
-            except:
-                ServerUtil.error (sys.exc_info () [1])
-        return func (*args, key=key, data=data)
+        BackendDispatch.put ((key, dtype, rdata))
+        func (*args, key=key, data=data)
     return decorated
 
 class UDPStatsServer (threading.Thread):
@@ -34,7 +33,8 @@ class UDPStatsServer (threading.Thread):
         self.port = port
         self.running = False
         self.climit = climit
-        self.backends = backends
+        self.backend = AsyncBackend (backends)
+        self.backend.daemon = True
         self.serverSocket = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
         self.serverSocket.setblocking (0)
         threading.Thread.__init__ (self)
@@ -77,6 +77,7 @@ class UDPStatsServer (threading.Thread):
 
     def run (self):
         ServerUtil.info ("Starting StatsAggregator on %s:%s" % (self.host, self.port))
+        self.backend.start ()
         self.serverSocket.bind ((self.host, self.port))
         self.running = True
         inputs = [self.serverSocket]

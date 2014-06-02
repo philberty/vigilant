@@ -44,6 +44,12 @@ struct watchy_pid {
 };
 TAILQ_HEAD(, watchy_pid) watchy_pids_head;
 
+struct watchy_session {
+  int fd;
+  TAILQ_ENTRY(watchy_session) entries;
+};
+TAILQ_HEAD(, watchy_session) watchy_session_head;
+
 static void
 shandler (int signo)
 {
@@ -51,9 +57,12 @@ shandler (int signo)
     {
     case SIGTERM:
       {
-	syslog (LOG_INFO, "Caught sigterm stopping runtime!");
-	event_base_loopbreak (evbase);
-	running = false;
+	syslog (LOG_INFO, "Caught sigterm!");
+	if (sessions == 0)
+	  {
+	    event_base_loopbreak (evbase);
+	    running = false;
+	  }
       }
       break;
 
@@ -161,6 +170,8 @@ callback_client_read (struct bufferevent *bev, void *arg)
 	  kill (getpid (), SIGTERM);
 	  break;
 
+	  // need logon/logoff for sessions
+
 	case INTERNAL:
 	  {
 	    struct watchy_pid * item;
@@ -226,7 +237,6 @@ void callback_client_error (struct bufferevent *bev, short what, void *arg)
   bufferevent_free (bev);
   int *fd = (int *) arg;
   close (*fd);
-  sessions--;
 }
 
 void callback_client_connect (int fd, short ev, void *arg)
@@ -248,7 +258,6 @@ void callback_client_connect (int fd, short ev, void *arg)
 		     &callback_client_error, // on error
 		     &client_fd);            // argument
   bufferevent_enable (bev, EV_READ);
-  sessions++;
 }
 
 static void

@@ -8,7 +8,9 @@ import traceback
 
 from WatchyServer import ServerUtil
 from WatchyServer import StatsServer
-from ConfigParser import SafeConfigParser
+from WatchyServer import BackendUtil
+
+from ConfigParser import RawConfigParser as CParser
 
 def printVersion ():
     print "WatchyD Version [%s]" % ServerUtil.version
@@ -36,7 +38,7 @@ def serverMain ():
         print >> sys.stderr, "Error requires config file see --help"
         sys.exit (1)
     try:
-        parseConfig = SafeConfigParser ()
+        parseConfig = CParser ()
         parseConfig.read (options.config)
         rbind = str (parseConfig.get ("watchyd", "web_bind"))
         rport = int (parseConfig.get ("watchyd", "web_port"))
@@ -45,12 +47,20 @@ def serverMain ():
     except:
         print >> sys.stderr, "\nError Parsing config!"
         sys.exit (1)
-    # default
-    limit = 40
     try:
         limit = int (parseConfig.get ("watchyd", "cache"))
     except:
-        pass
+        limit = 40 # default
+    try:
+        backends = str (parseConfig.get ("watchyd", "backends")).split ()
+    except:
+        backends = []
+    finally:
+        try:
+            backends = [ BackendUtil.Backend (i, parseConfig) for i in backends ]
+        except BackendUtil.BackendInitException:
+            print >> sys.stderr, "Error intilizing backend %s" % sys.exc_info ()[1]
+            sys.exit (-1)
     if options.fork is True:
         pid = os.fork ()
         if pid == -1:
@@ -72,7 +82,7 @@ def serverMain ():
         formatter = logging.Formatter (form)
         consoleHandler.setFormatter (formatter)
         rootLogger.addHandler (consoleHandler)
-    StatsServer.WatchyDServer (limit, wbind=rbind, wport=rport,
+    StatsServer.WatchyDServer (limit, backends, wbind=rbind, wport=rport,
                                ubind=abind, uport=aport,
                                debug=options.debug).listen ()
 

@@ -13,14 +13,20 @@ from StatsServer import StatSession_Metrics
 
 def consumer (func):
     def decorated (*args, **kwargs):
-        if hasattr (args [0], 'backend'):
-            if args [0].backend is not None:
-                args [0].backend.consume (*args, **kwargs)
-        return func (*args, **kwargs)
+        key = kwargs ['key']
+        data = kwargs ['data']
+        dtype = data ['type']
+        rdata = json.dumps (data, sort_keys=True, indent=4, separators=(',', ': '))
+        for i in args [0].backends:
+            try:
+                i.consume (dtype, key, rdata)
+            except:
+                ServerUtil.error (sys.exc_info () [1])
+        return func (*args, key=key, data=data)
     return decorated
 
 class UDPStatsServer (threading.Thread):
-    def __init__ (self, host='localhost', port=8080, climit=40, backend=None):
+    def __init__ (self, host='localhost', port=8080, climit=40, backends=[]):
         """
         Initilize Server keywords host default localhost and port 8080
         """
@@ -28,7 +34,7 @@ class UDPStatsServer (threading.Thread):
         self.port = port
         self.running = False
         self.climit = climit
-        self.backend = backend
+        self.backends = backends
         self.serverSocket = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
         self.serverSocket.setblocking (0)
         threading.Thread.__init__ (self)
@@ -61,11 +67,11 @@ class UDPStatsServer (threading.Thread):
         key = data ['name']
         which = data ['type']
         if which == 'host':
-            self.consumeHost (key, data)
+            self.consumeHost (key=key, data=data)
         elif which == 'process':
-            self.consumeProcess (key, data)
+            self.consumeProcess (key=key, data=data)
         elif which == 'log':
-            self.consumeLog (key, data)
+            self.consumeLog (key=key, data=data)
         else:
             ServerUtil.warning ('Invalid type [%s]' % which)
 

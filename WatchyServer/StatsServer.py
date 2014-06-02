@@ -104,11 +104,13 @@ def statics (path):
     return app.send_static_file (path)
 
 class WatchyDServer:
-    def __init__ (self, cacheLimit, wbind='localhost', wport=8080, ubind='localhost', uport=8081, debug=False):
+    def __init__ (self, cacheLimit, backends, wbind='localhost', wport=8080,
+                  ubind='localhost', uport=8081, debug=False):
         self.web_bind = wbind
         self.web_port = wport
         self.debug = debug
-        self.udp_server = UDPStatsServer (host=ubind, port=uport, climit=cacheLimit)
+        self.udp_server = UDPStatsServer (host=ubind, port=uport,
+                                          climit=cacheLimit, backends=backends)
 
     def listen (self):
         try:

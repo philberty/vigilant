@@ -1,3 +1,3 @@
 SUBDIRS = src
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign dejagnu
 ACLOCAL_AMFLAGS = -I m4

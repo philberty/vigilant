@@ -4,8 +4,6 @@ import json
 import traceback
 import ServerUtil
 
-from datetime import datetime
-
 from flask import Flask
 from flask import jsonify
 from flask import render_template
@@ -63,22 +61,8 @@ def getProcessGraph (key):
         return jsonify ({'ready':False})
     data = []
     for i in StatSession_Process [key]:
-        ts = str (i ['timeStamp'])
-        jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
-        data.append ((jts.isoformat (), i ['memory']))
+        data.append ((i ['timeStamp'], i ['memory']))
     return jsonify ({ 'ready':True, 'len' : len (StatSession_Process [key]),
-                      'label':'Memory Usage of %s' % key, 'data': data})
-
-@app.route ("/api/hosts/graph/<path:key>")
-def getHostGraph (key):
-    if key not in StatSession_Hosts:
-        return jsonify ({'ready':False})
-    data = []
-    for i in StatSession_Hosts [key]:
-        ts = str (i ['timeStamp'])
-        jts = datetime.strptime (ts, '%Y%m%d%H%M%S')
-        data.append ((jts.isoformat (), i ['memory']))
-    return jsonify ({ 'ready':True, 'len' : len (StatSession_Hosts [key]),
                       'label':'Memory Usage of %s' % key, 'data': data})
 
 @app.route ("/api/process/data/<path:key>")

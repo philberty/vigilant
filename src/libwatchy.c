@@ -128,13 +128,15 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
 		       "\"state\" : \"%s\", "
 		       "\"pid\" : %i, "
 		       "\"threads\" : %zi, "
-		       "\"memory\" : %i"
+		       "\"memory\" : %i, "
+		       "\"usage\" : %Lf"
 		       " }", type,
 		       stats->key, stats->tsp,
 		       stats->value.metric.status,
 		       stats->value.metric.cpid,
 		       stats->value.metric.nthreads,
-		       stats->value.metric.memory);
+		       stats->value.metric.memory,
+		       stats->value.metric.usage);
     }
   else if (stats->T == LOG)
     {

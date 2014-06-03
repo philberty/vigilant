@@ -6,6 +6,8 @@ import threading
 import traceback
 import ServerUtil
 
+from datetime import datetime
+
 from BackendUtil import AsyncBackend
 from BackendUtil import BackendDispatch
 from StatsServer import StatSession_Logs
@@ -66,6 +68,8 @@ class UDPStatsServer (threading.Thread):
     def consume (self, data):
         key = data ['name']
         which = data ['type']
+        data ['timeStamp'] = datetime.strptime (data ['timeStamp'],
+                                                '%Y%m%d%H%M%S').isoformat ()
         if which == 'host':
             self.consumeHost (key=key, data=data)
         elif which == 'process':

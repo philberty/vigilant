@@ -281,6 +281,7 @@ watchy_runtimeLoop (int fd)
   event_add (&ev_accept, NULL);
   while (running)
     event_base_loop (evbase, EVLOOP_NONBLOCK);
+  
 
   event_base_free (evbase);
   closelog ();

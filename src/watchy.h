@@ -44,6 +44,7 @@ extern "C" {
     pid_t cpid;
     size_t nthreads;
     unsigned int memory;
+    long double usage;
   };
 
   struct watchy_intern {

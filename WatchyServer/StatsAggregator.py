@@ -15,7 +15,6 @@ from StatsServer import StatSession_Hosts
 from StatsServer import StatSession_Process
 from StatsServer import StatSession_Metrics
 
-
 def consumer (func):
     def decorated (*args, **kwargs):
         key = kwargs ['key']
@@ -36,7 +35,6 @@ class UDPStatsServer (threading.Thread):
         self.running = False
         self.climit = climit
         self.backend = AsyncBackend (backends)
-        self.backend.daemon = True
         self.serverSocket = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
         self.serverSocket.setblocking (0)
         threading.Thread.__init__ (self)
@@ -98,7 +96,7 @@ class UDPStatsServer (threading.Thread):
                         sobject ['host'] = { 'host': rdata [1][0],
                                              'port': rdata [1][1]
                                          }
-                        ServerUtil.info ('Recieved [%s] from [%s:%i] for [%s]' \
+                        ServerUtil.debug ('Recieved [%s] from [%s:%i] for [%s]' \
                                          % (sobject ['type'],
                                             sobject ['host']['host'],
                                             sobject ['host']['port'],
@@ -114,3 +112,7 @@ class UDPStatsServer (threading.Thread):
             ServerUtil.error ("%s" % sys.exc_info ()[1])
         finally:
             self.serverSocket.close ()
+            ServerUtil.info ("Shutting down Backend")
+            self.backend.running = False
+            ServerUtil.info ("Stats Aggregator exited gracefully")
+

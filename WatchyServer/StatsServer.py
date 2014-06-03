@@ -98,7 +98,6 @@ class WatchyDServer:
 
     def listen (self):
         try:
-            self.udp_server.daemon = True
             self.udp_server.start ()
             ServerUtil.info ('WSGIServer:[gevent] starting http://%s:%i/' \
                              % (self.web_bind, self.web_port))

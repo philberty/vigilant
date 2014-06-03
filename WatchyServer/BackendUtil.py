@@ -1,5 +1,8 @@
+import sys
+import time
 import Queue
 import threading
+import traceback
 import ServerUtil
 
 import WatchyServer.backends.Backend_MongoDB as mongo
@@ -45,6 +48,13 @@ class AsyncBackend (threading.Thread):
         ServerUtil.info ('Starting Async Backend handler')
         self.running = True
         while self.running:
-            data = BackendDispatch.get ()
-            for i in self.backends:
-                i.consume (data)
+            try:
+                data = BackendDispatch.get (False)
+                for i in self.backends:
+                    i.consume (data)
+            except Queue.Empty:
+                time.sleep (1)
+            except:
+                ServerUtil.error ("%s" % traceback.format_exc ())
+                ServerUtil.error ("%s" % sys.exc_info ()[1])
+        ServerUtil.info ("Async Backend gacefully exited")

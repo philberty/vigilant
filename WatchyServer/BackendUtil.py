@@ -47,6 +47,9 @@ class AsyncBackend (threading.Thread):
 
     def run (self):
         ServerUtil.info ('Starting Async Backend handler')
+        if len (self.backends) == 0:
+            ServerUtil.info ('No Specified backends stopping handler')
+            return
         self.running = True
         while self.running:
             try:

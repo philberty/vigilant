@@ -21,8 +21,6 @@ def serverMain ():
     parser = optparse.OptionParser ()
     parser.add_option ("-v", "--version", dest='version',
                        help="Print version", action="store_true")
-    parser.add_option ("-l", "--logfile", dest='logfile',
-                       help="Ouput logfile", default="./server.log")
     parser.add_option ("-c", "--config", dest="config",
                        help="Config file location", default=None)
     parser.add_option ("-F", "--fork", dest="fork", action="store_true",

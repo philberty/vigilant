@@ -1,4 +1,4 @@
-AC_INIT(watchy, 0.01, https://github.com/redbrain/watchy)
+AC_INIT(watchy, 0.2, https://github.com/redbrain/watchy)
 AC_CONFIG_SRCDIR([src/test.c])
 AC_CONFIG_HEADER([src/config.h])
 dnl keep the autoconf generated stuff neatly in a folder 

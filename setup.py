@@ -22,7 +22,7 @@ install_reqs = parse_requirements ('./requirements.txt')
 reqs = [str(ir.req) for ir in install_reqs]
 setup (
     name = "Watchy",
-    version = "0.1",
+    version = "0.2",
     url = 'https://github.com/redbrain/watchy',
     author = 'Philip Herron',
     author_email = 'redbrain@gcc.gnu.org',

@@ -1,7 +1,7 @@
 import sys
 import logging
 
-version = '@VERSION@'
+version = '0.2'
 
 def info (message): logging.info (message)
 

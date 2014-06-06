@@ -35,6 +35,9 @@ static bool watch_host = false;
 static volatile bool ready = false;
 static char buffer [WTCY_PACKET_SIZE];
 static struct timeval one_sec = { 1, 0 };
+static char * _ARGV0 = NULL;
+
+#define _PROC_NAME "WatchyDaemon"
 
 struct watchy_pid {
   pid_t pid;
@@ -79,7 +82,7 @@ watchy_writePacketSync (struct watchy_data * const data, const int sockfd,
 
 int watchy_writePacket (struct watchy_data * const data, const int fd)
 {
-  return write (fd, data, sizeof (struct watchy_data));
+  return send (fd, data, sizeof (struct watchy_data), 0);
 }
 
 int setnonblock (int fd)
@@ -91,7 +94,7 @@ int setnonblock (int fd)
     return flags;
 
   flags |= O_NONBLOCK;
-  if (fcntl(fd, F_SETFL, flags) < 0)
+  if (fcntl (fd, F_SETFL, flags) < 0)
     return -1;
 
   return 0;
@@ -159,12 +162,17 @@ callback_client_read (struct bufferevent *bev, void *arg)
 	  // shutdown message
 	case SDOWN:
 	  {
-	    if (!persist)
+	    if (persist == false)
 	      {
+		syslog (LOG_INFO, "Shutting down Daemon not told to persist on detach!");
 		event_base_loopbreak (evbase);
 		running = false;
 	      }
 	  }
+	  break;
+
+	case PERSIST:
+	  persist = data.value.persist;
 	  break;
 
 	case INTERNAL:
@@ -236,17 +244,16 @@ void callback_client_error (struct bufferevent *bev, short what, void *arg)
 
 void callback_client_connect (int fd, short ev, void *arg)
 {
-  int client_fd;
   struct sockaddr_in client_addr;
   socklen_t client_len = sizeof (client_addr);
+  int client_fd = accept (fd, (struct sockaddr *)&client_addr,
+			  &client_len);
+  /* if (client_fd < 0) */
+  /*   return; */
 
-  client_fd = accept (fd, (struct sockaddr *)&client_addr,
-		      &client_len);
-  if (client_fd < 0)
-    return;
-
-  setnonblock (client_fd);
   struct bufferevent * bev = bufferevent_socket_new (evbase, client_fd, 0);
+  bufferevent_setwatermark (bev, EV_READ, sizeof (struct watchy_data),
+			    sizeof (struct watchy_data));
   bufferevent_setcb (bev,
 		     &callback_client_read,  // read event
 		     NULL,                   // write event
@@ -259,7 +266,7 @@ static void
 watchy_runtimeLoop (int fd)
 {
   running = true;
-  TAILQ_INIT(&watchy_pids_head);
+  TAILQ_INIT (&watchy_pids_head);
 
   signal (SIGTERM, shandler);
   setlogmask (LOG_UPTO (LOG_INFO));
@@ -276,7 +283,6 @@ watchy_runtimeLoop (int fd)
   event_add (&ev_accept, NULL);
   while (running)
     event_base_loop (evbase, EVLOOP_NONBLOCK);
-  
 
   event_base_free (evbase);
   closelog ();
@@ -291,8 +297,9 @@ watchy_runtimeLoop (int fd)
 
 int
 watchy_cAttachRuntime (const char * fifo, const char * host,
-		       const int port, int * const fd)
+		       const int port, int * const fd, char * const argv0)
 {
+  _ARGV0 = argv0;
   memset (&servaddr, 0, sizeof (servaddr));
   int ret = watchy_socket (host, port, &sockfd, &servaddr);
   if (ret != WTCY_NO_ERROR)
@@ -320,6 +327,14 @@ watchy_cAttachRuntime (const char * fifo, const char * host,
 
 	case 0:
 	  {
+	    setsid ();
+	    if (_ARGV0 != NULL)
+	      {
+		size_t len = strlen (_ARGV0);
+		memset (_ARGV0, 0, len - 1);
+		snprintf (_ARGV0, len, "%s", _PROC_NAME);
+	      }
+
 	    int sfd = socket (AF_UNIX, SOCK_STREAM, 0);
 	    setnonblock (sfd);
 
@@ -382,5 +397,6 @@ watchy_detachRuntime (int fd)
   data.T = SDOWN;
 
   watchy_writePacket (&data, fd);
+  sleep (1); //hack
   close (fd);
 }

@@ -38,13 +38,13 @@ extern "C" {
 #endif
 
   typedef enum {
-    INTERNAL,
-    METRIC,
-    HOST,
-    PROCESS,
-    LOG,
-    SDOWN,
-    PERSIST
+    INTERNAL = 0,
+    METRIC   = 1,
+    HOST     = 2,
+    PROCESS  = 3,
+    LOG      = 4,
+    SDOWN    = 5,
+    PERSIST  = 6
   } WATCHY_TYPE;
 
   struct watchy_metric {
@@ -98,7 +98,10 @@ extern "C" {
   extern int watchy_writePacketSync (struct watchy_data * const, const int,
 				     const struct sockaddr_in * const );
   extern int watchy_writePacket (struct watchy_data * const, const int);
-  extern int watchy_cAttachRuntime (const char *, const char *, const int, int * const);
+  extern int watchy_cAttachRuntime (const char *, const char *, const int, int * const,
+				    char * const);
+
+  extern void watchy_persistRuntime (int, bool);
   extern void watchy_detachRuntime (int);
   
 #ifdef __cplusplus

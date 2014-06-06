@@ -42,6 +42,7 @@ class AsyncBackend (threading.Thread):
     def __init__ (self, backends):
         threading.Thread.__init__ (self)
         self.running = False
+        self.daemon = True
         self.backends = backends
 
     def run (self):

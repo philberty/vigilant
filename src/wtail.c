@@ -122,8 +122,8 @@ int main (int argc, char **argv)
       return -1;
     }
 
-  int fd;
-  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
+  int fd = 0;
+  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, argv [0]);
   if (strcmp (fifo, WTCY_DEFAULT_FIFO))
     free (fifo);
 
@@ -132,6 +132,7 @@ int main (int argc, char **argv)
       fprintf (stderr, "Unable to attach to runtime [%i:%s]", ret, watchy_strerror (ret));
       return -1;
     }
+  printf ("trying to send stdin to [udp://%s@%s:%i]\n", key, bind, port);
   tail (fd, key);
 
   watchy_detachRuntime (fd);

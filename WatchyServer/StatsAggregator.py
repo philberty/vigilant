@@ -30,14 +30,15 @@ class UDPStatsServer (threading.Thread):
         """
         Initilize Server keywords host default localhost and port 8080
         """
+        threading.Thread.__init__ (self)
         self.host = host
         self.port = port
         self.running = False
+        self.daemon = True
         self.climit = climit
         self.backend = AsyncBackend (backends)
         self.serverSocket = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
         self.serverSocket.setblocking (0)
-        threading.Thread.__init__ (self)
 
     @consumer
     def consumeProcess (self, key, data):
@@ -104,6 +105,7 @@ class UDPStatsServer (threading.Thread):
                         self.consume (sobject)
                     except:
                         ServerUtil.debug ("%s" % traceback.format_exc ())
+                        ServerUtil.debug ("[%s]" % stats)
                         ServerUtil.error ("%s" % sys.exc_info ()[1])
         except KeyboardInterrupt:
             ServerUtil.info ("Caught Keyboard interupt closing")

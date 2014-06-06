@@ -7,10 +7,8 @@ import ServerUtil
 from flask import Flask
 from flask import jsonify
 from flask import render_template
-from flask_sockets import Sockets
 
 from gevent.pywsgi import WSGIServer
-from geventwebsocket.handler import WebSocketHandler
 
 StatSession_Logs = { }
 StatSession_Hosts = { }
@@ -20,7 +18,6 @@ StatSession_Metrics = { }
 tfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'templates')
 sfolder = os.path.join (os.path.dirname (os.path.abspath (__file__)), 'static')
 app = Flask ('WatchyServer', template_folder=tfolder, static_folder=sfolder)
-sockets = Sockets (app) # TODO websocket api for realtime data per key
 
 from StatsAggregator import UDPStatsServer
 
@@ -101,8 +98,7 @@ class WatchyDServer:
             self.udp_server.start ()
             ServerUtil.info ('WSGIServer:[gevent] starting http://%s:%i/' \
                              % (self.web_bind, self.web_port))
-            http_server = WSGIServer ((self.web_bind, self.web_port),
-                                      app, handler_class = WebSocketHandler)
+            http_server = WSGIServer ((self.web_bind, self.web_port), app)
             http_server.serve_forever()
         except KeyboardInterrupt:
             ServerUtil.warning ('Caught keyboard interupt stopping')

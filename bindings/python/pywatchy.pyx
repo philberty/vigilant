@@ -19,7 +19,7 @@ class WatchyDaemon:
         cdef int fd
         cdef int cport = port
         cdef const char * chost = host
-        cdef int ret = watchy_cAttachRuntime (fifo, chost, cport, &fd)
+        cdef int ret = watchy_cAttachRuntime (fifo, chost, cport, &fd, NULL)
         cdef const char * sret = watchy_strerror (ret)
         if ret != WTCY_NO_ERROR:
             raise Exception ('Unable to attach [%i][%s]' % (ret, sret))
@@ -31,13 +31,13 @@ class WatchyDaemon:
         watchy_detachRuntime (self._csock)
 
     def postMessage (self, key, message):
-        cdef  watchy_data data
+        cdef watchy_data data
         memset (&data, 0, sizeof (data))
         watchy_logPacket (&data, message, key)
         watchy_writePacket (&data, self._csock)
 
     def watchHost (self, key):
-        cdef  watchy_data data
+        cdef watchy_data data
         memset (&data, 0, sizeof (data))
         data.T = INTERNAL
         watchy_setTimeStamp (data.tsp, sizeof (data.tsp))
@@ -46,7 +46,7 @@ class WatchyDaemon:
         watchy_writePacket (&data, self._csock)
 
     def watchPid (self, key, pid):
-        cdef  watchy_data data
+        cdef watchy_data data
         memset (&data, 0, sizeof (data))
         data.T = INTERNAL
         watchy_setTimeStamp (data.tsp, sizeof (data.tsp))
@@ -56,10 +56,14 @@ class WatchyDaemon:
         watchy_writePacket (&data, self._csock)
 
     def stopWatchPid (self, pid):
-        cdef  watchy_data data
+        cdef watchy_data data
         memset (&data, 0, sizeof (data))
         data.T = INTERNAL
         watchy_setTimeStamp (data.tsp, sizeof (data.tsp))
         data.value.intern.pid = pid
         data.value.intern.watch = False
         watchy_writePacket (&data, self._csock)
+
+    def persistRuntime (self, persist=True):
+        cdef bool p = persist
+        watchy_persistRuntime (self._csock, p)

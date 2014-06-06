@@ -10,7 +10,8 @@ cdef extern from "watchy.h":
         HOST,
         PROCESS,
         LOG,
-        SDOWN
+        SDOWN,
+        PERSIST
 
     struct watchy_metric:
         char status [16]
@@ -28,6 +29,7 @@ cdef extern from "watchy.h":
         watchy_metric metric
         watchy_intern intern
         char buffer [WTCY_PACKET_SIZE-25]
+        bool persist
 
     struct watchy_data:
         WATCHY_TYPE T
@@ -42,5 +44,6 @@ cdef extern from "watchy.h":
     void watchy_getHostStats (watchy_metric * const)
     int watchy_statsToJson (const watchy_data * const, const size_t, char * const)
     int watchy_writePacket (watchy_data * const, const int)
-    int watchy_cAttachRuntime (const char *, const char *, const int, int * const)
+    int watchy_cAttachRuntime (const char *, const char *, const int, int * const, char * const)
+    void watchy_persistRuntime (int, bool)
     void watchy_detachRuntime (int)

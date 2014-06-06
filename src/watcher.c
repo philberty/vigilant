@@ -92,7 +92,7 @@ int main (int argc, char **argv)
   char * fifo = dfifo;
 
   int fd = 0;
-  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd);
+  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, argv[0]);
   if (ret != WTCY_NO_ERROR)
     {
       fprintf (stderr, "Error initilizing watchy runtime [%s][%s]\n\t%s\n",
@@ -146,7 +146,7 @@ int main (int argc, char **argv)
     }
   if (key != NULL)
     {
-      printf ("Tryign to watch host posting to [udp://%s@%s:%i]\n", key, bind, port);
+      printf ("Trying to watch host posting to [udp://%s@%s:%i]\n", key, bind, port);
 
       memset (&data, 0, sizeof (data));
       watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
@@ -160,7 +160,7 @@ int main (int argc, char **argv)
       watchy_writePacket (&data, fd);
       free (key);
     }
-
+  watchy_persistRuntime (fd, true);
   watchy_detachRuntime (fd);
   return 0;
 }

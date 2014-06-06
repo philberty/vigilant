@@ -33,12 +33,12 @@ $ sudo pip install -r requirements.txt
 $ # the python setup.py will create the cython module but it requires pkg-config watchy to work
 $ python setup.py build
 $ # sudo -E so it will export PKG_CONFIG_PATH
-$ sudo -E python setup.py install
+$ sudo -E python setup.py install --prefix=/opt/watchy
 ```
 
 ## Usage
 
-Firstly you should setup the server open /etc/watchy/watchy.cfg
+Firstly you should setup the server an example config should be in /etc/watchy/example-watchy.cfg
 
 ```bash
 [watchyd]
@@ -46,8 +46,9 @@ web_bind = 0.0.0.0     # address to bind to for web app
 web_port = 7777        # port to serve the web app
 stats_bind = localhost # stats aggregator bind
 stats_port = 7878      # stats aggregator port
-backends = none        # This is in progress to store stats
 ```
+
+This is the barebones configuration, the web bind and port is required for the web dashboard the stats bind/port is for the stats aggregation process. Clients the watchydaemon send data to this not the dashboard.
 
 Now you can run the web app:
 
@@ -58,30 +59,28 @@ Usage: watchy.py [options]
 Options:
   -h, --help            show this help message and exit
   -v, --version         Print version
-  -l LOGFILE, --logfile=LOGFILE
-                        Ouput logfile
   -c CONFIG, --config=CONFIG
                         Config file location
   -F, --fork            Fork as daemon
-  -N NAME, --name=NAME  Logging name
-  -d, --debug           Verbose Debugging on of off
 
-$ /usr/local/bin/watchy.py -F -N watchy1 -l ./watchy-server.log -c /etc/watchy/watchy.cfg
-$ tail -f watchy-server.log 
-[watchy1] INFO  * Running on http://0.0.0.0:7777/
-[watchy1] INFO Starting StatsAggregator on localhost:7878
-...
-$ kill pid
 ```
 
-Now you should be able to point your browser to http://localhost:7777, this is
-a python flask web application. A /etc/init.d script would be nice here,
-and a way to run it via nginx or apache etc for a more real setup.
-
-Sending stats can be done via:
+You can run this server via:
 
 ```bash
-$ /opt/watchy/bin/watcher -k `hostname` -b localhost -p 7878 process1:<pid> process2:<pid>
+$ /usr/local/bin/watchy.py -c /etc/watchy/example-watchy.cfg 
+WATCHY INFO - Starting StatsAggregator on 0.0.0.0:7878
+WATCHY INFO - Starting Async Backend handler
+WATCHY INFO - WSGIServer:[gevent] starting http://0.0.0.0:8787/
+...
+```
+
+You should be able to point your browser to http://localhost:8787, you can fork as a daemon and change your logging config in the config file as per pythong logging.config.
+
+You can send stats up many ways but the easiest is:
+
+```bash
+$ /opt/watchy/bin/watcher -k hostname -b localhost -p 7878 process1:<pid> process2:<pid>
 ```
 
 Or you can tail a log:
@@ -89,6 +88,24 @@ Or you can tail a log:
 ```bash
 $ tail -f /var/log/syslog | /opt/watchy/bin/wtail -k syslog -p 7878 -b localhost
 ```
+
+The web app should automatically update and you should see things going off if not look at the log and see if it is getting any stats.
+
+##Backends
+
+Currently the mongodb backend is the only working backend to enable it specify in the config:
+
+```ini
+[watchyd]
+backends = mongo
+
+[mongo]
+type = mongodb
+uri = mongodb://localhost:27017
+
+```
+
+You simple specify the URI to your mongo instance this works via: pymongo MongoClient (uri). Zeromq, RabbitMq, Websockets and Ganglia are currently under development.
 
 ##Platform Support
 
@@ -104,6 +121,5 @@ real time stats per node. All rest calls are json no xml support.
 
   * http://host:port/api/{process/hosts/logs}/keys - Get all node key names
   * http://host:port/api/{process/hosts/logs}/data/<node-name>, Get the current session raw data
-  * http://host:port/api/{process/hosts}/graph/<node-name>, Get the current session graph data
 
 The web socket api is going to be very useful here and a zeromq a rabbit amqp backend too.

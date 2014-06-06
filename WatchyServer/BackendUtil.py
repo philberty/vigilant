@@ -54,6 +54,7 @@ class AsyncBackend (threading.Thread):
                 for i in self.backends:
                     i.consume (data)
             except Queue.Empty:
+                # sleep to stop spamming the process
                 time.sleep (1)
             except:
                 ServerUtil.error ("%s" % traceback.format_exc ())

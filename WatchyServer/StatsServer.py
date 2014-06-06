@@ -76,10 +76,9 @@ def statics (path):
 
 class WatchyDServer:
     def __init__ (self, cacheLimit, backends, wbind='localhost', wport=8080,
-                  ubind='localhost', uport=8081, debug=False):
+                  ubind='localhost', uport=8081):
         self.web_bind = wbind
         self.web_port = wport
-        self.debug = debug
         self.udp_server = UDPStatsServer (host=ubind, port=uport,
                                           climit=cacheLimit, backends=backends)
 

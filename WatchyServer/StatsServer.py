@@ -27,11 +27,11 @@ def index ():
 
 @app.route ("/process/<path:key>")
 def processGraph (key):
-    return render_template ('graph.html', node=key)
+    return render_template ('graph.html', node=key, prefix='/api/process/data/')
 
 @app.route ("/hosts/<path:key>")
 def hostsGraph (key):
-    return render_template ('host.html', node=key)
+    return render_template ('graph.html', node=key, prefix='/api/hosts/data/')
 
 @app.route ("/logs/<path:key>")
 def logsView (key):
@@ -51,16 +51,6 @@ def getProcess ():
 def getLogs ():
     nodes = StatSession_Logs.keys ()
     return jsonify ({'keys':nodes, 'len':len (nodes)})
-
-@app.route ("/api/process/graph/<path:key>")
-def getProcessGraph (key):
-    if key not in StatSession_Process:
-        return jsonify ({'ready':False})
-    data = []
-    for i in StatSession_Process [key]:
-        data.append ((i ['timeStamp'], i ['memory']))
-    return jsonify ({ 'ready':True, 'len' : len (StatSession_Process [key]),
-                      'label':'Memory Usage of %s' % key, 'data': data})
 
 @app.route ("/api/process/data/<path:key>")
 def getProcessData (key):

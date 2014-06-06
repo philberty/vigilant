@@ -16,6 +16,8 @@
 
     <script type="text/javascript">
      $(function () {
+       var apipfx = '{{ prefix }}'
+       console.log (apipfx)
        var gkey = '{{ node }}'
        function fillSideBar () {
 	 function keyFetch (keys) {
@@ -46,19 +48,33 @@
 
        function render () {
 	 function graph (rdata) {
-	   // need to conver all isoformat dates to js date objects
-	   var gdata = {label:rdata['label'], data:[]}
+	    var memory = {
+	     label : 'Memory Usage in Kb',
+	     data : []
+	   }
+	   var usage = {
+	     label : 'Total Utilization in %',
+	     data : []
+	   }
 	   for (var i in rdata ['data']) {
 	     var elem = rdata ['data'] [i]
-	     gdata ['data'].push ([new Date (elem [0]), elem [1]])
+	     var date = new Date (elem ['timeStamp'])
+	     memory ['data'].push ([date, elem ['memory']])
+	     usage ['data'].push ([date, elem ['usage']])
 	   }
-	   $.plot("#placeholder", [gdata], {
+	   console.log (memory)
+	   console.log (usage)
+	   $.plot("#memory", [memory], {
+	     xaxis: {
+	       mode: "time"
+	     }});
+	   $.plot("#cpu", [usage], {
 	     xaxis: {
 	       mode: "time"
 	     }});
 	 }
 	 $.ajax({
-	   url: "/api/process/graph/" + gkey,
+	   url: apipfx + gkey,
 	   type: "GET",
 	   dataType: "json",
 	   success: graph
@@ -101,7 +117,11 @@
 	  <h1 class="page-header">Dashboard {{ node }}</h1>
 	  
 	  <div class="stat-container">
-	    <div id="placeholder" class="stat-placeholder"></div>
+	    <div id="memory" class="stat-placeholder"></div>
+	  </div>
+
+	  <div class="stat-container">
+	    <div id="cpu" class="stat-placeholder"></div>
 	  </div>
 	  
         </div>

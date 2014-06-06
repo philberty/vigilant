@@ -40,7 +40,7 @@ $ sudo -E python setup.py install --prefix=/opt/watchy
 
 Firstly you should setup the server an example config should be in /etc/watchy/example-watchy.cfg
 
-```bash
+```ini
 [watchyd]
 web_bind = 0.0.0.0     # address to bind to for web app
 web_port = 7777        # port to serve the web app

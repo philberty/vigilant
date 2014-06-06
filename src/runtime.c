@@ -30,8 +30,8 @@ static pid_t opener, spid;
 static int sockfd;
 static struct sockaddr_in servaddr;
 static bool running = false;
+static bool persist = false;
 static bool watch_host = false;
-static size_t sessions = 0;
 static volatile bool ready = false;
 static char buffer [WTCY_PACKET_SIZE];
 static struct timeval one_sec = { 1, 0 };
@@ -44,12 +44,6 @@ struct watchy_pid {
 };
 TAILQ_HEAD(, watchy_pid) watchy_pids_head;
 
-struct watchy_session {
-  int fd;
-  TAILQ_ENTRY(watchy_session) entries;
-};
-TAILQ_HEAD(, watchy_session) watchy_session_head;
-
 static void
 shandler (int signo)
 {
@@ -58,11 +52,8 @@ shandler (int signo)
     case SIGTERM:
       {
 	syslog (LOG_INFO, "Caught sigterm!");
-	if (sessions == 0)
-	  {
-	    event_base_loopbreak (evbase);
-	    running = false;
-	  }
+	event_base_loopbreak (evbase);
+	running = false;
       }
       break;
 
@@ -167,10 +158,14 @@ callback_client_read (struct bufferevent *bev, void *arg)
 	{
 	  // shutdown message
 	case SDOWN:
-	  kill (getpid (), SIGTERM);
+	  {
+	    if (!persist)
+	      {
+		event_base_loopbreak (evbase);
+		running = false;
+	      }
+	  }
 	  break;
-
-	  // need logon/logoff for sessions
 
 	case INTERNAL:
 	  {
@@ -368,7 +363,24 @@ watchy_cAttachRuntime (const char * fifo, const char * host,
 }
 
 void
+watchy_persistRuntime (int fd, bool persist)
+{
+  struct watchy_data data;
+  memset (&data, 0, sizeof (data));
+
+  data.T = PERSIST;
+  data.value.persist = persist;
+
+  watchy_writePacket (&data, fd);
+}
+
+void
 watchy_detachRuntime (int fd)
 {
+  struct watchy_data data;
+  memset (&data, 0, sizeof (data));
+  data.T = SDOWN;
+
+  watchy_writePacket (&data, fd);
   close (fd);
 }

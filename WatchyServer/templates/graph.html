@@ -17,7 +17,6 @@
     <script type="text/javascript">
      $(function () {
        var apipfx = '{{ prefix }}'
-       console.log (apipfx)
        var gkey = '{{ node }}'
        function fillSideBar () {
 	 function keyFetch (keys) {
@@ -62,8 +61,6 @@
 	     memory ['data'].push ([date, elem ['memory']])
 	     usage ['data'].push ([date, elem ['usage']])
 	   }
-	   console.log (memory)
-	   console.log (usage)
 	   $.plot("#memory", [memory], {
 	     xaxis: {
 	       mode: "time"

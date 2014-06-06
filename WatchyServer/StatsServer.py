@@ -27,11 +27,11 @@ def index ():
 
 @app.route ("/process/<path:key>")
 def processGraph (key):
-    return render_template ('graph.html', node=key, prefix='/api/process/data/')
+    return render_template ('graph.html', node=key, prefix='/api/process/')
 
 @app.route ("/hosts/<path:key>")
 def hostsGraph (key):
-    return render_template ('graph.html', node=key, prefix='/api/hosts/data/')
+    return render_template ('graph.html', node=key, prefix='/api/hosts/')
 
 @app.route ("/logs/<path:key>")
 def logsView (key):

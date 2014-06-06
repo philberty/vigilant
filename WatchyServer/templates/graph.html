@@ -39,7 +39,7 @@
 	   }
 	 }
 	  $.ajax({
-	   url: "/api/process/keys",
+	   url: apipfx + 'keys',
 	   type: "GET",
 	   dataType: "json",
 	   success: keyFetch
@@ -74,7 +74,7 @@
 	     }});
 	 }
 	 $.ajax({
-	   url: apipfx + gkey,
+	   url: apipfx + 'data/' + gkey,
 	   type: "GET",
 	   dataType: "json",
 	   success: graph

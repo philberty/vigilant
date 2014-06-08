@@ -76,7 +76,10 @@ watchy_logPacket (struct watchy_data * const data, const char * message, const c
   char buffer [sizeof (data->value.buffer)];
   memset (buffer, 0, sizeof (buffer));
 
-  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) - 1 : strlen (message);
+  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) - 1 : strlen (message) - 1;
+  if (message [ncpy] == '\n')
+    ncpy -= 1;
+
   strncpy (buffer, message, ncpy);
   strncpy (data->value.buffer, buffer, sizeof (buffer));
 }

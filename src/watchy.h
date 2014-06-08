@@ -38,13 +38,14 @@ extern "C" {
 #endif
 
   typedef enum {
-    INTERNAL = 0,
-    METRIC   = 1,
-    HOST     = 2,
-    PROCESS  = 3,
-    LOG      = 4,
-    SDOWN    = 5,
-    PERSIST  = 6
+    INTERNAL  = 0,
+    METRIC    = 1,
+    HOST      = 2,
+    PROCESS   = 3,
+    LOG       = 4,
+    SDOWN     = 5,
+    PERSIST   = 6,
+    HEARTBEAT = 7
   } WATCHY_TYPE;
 
   struct watchy_metric {
@@ -71,6 +72,7 @@ extern "C" {
       struct watchy_intern intern;
       char buffer [WTCY_PACKET_SIZE-25];
       bool persist;
+      pid_t heartbeat;
     } value ;
   };
 

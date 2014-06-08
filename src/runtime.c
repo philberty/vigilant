@@ -34,8 +34,10 @@ static bool persist = false;
 static bool watch_host = false;
 static bool ready = false;
 static char buffer [WTCY_PACKET_SIZE];
-static struct timeval one_sec = { 1, 0 };
 static char ** _ARGV0 = NULL;
+
+static struct timeval one_sec = { 1, 0 };
+static struct timeval heartbeat = { 30, 0 };
 
 #define _PROC_NAME "WatchyDaemon"
 
@@ -105,6 +107,9 @@ void callback_doStats (int fd, short event, void * arg)
   struct watchy_pid * node = arg;
   syslog (LOG_INFO, "Watch pid [%i]", node->pid);
 
+  struct watchy_data data;
+  memset (&data, 0, sizeof (data));
+
   if (kill (node->pid, 0) == -1)
     {
       syslog (LOG_INFO, "pid [%i] is no longer alive", node->pid);
@@ -119,12 +124,13 @@ void callback_doStats (int fd, short event, void * arg)
 	      free (item);
 	    }
 	}
+      // empty packet defines process stopped
+      data.T = PROCESS;
+      watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
+      watchy_writePacketSync (&data, sockfd, &servaddr);
     }
   else
-    { 
-      struct watchy_data data;
-      memset (&data, 0, sizeof (data));
-
+    {
       data.T = PROCESS;
       strncpy (data.key, node->node.key, sizeof (data.key));
       watchy_setTimeStamp (data.tsp, sizeof (data.tsp));
@@ -146,6 +152,20 @@ void callback_doHostStats (int fd, short event, void * arg)
   watchy_getHostStats (&data.value.metric);
       
   watchy_writePacketSync (&data, sockfd, &servaddr);
+}
+
+/* void callback_doHeartBeat (int fd, short event, void * arg) */
+/* { */
+/*   struct watchy_pid * node = arg; */
+/*   syslog (LOG_INFO, "Watchy HeartBeat pid [%i]", node->pid); */
+
+/*   struct watchy_data data; */
+/*   memset (&data, 0, sizeof (data)); */
+/*   data.T = HEARTBEAT; */
+/*   strncpy (data.key, node->node.key, sizeof (data.key)); */
+/*   data.value.heartbeat = node->pid; */
+
+/*   watchy_writePacketSync (&data, sockfd, &servaddr); */
 }
 
 void

@@ -152,5 +152,17 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
 		       stats->key, stats->tsp,
 		       stats->value.buffer);
     }
+  else if (stats->T == HEARTBEAT)
+    {
+      strncpy (type, "heartbeat", sizeof (type));
+      return snprintf (buffer, blen, "{ "
+		       "\"type\" : \"%s\", "
+		       "\"name\" : \"%s\", "
+		       "\"timeStamp\" : \"%s\", "
+		       "\"heartbeat\" : \"%s\""
+		       " }", type,
+		       stats->key, stats->tsp,
+		       stats->value.heartbeat);
+    }
   return WTCY_PACKET_ERR;
 }

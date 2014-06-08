@@ -92,7 +92,7 @@ int main (int argc, char **argv)
   char * fifo = dfifo;
 
   int fd = 0;
-  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, argv[0]);
+  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, &argv[0]);
   if (ret != WTCY_NO_ERROR)
     {
       fprintf (stderr, "Error initilizing watchy runtime [%s][%s]\n\t%s\n",
@@ -160,6 +160,7 @@ int main (int argc, char **argv)
       watchy_writePacket (&data, fd);
       free (key);
     }
+
   watchy_persistRuntime (fd, true);
   watchy_detachRuntime (fd);
   return 0;

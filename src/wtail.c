@@ -123,7 +123,7 @@ int main (int argc, char **argv)
     }
 
   int fd = 0;
-  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, argv [0]);
+  int ret = watchy_cAttachRuntime (fifo, bind, port, &fd, &argv [0]);
   if (strcmp (fifo, WTCY_DEFAULT_FIFO))
     free (fifo);
 

@@ -5,9 +5,6 @@
 #include <time.h>
 #include <libproc.h>
 
-#include <sys/sysctl.h>
-#include <mach/vm_param.h>
-
 #include "watchy.h"
 
 void watchy_getStats (struct watchy_metric * const stats, const pid_t ipid)
@@ -16,6 +13,7 @@ void watchy_getStats (struct watchy_metric * const stats, const pid_t ipid)
 
   struct proc_taskinfo tinfo;
   memset (&tinfo, 0, sizeof (tinfo));
+
   int nb = proc_pidinfo (ipid, PROC_PIDTASKINFO, 0,  &tinfo, sizeof (tinfo));
   if (nb <= 0)
     return;
@@ -29,7 +27,6 @@ void watchy_getStats (struct watchy_metric * const stats, const pid_t ipid)
 
 void watchy_getHostStats (struct watchy_metric * const stats)
 {
-  // TODO sysctl is a fucking nightmare retarded api just too generic
-  stats->memory = 0;
-  strncpy (stats->status, "running", sizeof (stats->status));
+  // TODO
+  ;
 }

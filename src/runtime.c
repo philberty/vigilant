@@ -32,10 +32,10 @@ static struct sockaddr_in servaddr;
 static bool running = false;
 static bool persist = false;
 static bool watch_host = false;
-static volatile bool ready = false;
+static bool ready = false;
 static char buffer [WTCY_PACKET_SIZE];
 static struct timeval one_sec = { 1, 0 };
-static char * _ARGV0 = NULL;
+static char ** _ARGV0 = NULL;
 
 #define _PROC_NAME "WatchyDaemon"
 
@@ -270,8 +270,8 @@ watchy_runtimeLoop (int fd)
 
   signal (SIGTERM, shandler);
   setlogmask (LOG_UPTO (LOG_INFO));
-  openlog ("WatchyBus", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
-  syslog (LOG_NOTICE, "Watchy Server started by User %d", getuid ());
+  openlog (_PROC_NAME, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+  syslog (LOG_NOTICE, "Watchy Daemon started by User %d", getuid ());
 
   evbase = event_base_new ();
   struct event ev_accept;
@@ -279,11 +279,12 @@ watchy_runtimeLoop (int fd)
 		EV_READ | EV_PERSIST,
 		&callback_client_connect,
 		NULL);
-
   event_add (&ev_accept, NULL);
+
   while (running)
     event_base_loop (evbase, EVLOOP_NONBLOCK);
 
+  syslog (LOG_NOTICE, "Watchy Daemon shutting down");
   event_base_free (evbase);
   closelog ();
 
@@ -297,7 +298,7 @@ watchy_runtimeLoop (int fd)
 
 int
 watchy_cAttachRuntime (const char * fifo, const char * host,
-		       const int port, int * const fd, char * const argv0)
+		       const int port, int * const fd, char ** const argv0)
 {
   _ARGV0 = argv0;
   memset (&servaddr, 0, sizeof (servaddr));
@@ -330,9 +331,9 @@ watchy_cAttachRuntime (const char * fifo, const char * host,
 	    setsid ();
 	    if (_ARGV0 != NULL)
 	      {
-		size_t len = strlen (_ARGV0);
-		memset (_ARGV0, 0, len - 1);
-		snprintf (_ARGV0, len, "%s", _PROC_NAME);
+		size_t len = strlen (*_ARGV0);
+		memset (*_ARGV0, 0, len - 1);
+		snprintf (*_ARGV0, len, "%s", _PROC_NAME);
 	      }
 
 	    int sfd = socket (AF_UNIX, SOCK_STREAM, 0);
@@ -397,6 +398,5 @@ watchy_detachRuntime (int fd)
   data.T = SDOWN;
 
   watchy_writePacket (&data, fd);
-  sleep (1); //hack
   close (fd);
 }

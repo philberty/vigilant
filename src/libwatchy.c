@@ -76,8 +76,8 @@ watchy_logPacket (struct watchy_data * const data, const char * message, const c
   char buffer [sizeof (data->value.buffer)];
   memset (buffer, 0, sizeof (buffer));
 
-  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) : strlen (message);
-  strncpy (buffer, message, ncpy - 1);
+  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) - 1 : strlen (message);
+  strncpy (buffer, message, ncpy);
   strncpy (data->value.buffer, buffer, sizeof (buffer));
 }
 
@@ -99,7 +99,6 @@ watchy_socket (const char * bind, const int port, int * const sockfd,
 
   servaddr->sin_family = AF_INET;
   servaddr->sin_port = htons (port);
-
   // TODO ERROR CHECK
   inet_aton (bind, &servaddr->sin_addr);
 

@@ -159,7 +159,7 @@ watchy_statsToJson (const struct watchy_data * const stats, const size_t blen, c
 		       "\"type\" : \"%s\", "
 		       "\"name\" : \"%s\", "
 		       "\"timeStamp\" : \"%s\", "
-		       "\"heartbeat\" : \"%s\""
+		       "\"heartbeat\" : \"%i\""
 		       " }", type,
 		       stats->key, stats->tsp,
 		       stats->value.heartbeat);

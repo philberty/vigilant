@@ -37,7 +37,7 @@ static char buffer [WTCY_PACKET_SIZE];
 static char ** _ARGV0 = NULL;
 
 static struct timeval one_sec = { 1, 0 };
-static struct timeval heartbeat = { 30, 0 };
+//static struct timeval heartbeat = { 30, 0 };
 
 #define _PROC_NAME "WatchyDaemon"
 
@@ -166,7 +166,7 @@ void callback_doHostStats (int fd, short event, void * arg)
 /*   data.value.heartbeat = node->pid; */
 
 /*   watchy_writePacketSync (&data, sockfd, &servaddr); */
-}
+/* } */
 
 void
 callback_client_read (struct bufferevent *bev, void *arg)

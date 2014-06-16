@@ -73,14 +73,41 @@ watchy_logPacket (struct watchy_data * const data, const char * message, const c
   watchy_setTimeStamp (data->tsp, sizeof (data->tsp));
   memset (data->value.buffer, 0, sizeof (data->value.buffer));
 
-  char buffer [sizeof (data->value.buffer)];
+  size_t bsize = sizeof (data->value.buffer);
+  char buffer [bsize];
   memset (buffer, 0, sizeof (buffer));
 
-  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) - 1 : strlen (message) - 1;
-  if (message [ncpy] == '\n')
-    ncpy -= 1;
+  size_t ncpy = (strlen (message) >= sizeof (buffer)) ? sizeof (buffer) : strlen (message);
+  size_t i, offs = 0;
+  for (i = 0; i < ncpy; ++i)
+    {
+      char elem = message [i];
+      if (!iscntrl (elem))
+	buffer [offs++] = elem;
+      else
+	{
+	  // if not enough space continue on.
+	  // (+3) \n turns into \\n so its not 3 chars not 1
+	  if ((offs + 3) >= bsize)
+	    continue;
 
-  strncpy (buffer, message, ncpy);
+	  switch (elem)
+	    {
+	    case '\n':
+	      {
+		buffer [offs++] = '\\';
+		buffer [offs++] = '\\';
+		buffer [offs++] = 'n';
+	      }
+	      break;
+
+	      // unknown control chars are simply just a space
+	    default:
+	      buffer [offs++] = ' ';
+	      break;
+	    }
+        }
+    }
   strncpy (data->value.buffer, buffer, sizeof (buffer));
 }
 

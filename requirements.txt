@@ -1,7 +1,6 @@
 flask==0.10.1
-flask-sockets==0.1
-gevent-websocket==0.9.3
-pkgconfig==1.1.0
-cython==0.20.1
+gevent==1.0.1
 pymongo==2.7.1
 pika==0.9.8
+pkgconfig==1.1.0
+cython==0.20.1

@@ -37,5 +37,5 @@ setup (
     package_data = {'WatchyServer': ['templates/*',
                                      'static/css/*',
                                      'static/js/*']},
-    data_files=[('/etc/watchy/', ['etc/watchy/example-watchy.cfg'])],
+    data_files=[('config', ['etc/watchy/example-watchy.cfg'])],
 )

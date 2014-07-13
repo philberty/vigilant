@@ -28,5 +28,5 @@ class WatchyDServer:
             ServerUtil.error ("%s" % sys.exc_info ()[1])
         finally:
             ServerUtil.info ("Shutting down Stats Aggregator")
-            self.udp_server.running = False
+            self.udp_server.running = Falseo
 

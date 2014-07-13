@@ -34,6 +34,7 @@ class WatchyTestCase (unittest.TestCase):
         self.udp_server.start ()
 
     def tearDown (self):
+        self.udp_server.running = False
         self.daemon.cleanup ()
 
     def test_logs (self):

@@ -6,4 +6,5 @@ autoreconf --force --install
 make
 make install
 export PKG_CONFIG_PATH=$_INSTALL/lib/pkgconfig
-python setup.py build
+python setup.py install --prefix=$_INSTALL
+python watchy_server_test.py

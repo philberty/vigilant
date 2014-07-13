@@ -14,15 +14,21 @@ from WatchyServer import StatsAggregator
 class WatchyTestCase (unittest.TestCase):
 
     def setUp (self):
+        local_fifo = os.path.join (os.getcwd (), 'fifo.watchy')
+        try:
+            f = open (local_fifo)
+            raise Exception ('test directory not clean')
+        except IOError:
+            pass
+        assert local_fifo
         StatsApp.app.config ['TESTING'] = True
         self.app = StatsApp.app.test_client()
-        self.daemon = pywatchy.WatchyDaemon ('localhost', 7878)
+        self.daemon = pywatchy.WatchyDaemon ('localhost', 7878, fifo=local_fifo)
         self.udp_server = StatsAggregator.UDPStatsServer (host='localhost', port=7878)
         self.udp_server.start ()
 
     def tearDown (self):
-        del self.daemon
-        self.daemon = None
+        self.daemon.cleanup ()
 
     def test_logs (self):
         resp = self.app.get ('/api/logs/keys')

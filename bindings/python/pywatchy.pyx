@@ -30,6 +30,9 @@ class WatchyDaemon:
     def __dealloc__ (self):
         watchy_detachRuntime (self._csock)
 
+    def cleanup (self):
+        watchy_detachRuntime (self._csock)
+
     def postMessage (self, key, message):
         cdef watchy_data data
         memset (&data, 0, sizeof (data))

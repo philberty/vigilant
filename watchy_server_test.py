@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 import os
@@ -7,6 +6,8 @@ import json
 import time
 import unittest
 
+if len (sys.argv) < 2:
+    sys.exit ('Error: need to pass prefix to pywatchy.so python module')
 __path = '%(prefix)s/lib/python%(major)s.%(minor)s/site-packages/' \
     % {'prefix' : sys.argv [1], 'major' : sys.version_info [0],
        'minor' : sys.version_info [1] }
@@ -50,4 +51,5 @@ class WatchyTestCase (unittest.TestCase):
         assert data ['keys'] [0] == 'test'
 
 if __name__ == '__main__':
+    del sys.argv [1:]
     unittest.main ()

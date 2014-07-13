@@ -2,10 +2,15 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import json
 import time
 import unittest
 
+__path = '%(prefix)s/lib/python%(major)s.%(minor)s/site-packages/' \
+    % {'prefix' : sys.argv [1], 'major' : sys.version_info [0],
+       'minor' : sys.version_info [1] }
+sys.path.append (__path)
 import pywatchy
 
 from WatchyServer import StatsApp

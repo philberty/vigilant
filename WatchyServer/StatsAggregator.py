@@ -8,12 +8,12 @@ import ServerUtil
 
 from datetime import datetime
 
+from StatsApp import StatSession_Logs, \
+    StatSession_Hosts, \
+    StatSession_Process, \
+    StatSession_Metrics
 from BackendUtil import AsyncBackend
 from BackendUtil import BackendDispatch
-from StatsServer import StatSession_Logs
-from StatsServer import StatSession_Hosts
-from StatsServer import StatSession_Process
-from StatsServer import StatSession_Metrics
 
 def consumer (func):
     def decorated (*args, **kwargs):

@@ -7,8 +7,8 @@ import optparse
 import traceback
 import logging.config
 
+import WatchyServer
 from WatchyServer import ServerUtil
-from WatchyServer import StatsServer
 from WatchyServer import BackendUtil
 
 from ConfigParser import RawConfigParser as CParser
@@ -68,8 +68,8 @@ def serverMain ():
         else:
             print pid
             sys.exit (0)
-    StatsServer.WatchyDServer (limit, backends, wbind=rbind, wport=rport,
-                               ubind=abind, uport=aport).listen ()
+    WatchyServer.WatchyDServer (limit, backends, wbind=rbind, wport=rport,
+                                ubind=abind, uport=aport).listen ()
 
 if __name__ == "__main__":
     serverMain ()

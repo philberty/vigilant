@@ -7,4 +7,4 @@ make
 make install
 export PKG_CONFIG_PATH=$_INSTALL/lib/pkgconfig
 python setup.py install --prefix=$_INSTALL
-#python watchy_server_test.py $_INSTALL
+python watchy_server_test.py $_INSTALL

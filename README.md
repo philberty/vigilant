@@ -8,6 +8,25 @@ your process stops. No need to externally start a process to watch
 and send stats. Its efficient and simple and easy to use is 100% the
 goal of this project.
 
+## Dependancies
+
+Watchy will be highly portable....
+
+### MacOSX
+
+I use brew for dependancies on macosx:
+
+```
+$ brew install autoconf libtool automake pkgconfig libevent
+$ export PKG_CONFIG_PATH=`brew --prefix`/Cellar/libevent/2.0.21/lib/pkgconfig:$PKG_CONFIG_PATH
+$ # test
+$ pkg-config --cflags --libs libevent
+```
+
+### Ubuntu
+
+TODO
+
 ## Compilation
 
 To compile and setup the system:

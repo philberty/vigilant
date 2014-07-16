@@ -1,5 +1,5 @@
-#ifndef __WATCHY_H__
-#define __WATCHY_H__
+#ifndef WATCHY_H
+#define WATCHY_H
 
 //for bool
 #include <stdbool.h>
@@ -25,7 +25,7 @@
 #define WTCY_ATIMEOUT    8
 #define WTCY_UNKNOWN     9
 
-// this is a very basic protocol thsi is the size of every object
+// this is a very basic protocol this is the size of every object
 // means the server can simly .read (256) and you know you will
 // get all the data no need to keep reading etc..
 #define WTCY_PACKET_SIZE 256
@@ -110,4 +110,4 @@ extern "C" {
 }
 #endif
 
-#endif //__WATCHY_H__
+#endif //WATCHY_H

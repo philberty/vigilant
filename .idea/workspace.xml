@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e31b7c92-13c7-42e3-8e8f-53f8b831523a" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/StatsClient/StatsDaemon.py" afterPath="$PROJECT_DIR$/StatsClient/StatsDaemon.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/StatsClient/__init__.py" afterPath="$PROJECT_DIR$/StatsClient/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sclient.py" afterPath="$PROJECT_DIR$/sclient.py" />
     </list>
     <ignored path="watchy.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -42,10 +40,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sclient.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="sclient.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sclient.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.23595506" vertical-offset="0" max-vertical-offset="445">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
               <caret line="7" column="56" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="56" />
               <folding>
                 <element signature="e#24#42#0" expanded="true" />
@@ -54,11 +52,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="StatsDaemon.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="StatsDaemon.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/StatsClient/StatsDaemon.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1775" max-vertical-offset="2940">
-              <caret line="119" column="38" selection-start-line="119" selection-start-column="38" selection-end-line="119" selection-end-column="38" />
+            <state vertical-scroll-proportion="0.9325843" vertical-offset="1670" max-vertical-offset="2940">
+              <caret line="139" column="20" selection-start-line="139" selection-start-column="20" selection-end-line="139" selection-end-column="20" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -654,7 +652,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16971000" />
+    <option name="totallyTimeSpent" value="17259000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1280" height="774" extended-state="6" />
@@ -799,22 +797,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/StatsClient/StatsDaemon.py">
+    <entry file="file://$PROJECT_DIR$/sclient.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1775" max-vertical-offset="2940">
-          <caret line="119" column="38" selection-start-line="119" selection-start-column="38" selection-end-line="119" selection-end-column="38" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
+          <caret line="7" column="56" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="56" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#24#42#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sclient.py">
+    <entry file="file://$PROJECT_DIR$/StatsClient/StatsDaemon.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23595506" vertical-offset="0" max-vertical-offset="445">
-          <caret line="7" column="56" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="56" />
+        <state vertical-scroll-proportion="0.9325843" vertical-offset="1670" max-vertical-offset="2940">
+          <caret line="139" column="20" selection-start-line="139" selection-start-column="20" selection-end-line="139" selection-end-column="20" />
           <folding>
-            <element signature="e#24#42#0" expanded="true" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>

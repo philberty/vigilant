@@ -125,19 +125,19 @@ class StatServerDaemon:
             message = {
                 'key': self._key,
                 'type': 'host',
-                'payload':
-                    {'platform': platform.platform(),
-                     'hostname': platform.node(),
-                     'machine': platform.machine(),
-                     'version': platform.version(),
-                     'cores': psutil.cpu_count(),
-                     'usage': psutil.cpu_times_percent().user,
-                     'memory_total': psutil.virtual_memory().total,
-                     'memory_used': psutil.virtual_memory().used,
-                     'disk_total': psutil.disk_usage('/').total,
-                     'disk_free': psutil.disk_usage('/').used,
-                     'timestamp': datetime.datetime.now().isoformat(),
-                     'process': len(psutil.pids())
+                'payload': {
+                    'platform': platform.platform(),
+                    'hostname': platform.node(),
+                    'machine': platform.machine(),
+                    'version': platform.version(),
+                    'cores': psutil.cpu_count(),
+                    'usage': psutil.cpu_times_percent().user,
+                    'memory_total': psutil.virtual_memory().total,
+                    'memory_used': psutil.virtual_memory().used,
+                    'disk_total': psutil.disk_usage('/').total,
+                    'disk_free': psutil.disk_usage('/').used,
+                    'timestamp': datetime.datetime.now().isoformat(),
+                    'process': len(psutil.pids())
                     }
             }
             self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))

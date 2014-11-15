@@ -23,12 +23,6 @@ def _isDaemonAlive(pid='/tmp/watchy.pid'):
         return False
     return True
 
-def __daemonizeStatsDaemon():
-    try:
-        __STATS_DAEMON_SERVER.startServer()
-    except:
-        syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
-        syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
 
 class ClientDaemonConnection:
     def __init__(self, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
@@ -68,17 +62,23 @@ class ClientDaemonConnection:
         message = {'type': 'stop'}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
+
 class StatServerDaemon:
     def __init__(self, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
         self._transport = transport
         self._sock = sock
         self._sigpid = sigpid
         self._pids = {}
+        self._loop = None
         if _isDaemonAlive(pid):
             raise Exception('Lock [%s] pid is already alive' % pid)
 
-    def _clientConnected(self, reader, writer):
-        syslog.syslog(syslog.LOG_ALERT, "got something!")
+    def _clientConnected(self, reader, _):
+        while True:
+            data = yield from reader.read(8192)
+            if not data:
+                break
+            syslog.syslog(syslog.LOG_ALERT, "got data [%s]!" % data)
 
     def _signalParent(self):
         try:
@@ -86,38 +86,45 @@ class StatServerDaemon:
         except:
             pass
 
-    def close(self):
-        self._loop.stop()
-        self._loop.close()
-
-    def startServer(self):
+    def start(self):
         self._loop = asyncio.new_event_loop()
         self._transport.initTransport()
-        start_server = asyncio.start_unix_server(self._clientConnected, path=self._sock, loop=self._loop)
-        self._loop.run_until_complete(start_server)
+        server = asyncio.start_unix_server(self._clientConnected, path=self._sock, loop=self._loop)
+        self._loop.run_until_complete(server)
         self._signalParent()
-        self._loop.run_forever()
+        try:
+            self._loop.run_forever()
+        finally:
+            self._loop.close()
 
 
-def __daemonReadyHandler(*args):
+def _daemonReadyHandler(*args):
     global __STATS_DAEMON_READY
     __STATS_DAEMON_READY = True
 
 
-def forkStatsDaemon(statsDaemon, timeout=3, lock='/tmp/watchy.pid'):
-    global __STATS_DAEMON_SERVER, __STATS_DAEMON_READY, __STATS_DAEMON_APP
-    __STATS_DAEMON_SERVER = statsDaemon
+def _daemonizeStatsDaemon():
+    try:
+        __STATS_DAEMON_SERVER.start()
+    except:
+        syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
+        syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
 
-    signal.signal(signal.SIGUSR1, __daemonReadyHandler)
+
+def forkStatsDaemon(daemon, timeout=3, lock='/tmp/watchy.pid'):
+    global __STATS_DAEMON_SERVER, __STATS_DAEMON_READY, __STATS_DAEMON_APP
+    __STATS_DAEMON_SERVER = daemon
+
+    signal.signal(signal.SIGUSR1, _daemonReadyHandler)
 
     pid = os.fork()
     if pid == 0:
-        daemon = Daemonize(app=__STATS_DAEMON_APP, pid=lock, verbose=True, action=__daemonizeStatsDaemon)
+        daemon = Daemonize(app=__STATS_DAEMON_APP, pid=lock, verbose=True, action=_daemonizeStatsDaemon)
         daemon.start()
         sys.exit(0)
 
     for i in range(timeout):
-        if __STATS_DAEMON_READY:
+        if __STATS_DAEMON_READY is True:
             break
         time.sleep(1)
     if __STATS_DAEMON_READY is False:

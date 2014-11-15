@@ -8,6 +8,5 @@ def StatsClientMain():
     client = StatsClient.attachOrCreateStatsDaemon(transport)
     client.postStopWatchPid(1234)
 
-
 if __name__ == "__main__":
     StatsClientMain()

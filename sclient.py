@@ -5,7 +5,7 @@ from StatsClient import SimpleTransports
 
 def StatsClientMain():
     transport = SimpleTransports.UDPStatsTransport()
-    client = StatsClient.attachOrCreateStatsDaemon(transport)
+    client = StatsClient.attachOrCreateStatsDaemon('test', transport)
     client.postStopWatchPid(1234)
 
 if __name__ == "__main__":

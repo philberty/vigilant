@@ -7,12 +7,15 @@ import socket
 import asyncio
 import syslog
 import traceback
-
-from daemonize import Daemonize
+import platform
+import psutil
+import datetime
+import daemonize
 
 __STATS_DAEMON_APP = 'watchy'
 __STATS_DAEMON_SERVER = None
 __STATS_DAEMON_READY = False
+
 
 def _isDaemonAlive(pid='/tmp/watchy.pid'):
     try:
@@ -64,21 +67,15 @@ class ClientDaemonConnection:
 
 
 class StatServerDaemon:
-    def __init__(self, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
+    def __init__(self, key, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
         self._transport = transport
         self._sock = sock
         self._sigpid = sigpid
         self._pids = {}
         self._loop = None
+        self._key = key
         if _isDaemonAlive(pid):
             raise Exception('Lock [%s] pid is already alive' % pid)
-
-    def _clientConnected(self, reader, _):
-        while True:
-            data = yield from reader.read(8192)
-            if not data:
-                break
-            syslog.syslog(syslog.LOG_ALERT, "got data [%s]!" % data)
 
     def _signalParent(self):
         try:
@@ -86,9 +83,71 @@ class StatServerDaemon:
         except:
             pass
 
+    @asyncio.coroutine
+    def _clientConnected(self, reader, _):
+        while True:
+            data = yield from reader.read(8192)
+            if not data:
+                break
+            try:
+                data = json.loads(data.decode('utf-8'))
+                syslog.syslog(syslog.LOG_ALERT, "Got message type [%s]!" % data['type'])
+            except:
+                pass
+
+    @asyncio.coroutine
+    def _postHostStats(self):
+        while True:
+            for key in self._pids:
+                pid = self._pids[key]
+                process = psutil.Process(pid)
+                message = {
+                    'key': key,
+                    'type': 'pid',
+                    'payload': {
+                        'pid': pid,
+                        'name': process.name(),
+                        'user': process.username(),
+                        'status': process.status(),
+                        'cpu': process.cpu_percent(interval=1.0),
+                        'threads': process.threads(),
+                        'memory': process.memory_percent(),
+                        'io': None,
+                        'fds': process.num_fds()
+                    }
+                }
+                self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+            yield from asyncio.sleep(2)
+
+    @asyncio.coroutine
+    def _postPidStats(self):
+        while True:
+            message = {
+                'key': self._key,
+                'type': 'host',
+                'payload':
+                    {'platform': platform.platform(),
+                     'hostname': platform.node(),
+                     'machine': platform.machine(),
+                     'version': platform.version(),
+                     'cores': psutil.cpu_count(),
+                     'usage': psutil.cpu_times_percent().user,
+                     'memory_total': psutil.virtual_memory().total,
+                     'memory_used': psutil.virtual_memory().used,
+                     'disk_total': psutil.disk_usage('/').total,
+                     'disk_free': psutil.disk_usage('/').used,
+                     'timestamp': datetime.datetime.now().isoformat(),
+                     'process': len(psutil.pids())
+                    }
+            }
+            self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+            yield from asyncio.sleep(4)
+
     def start(self):
-        self._loop = asyncio.new_event_loop()
         self._transport.initTransport()
+        self._loop = asyncio.new_event_loop()
+        asyncio.async(self._postHostStats, loop=self._loop)
+        asyncio.async(self._postPidStats, loop=self._loop)
         server = asyncio.start_unix_server(self._clientConnected, path=self._sock, loop=self._loop)
         self._loop.run_until_complete(server)
         self._signalParent()
@@ -119,7 +178,7 @@ def forkStatsDaemon(daemon, timeout=3, lock='/tmp/watchy.pid'):
 
     pid = os.fork()
     if pid == 0:
-        daemon = Daemonize(app=__STATS_DAEMON_APP, pid=lock, verbose=True, action=_daemonizeStatsDaemon)
+        daemon = daemonize.Daemonize(app=__STATS_DAEMON_APP, pid=lock, action=_daemonizeStatsDaemon)
         daemon.start()
         sys.exit(0)
 

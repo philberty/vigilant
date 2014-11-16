@@ -2,7 +2,6 @@ import os
 import sys
 import json
 import time
-import signal
 import socket
 import asyncio
 import syslog
@@ -10,22 +9,39 @@ import traceback
 import platform
 import psutil
 import datetime
+import signal
+import select
+import threading
 import daemonize
 
 __STATS_DAEMON_APP = 'watchy'
 __STATS_DAEMON_SERVER = None
 __STATS_DAEMON_READY = False
+__STATS_DAEMON_STOP = False
 
-
-def _isDaemonAlive(pid='/tmp/watchy.pid'):
+def isPidAlive(pid):
+    if pid <= 0:
+        return False
     try:
-        with open(pid, 'r') as fd:
-            process = fd.read()
-            os.kill(int(process), 0)
+        os.kill(int(pid), 0)
     except:
         return False
     return True
 
+def getPidFromLockFile(lock='/tmp/watchy.pid'):
+    try:
+        pid = -1
+        with open(lock, 'r') as fd:
+            pid = fd.read()
+        return int(pid)
+    except:
+        return pid
+
+def doesFileExist(path):
+    try:
+        return os.path.isfile(path)
+    except:
+        return False
 
 class ClientDaemonConnection:
     def __init__(self, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
@@ -34,7 +50,7 @@ class ClientDaemonConnection:
         self._connect()
 
     def _connect(self):
-        if _isDaemonAlive(self._pid) is False:
+        if isPidAlive(getPidFromLockFile(self._pid)) is False:
             raise Exception('Daemon process not alive [%s]' % self._pid)
         self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
@@ -65,16 +81,75 @@ class ClientDaemonConnection:
         message = {'type': 'stop'}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
+class StatsServerUnixSocket(threading.Thread):
+    def __init__(self, sock):
+        threading.Thread.__init__(self)
+        self._sock = sock
+        self._running = False
+        self.daemon = True
+        self._createSocket()
+
+    def _createSocket(self):
+        try:
+            os.unlink(self._sock)
+        except OSError:
+            if os.path.exists(self._sock):
+                raise
+        self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self._socket.setblocking(0)
+
+    @property
+    def running(self):
+        return self._running
+
+    @running.setter
+    def running(self, value):
+        self._running = value
+
+    def _watchyProtocolHandler(self, message):
+        global __STATS_DAEMON_STOP
+        syslog.syslog(syslog.LOG_ALERT, "Message type [%s]" % message['type'])
+        if message['type'] == 'stop':
+            __STATS_DAEMON_STOP = True
+
+    def run(self):
+        self._running = True
+        self._socket.bind(self._sock)
+        self._socket.listen(1)
+        inputs = [self._socket]
+        try:
+            while self._running is True:
+                (reads, writes, errors) = select.select(
+                    inputs, [], inputs
+                )
+                for i in reads:
+                    if i is self._socket:
+                        connection, _ = self._socket.accept()
+                        connection.setblocking(0)
+                        inputs.append(connection)
+                    else:
+                        try:
+                            data = self._socket.recv(1024)
+                            if data:
+                                message = json.loads(data.decode("utf-8"))
+                                self._watchyProtocolHandler(message)
+                        except:
+                            pass
+        except:
+            syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
+            syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
+        finally:
+            self._socket.close()
 
 class StatServerDaemon:
     def __init__(self, key, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
         self._transport = transport
         self._sock = sock
         self._sigpid = sigpid
-        self._pids = {}
         self._loop = None
         self._key = key
-        if _isDaemonAlive(pid):
+        self._server = None
+        if isPidAlive(getPidFromLockFile(pid)):
             raise Exception('Lock [%s] pid is already alive' % pid)
 
     def _signalParent(self):
@@ -83,79 +158,63 @@ class StatServerDaemon:
         except:
             pass
 
-    @asyncio.coroutine
-    def _clientConnected(self, reader, _):
-        while True:
-            data = yield from reader.read(8192)
-            if not data:
-                break
-            try:
-                data = json.loads(data.decode('utf-8'))
-                syslog.syslog(syslog.LOG_ALERT, "Got message type [%s]!" % data['type'])
-            except:
-                pass
+    def _stopEventLoop(self):
+        if self._loop:
+            self._loop.stop()
+            self._loop.close()
+        if self._server:
+            self._server.running = False
+            if doesFileExist(self._sock):
+                os.unlink(self._sock)
+
+    def _getHostStats(self):
+        return {
+            'key': self._key,
+            'type': 'host',
+            'payload': {
+                'platform': platform.platform(),
+                'hostname': platform.node(),
+                'machine': platform.machine(),
+                'version': platform.version(),
+                'cores': psutil.cpu_count(),
+                'usage': psutil.cpu_times_percent().user,
+                'memory_total': psutil.virtual_memory().total,
+                'memory_used': psutil.virtual_memory().used,
+                'disk_total': psutil.disk_usage('/').total,
+                'disk_free': psutil.disk_usage('/').used,
+                'timestamp': datetime.datetime.now().isoformat(),
+                'process': len(psutil.pids())
+            }
+        }
 
     @asyncio.coroutine
     def _postHostStats(self):
+        global __STATS_DAEMON_STOP
         while True:
-            for key in self._pids:
-                pid = self._pids[key]
-                process = psutil.Process(pid)
-                message = {
-                    'key': key,
-                    'type': 'pid',
-                    'payload': {
-                        'pid': pid,
-                        'name': process.name(),
-                        'user': process.username(),
-                        'status': process.status(),
-                        'cpu': process.cpu_percent(interval=1.0),
-                        'threads': process.threads(),
-                        'memory': process.memory_percent(),
-                        'io': None,
-                        'fds': process.num_fds()
-                    }
-                }
+            try:
+                message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
-            yield from asyncio.sleep(2)
-
-    @asyncio.coroutine
-    def _postPidStats(self):
-        while True:
-            message = {
-                'key': self._key,
-                'type': 'host',
-                'payload': {
-                    'platform': platform.platform(),
-                    'hostname': platform.node(),
-                    'machine': platform.machine(),
-                    'version': platform.version(),
-                    'cores': psutil.cpu_count(),
-                    'usage': psutil.cpu_times_percent().user,
-                    'memory_total': psutil.virtual_memory().total,
-                    'memory_used': psutil.virtual_memory().used,
-                    'disk_total': psutil.disk_usage('/').total,
-                    'disk_free': psutil.disk_usage('/').used,
-                    'timestamp': datetime.datetime.now().isoformat(),
-                    'process': len(psutil.pids())
-                    }
-            }
-            self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
-            yield from asyncio.sleep(4)
+            except:
+                syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
+                syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
+            finally:
+                yield from asyncio.sleep(4)
 
     def start(self):
+        global __STATS_DAEMON_STOP
+        __STATS_DAEMON_STOP = False
+        syslog.syslog(syslog.LOG_ALERT, "Starting event loop")
+        self._server = StatsServerUnixSocket(self._sock)
         self._transport.initTransport()
-        self._loop = asyncio.new_event_loop()
-        asyncio.async(self._postHostStats, loop=self._loop)
-        asyncio.async(self._postPidStats, loop=self._loop)
-        server = asyncio.start_unix_server(self._clientConnected, path=self._sock, loop=self._loop)
-        self._loop.run_until_complete(server)
-        self._signalParent()
-        try:
-            self._loop.run_forever()
-        finally:
-            self._loop.close()
 
+        self._loop = asyncio.get_event_loop()
+        self._server.start()
+
+        self._signalParent()
+
+        self._loop.run_until_complete(self._postHostStats())
+        self._server.running = False
+        self._loop.close()
 
 def _daemonReadyHandler(*args):
     global __STATS_DAEMON_READY

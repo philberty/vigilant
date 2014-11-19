@@ -1,7 +1,7 @@
 package io.github.observant.resources;
 
-/**
- * Created by redbrain on 19/11/2014.
- */
+import javax.ws.rs.Path;
+
+@Path("")
 public class HostResource {
 }

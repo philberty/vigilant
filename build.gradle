@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+mainClassName = 'hello.HelloWorld'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+jar {
+    baseName = 'watchy'
+    version =  '0.1'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}

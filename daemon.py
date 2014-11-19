@@ -68,7 +68,7 @@ def daemon():
                       help="Print version", action="store_true")
     parser.add_option("-c", "--config", dest="config",
                       help="Config file location", default=None)
-    parser.add_option("-r", "--running", dest="running",
+    parser.add_option("-r", "--status", dest="status",
                       help="Is daemon running", default=False, action="store_true")
     parser.add_option('-s', "--start", dest="start",
                       help="Start Daemon with config", default=False, action="store_true")
@@ -83,7 +83,7 @@ def daemon():
         sys.exit('You must specify a configuration file, see --help')
     config = CParser()
     config.read(options.config)
-    if options.running:
+    if options.status:
         print(isDaemonRunning(config))
     if options.kill:
         killDaemon(config)

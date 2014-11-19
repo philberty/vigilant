@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
 
-mainClassName = 'hello.HelloWorld'
+mainClassName = 'io.github.observant.ObservantServerMain'
 
 repositories {
     mavenLocal()
@@ -10,7 +10,7 @@ repositories {
 }
 
 jar {
-    baseName = 'watchy'
+    baseName = 'observant'
     version =  '0.1'
 }
 

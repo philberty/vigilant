@@ -1,7 +1,7 @@
-Watchy
-------
+Observant
+---------
 
-Watchy provides application driven, distributed stats/process/log monitoring. The project is made up of several separate
+Observant provides application driven, distributed stats/process/log monitoring. The project is made up of several separate
 components the Server with angularjs dashboard, the stats daemon and finally your client applications.
 
 Imagine starting your application as so:

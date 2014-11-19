@@ -61,6 +61,7 @@ def configureLogging(config):
     except:
         sys.exit("invalid config present in [%s] - [%s]" % (config, sys.exc_info()))
 
+
 def daemon():
     parser = optparse.OptionParser()
     parser.add_option("-v", "--version", dest='version',

@@ -6,7 +6,11 @@ jdk:
  os:
    - linux
    - osx
+script: ./gradlew build
 notifications:
   notifications:
     email:
       - herron.philip@googlemail.com
+branches:
+  except:
+    - gh-pages

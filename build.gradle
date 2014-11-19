@@ -1,5 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'findbugs'
+apply plugin: 'eclipse'
 apply plugin: 'application'
 
 mainClassName = 'io.github.observant.ObservantServerMain'
@@ -7,6 +9,22 @@ mainClassName = 'io.github.observant.ObservantServerMain'
 repositories {
     mavenLocal()
     mavenCentral()
+}
+
+dependencies {
+    compile 'com.squareup.dagger:dagger-compiler:1.1.0'
+    compile 'com.squareup.dagger:dagger:1.1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/webapp'
+        }
+    }
 }
 
 jar {

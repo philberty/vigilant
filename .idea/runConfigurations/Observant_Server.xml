@@ -1,24 +1,21 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Observant-Server" type="Application" factoryName="Application" singleton="true">
-    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-      <pattern>
-        <option name="PATTERN" value="io.github.observant.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
-    <option name="MAIN_CLASS_NAME" value="io.github.observant.ObservantServerMain" />
-    <option name="VM_PARAMETERS" value="" />
-    <option name="PROGRAM_PARAMETERS" value="" />
-    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-    <option name="ALTERNATIVE_JRE_PATH" value="" />
-    <option name="ENABLE_SWING_INSPECTOR" value="false" />
-    <option name="ENV_VARIABLES" />
-    <option name="PASS_PARENT_ENVS" value="true" />
-    <module name="observant" />
-    <envs />
-    <RunnerSettings RunnerId="Run" />
-    <ConfigurationWrapper RunnerId="Run" />
+  <configuration default="false" name="Observant-Server" type="GradleRunConfiguration" factoryName="Gradle" singleton="true">
+    <ExternalSystemSettings>
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value="run" />
+        </list>
+      </option>
+      <option name="vmOptions" value="" />
+    </ExternalSystemSettings>
+    <RunnerSettings RunnerId="ExternalSystemTaskRunner" />
+    <ConfigurationWrapper RunnerId="ExternalSystemTaskRunner" />
     <method />
   </configuration>
 </component>

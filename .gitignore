@@ -72,3 +72,5 @@ target/
 hs_err_pid*
 
 .gradle
+
+./src/main/webapp/js/lib

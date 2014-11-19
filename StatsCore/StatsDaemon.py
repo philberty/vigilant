@@ -3,8 +3,6 @@ import sys
 import json
 import time
 import socket
-import syslog
-import traceback
 import signal
 import daemonize
 
@@ -20,6 +18,12 @@ def isPidAlive(pid):
     return True
 
 def getPidFromLockFile(lock='/tmp/watchy.pid'):
+    """
+    Returns the pid inside the specified lock file else returns -1
+
+    :param lock: the lock file to open and read for the pid
+    :return: returns the pid inside the specified lock file else -1
+    """
     try:
         pid = -1
         with open(lock, 'r') as fd:
@@ -47,39 +51,74 @@ class ClientDaemonConnection:
         self._socket.close()
 
     def postWatchPid(self, key, pid):
+        """
+        Send the daemon a message telling it to monitor the specified process
+
+        :param key: string key to tie a process to could be process name or other
+        :param pid: the pid of the process to monitor
+        """
         message = {'type': 'watch', 'key': key, 'pid': pid}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
     def postStopWatchPid(self, pid):
+        """
+        Send the daemon a message telling it to stop monitoring the specified process
+
+        :param pid: the pid to stop watching
+        """
         message = {'type': 'stopWatchPid', 'pid': pid}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
     def postStopWatchKey(self, key):
+        """
+        Send the daemon a message telling to stop monitoring the process with the specified key
+
+        :param key: the key to stop watching
+        """
         message = {'type': 'stopWatchKey', 'key': key}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
     def postLogMessageForKey(self, key, log):
+        """
+        Send the daemon a log message to handle against a key
+
+        :param key: key to post log message against
+        :param log: the string log message
+        """
         message = {'type': 'postLog', 'key': key, 'message': log}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
     def postStopDaemon(self):
+        """
+        Send the daemon a message to stop running
+        """
         message = {'type': 'stop'}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
 
 def _daemonReadyHandler(*args):
+    """
+    Wrapper to handle daemon ready signal
+    """
     StatsDaemonState.STATS_DAEMON_READY = True
 
 
 def _daemonizeStatsDaemon():
-    try:
-        StatsDaemonState.STATS_DAEMON_SERVER.start()
-    except:
-        syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
-        syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
+    """
+    Wrapper to handle the daemonization
+    """
+    StatsDaemonState.STATS_DAEMON_SERVER.start()
 
 
 def forkStatsDaemon(daemon, timeout=3, lock='/tmp/watchy.pid'):
+    """
+    Fork the stats Daemon as a real system daemon to run in the background
+
+    :param daemon: The StatServerDaemon from StatsAsyncCore
+    :param timeout: optional keyword argument for the timeout to wait on daemon ready signal
+    :param lock: optional specify the location of the daemon lock file
+    :raise Exception: Raises an exception if the timeout elapses before daemon ready
+    """
     StatsDaemonState.STATS_DAEMON_SERVER = daemon
 
     signal.signal(signal.SIGUSR1, _daemonReadyHandler)

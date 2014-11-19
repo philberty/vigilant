@@ -8,9 +8,7 @@ import traceback
 import signal
 import daemonize
 
-__STATS_DAEMON_APP = 'watchy'
-__STATS_DAEMON_SERVER = None
-__STATS_DAEMON_READY = False
+from . import StatsDaemonState
 
 def isPidAlive(pid):
     if pid <= 0:
@@ -29,12 +27,6 @@ def getPidFromLockFile(lock='/tmp/watchy.pid'):
         return int(pid)
     except:
         return pid
-
-def doesFileExist(path):
-    try:
-        return os.path.isfile(path)
-    except:
-        return False
 
 class ClientDaemonConnection:
     def __init__(self, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
@@ -76,33 +68,32 @@ class ClientDaemonConnection:
 
 
 def _daemonReadyHandler(*args):
-    global __STATS_DAEMON_READY
-    __STATS_DAEMON_READY = True
+    StatsDaemonState.STATS_DAEMON_READY = True
 
 
 def _daemonizeStatsDaemon():
     try:
-        __STATS_DAEMON_SERVER.start()
+        StatsDaemonState.STATS_DAEMON_SERVER.start()
     except:
         syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
         syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
 
 
 def forkStatsDaemon(daemon, timeout=3, lock='/tmp/watchy.pid'):
-    global __STATS_DAEMON_SERVER, __STATS_DAEMON_READY, __STATS_DAEMON_APP
-    __STATS_DAEMON_SERVER = daemon
+    StatsDaemonState.STATS_DAEMON_SERVER = daemon
 
     signal.signal(signal.SIGUSR1, _daemonReadyHandler)
 
     pid = os.fork()
     if pid == 0:
-        daemon = daemonize.Daemonize(app=__STATS_DAEMON_APP, pid=lock, action=_daemonizeStatsDaemon)
+        daemon = daemonize.Daemonize(app=StatsDaemonState.STATS_DAEMON_APP,
+                                     pid=lock, action=_daemonizeStatsDaemon)
         daemon.start()
         sys.exit(0)
 
     for i in range(timeout):
-        if __STATS_DAEMON_READY is True:
+        if StatsDaemonState.STATS_DAEMON_READY:
             break
         time.sleep(1)
-    if __STATS_DAEMON_READY is False:
+    if StatsDaemonState.STATS_DAEMON_READY is False:
         raise Exception('Timeout of [%i] seconds, failed waiting for daemon to come alive' % timeout)

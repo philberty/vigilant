@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import time
 
-import StatsClient
+import StatsCore
 
-from StatsClient import StatsDaemon
-from StatsClient import SimpleTransports
+from StatsCore import StatsDaemon
+from StatsCore import SimpleTransports
 
 def StatsClientMain():
     transport = SimpleTransports.UDPStatsTransport()
-    client = StatsClient.attachOrCreateStatsDaemon('test', transport)
+    client = StatsCore.attachOrCreateStatsDaemon('test', transport)
 
     time.sleep(10)
     print('sending daemon kill')

@@ -5,6 +5,8 @@ import select
 import syslog
 import threading
 
+from . import StatsDaemonState
+
 class StatsServerUnixSocket(threading.Thread):
     def __init__(self, sock):
         threading.Thread.__init__(self)
@@ -33,7 +35,7 @@ class StatsServerUnixSocket(threading.Thread):
     def _watchyProtocolHandler(self, message):
         syslog.syslog(syslog.LOG_ALERT, "Message type [%s]" % message['type'])
         if message['type'] == 'stop':
-
+            StatsDaemonState.STATS_DAEMON_STOP = True
 
     def bind(self):
         self._running = True
@@ -67,8 +69,7 @@ class StatsServerUnixSocket(threading.Thread):
                     i.close()
                     inputs.remove(i)
         except:
-            syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
-            syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
+            pass
         finally:
             self._socket.close()
             os.unlink(self._sock)

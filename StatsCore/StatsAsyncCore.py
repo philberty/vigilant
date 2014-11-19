@@ -11,8 +11,7 @@ import traceback
 
 from . import StatsDaemon
 from . import StatsDaemonServer
-
-STATS_DAEMON_STOP = False
+from . import StatsDaemonState
 
 class StatServerDaemon:
     def __init__(self, key, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
@@ -32,20 +31,14 @@ class StatServerDaemon:
             pass
 
     def _stopEventLoop(self, *args):
-        syslog.syslog(syslog.LOG_ALERT, "holy fuck!")
         if self._server:
-            syslog.syslog(syslog.LOG_ALERT, "1")
             self._server.running = False
-            syslog.syslog(syslog.LOG_ALERT, "2")
             self._server.join()
-            syslog.syslog(syslog.LOG_ALERT, "3")
+            self._server = None
         if self._loop:
-            syslog.syslog(syslog.LOG_ALERT, "4")
             self._loop.stop()
-            syslog.syslog(syslog.LOG_ALERT, "5")
             self._loop.close()
-            syslog.syslog(syslog.LOG_ALERT, "6")
-
+            self._loop = None
 
     def _getHostStats(self):
         return {
@@ -70,7 +63,7 @@ class StatServerDaemon:
     @asyncio.coroutine
     def _postHostStats(self):
         while True:
-            if STATS_DAEMON_STOP:
+            if StatsDaemonState.STATS_DAEMON_STOP:
                 self._stopEventLoop()
                 break
             try:
@@ -83,9 +76,16 @@ class StatServerDaemon:
                 yield from asyncio.sleep(4)
         self._stopEventLoop()
 
+    def _runEventLoop(self):
+        try:
+            self._loop.run_forever()
+        except:
+            pass
+        finally:
+            self._stopEventLoop()
+
     def start(self):
-        global STATS_DAEMON_STOP
-        STATS_DAEMON_STOP = False
+        StatsDaemonState.STATS_DAEMON_STOP = False
         self._server = StatsDaemonServer.StatsServerUnixSocket(self._sock)
         self._transport.initTransport()
         self._loop = asyncio.get_event_loop()
@@ -94,7 +94,4 @@ class StatServerDaemon:
         self._server.start()
         self._loop.add_signal_handler(signal.SIGTERM, self._stopEventLoop)
         asyncio.async(self._postHostStats(), loop=self._loop)
-        try:
-            self._loop.run_forever()
-        finally:
-            self._stopEventLoop()
+        self._runEventLoop()

@@ -63,9 +63,6 @@ class StatServerDaemon:
     @asyncio.coroutine
     def _postHostStats(self):
         while True:
-            if StatsDaemonState.STATS_DAEMON_STOP:
-                self._stopEventLoop()
-                break
             try:
                 message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
@@ -74,7 +71,6 @@ class StatServerDaemon:
                 syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
-        self._stopEventLoop()
 
     def _runEventLoop(self):
         try:
@@ -85,7 +81,6 @@ class StatServerDaemon:
             self._stopEventLoop()
 
     def start(self):
-        StatsDaemonState.STATS_DAEMON_STOP = False
         self._server = StatsDaemonServer.StatsServerUnixSocket(self._sock)
         self._transport.initTransport()
         self._loop = asyncio.get_event_loop()

@@ -1,0 +1,31 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Gradle : observant : observant.war (exploded)">
+    <output-path>$PROJECT_DIR$/build/classes/artifacts/observant/exploded/observant.war</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="observant/web/Web Gradle : observant.war" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="observant" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Gradle: dagger-compiler-1.1.0" />
+          <element id="library" level="project" name="Gradle: dagger-1.1.0" />
+          <element id="library" level="project" name="Gradle: jsr311-api-1.1.1" />
+          <element id="library" level="project" name="Gradle: jersey-server-1.13" />
+          <element id="library" level="project" name="Gradle: jersey-core-1.13" />
+          <element id="library" level="project" name="Gradle: jersey-servlet-1.13" />
+          <element id="library" level="project" name="Gradle: javax.inject-1" />
+          <element id="library" level="project" name="Gradle: javawriter-2.1.1" />
+          <element id="library" level="project" name="Gradle: asm-3.1" />
+          <element id="library" level="project" name="Gradle: netty-3.5.0.Final" />
+          <element id="library" level="project" name="Gradle: slf4j-simple-1.6.1" />
+          <element id="library" level="project" name="Gradle: slf4j-api-1.6.1" />
+          <element id="library" level="project" name="Gradle: servlet-api-2.5" />
+        </element>
+      </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/build/classes/artifacts/observant/exploded/observant.war/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

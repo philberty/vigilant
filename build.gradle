@@ -1,9 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'application'
-
-mainClassName = 'io.github.observant.ObservantServerMain'
+apply plugin: 'war'
 
 repositories {
     mavenLocal()
@@ -11,32 +7,27 @@ repositories {
 }
 
 dependencies {
+    compile 'org.slf4j:slf4j-simple:1.6.1'
+
     compile 'com.squareup.dagger:dagger-compiler:1.1.0'
     compile 'com.squareup.dagger:dagger:1.1.0'
 
     compile "javax.ws.rs:jsr311-api:1.1.1"
 
+    compile "javax.servlet:servlet-api:2.5"
+
     compile 'com.sun.jersey:jersey-server:1.13'
     compile 'com.sun.jersey:jersey-core:1.13'
     compile 'com.sun.jersey:jersey-servlet:1.13'
 
+    compile 'io.netty:netty:3.5.0.Final'
+
     testCompile "junit:junit-dep:4.10"
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-        resources {
-            srcDir 'src/main/webapp'
-        }
-    }
-}
-
-jar {
-    baseName = 'observant'
-    version =  '0.1'
+war {
+    from 'src/main/webapp' // adds a file-set to the root of the archive
+    webXml = file('src/main/java/io.github.observant/web.xml') // copies a file to WEB-INF/web.xml
 }
 
 task wrapper(type: Wrapper) {

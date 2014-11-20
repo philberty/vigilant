@@ -3,9 +3,9 @@ import json
 import socket
 import select
 import syslog
+import signal
 import threading
 
-from . import StatsDaemonState
 
 class StatsServerUnixSocket(threading.Thread):
     def __init__(self, sock):
@@ -32,10 +32,14 @@ class StatsServerUnixSocket(threading.Thread):
     def running(self, value):
         self._running = value
 
+    def _handleStopDaemonMessage(self):
+        os.kill(os.getpid(), signal.SIGTERM)
+        self._running = False
+
     def _watchyProtocolHandler(self, message):
         syslog.syslog(syslog.LOG_ALERT, "Message type [%s]" % message['type'])
         if message['type'] == 'stop':
-            StatsDaemonState.STATS_DAEMON_STOP = True
+            self._handleStopDaemonMessage()
 
     def bind(self):
         self._running = True

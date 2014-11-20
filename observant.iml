@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$" external.system.id="GRADLE" external.system.module.group="" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
-    <facet type="Python" name="Python">
-      <configuration sdkName="Python 3.4.1 (/usr/local/Cellar/python3/3.4.1_1/bin/python3.4)" />
-    </facet>
     <facet type="web" name="Web Gradle : observant.war">
       <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/src/main/webapp/WEB-INF/web.xml" />
+        </descriptors>
         <webroots>
           <root url="file://$MODULE_DIR$/src/main/webapp" relative="/" />
         </webroots>
@@ -16,7 +16,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/build/classes/main" />
     <output-test url="file://$MODULE_DIR$/build/classes/test" />
     <exclude-output />
@@ -30,21 +30,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="Gradle: dagger-compiler-1.1.0" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: dagger-1.1.0" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: jsr311-api-1.1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: jersey-server-1.13" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: jersey-core-1.13" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: jersey-servlet-1.13" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: javax.inject-1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: javawriter-2.1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: asm-3.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: junit-dep-4.10" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: hamcrest-core-1.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: netty-3.5.0.Final" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: slf4j-simple-1.6.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: slf4j-api-1.6.1" level="project" />
-    <orderEntry type="library" exported="" name="Gradle: servlet-api-2.5" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: servlet-api-2.5" level="project" />
+    <orderEntry type="library" exported="" scope="RUNTIME" name="Gradle: jstl-1.1.2" level="project" />
   </component>
 </module>
 

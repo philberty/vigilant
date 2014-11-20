@@ -1,35 +1,12 @@
 apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'jetty'
 
 repositories {
-    mavenLocal()
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-simple:1.6.1'
-
-    compile 'com.squareup.dagger:dagger-compiler:1.1.0'
-    compile 'com.squareup.dagger:dagger:1.1.0'
-
-    compile "javax.ws.rs:jsr311-api:1.1.1"
-
-    compile "javax.servlet:servlet-api:2.5"
-
-    compile 'com.sun.jersey:jersey-server:1.13'
-    compile 'com.sun.jersey:jersey-core:1.13'
-    compile 'com.sun.jersey:jersey-servlet:1.13'
-
-    compile 'io.netty:netty:3.5.0.Final'
-
-    testCompile "junit:junit-dep:4.10"
-}
-
-war {
-    from 'src/main/webapp' // adds a file-set to the root of the archive
-    webXml = file('src/main/java/io.github.observant/web.xml') // copies a file to WEB-INF/web.xml
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
+  providedCompile 'javax.servlet:servlet-api:2.5'
+  runtime 'javax.servlet:jstl:1.1.2'
 }

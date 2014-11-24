@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: org.scalatra.rl:rl_2.11:0.4.10">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatra.rl/rl_2.11/jars/rl_2.11-0.4.10.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

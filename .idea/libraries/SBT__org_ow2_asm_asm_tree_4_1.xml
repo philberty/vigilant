@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: org.ow2.asm:asm-tree:4.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm-tree/jars/asm-tree-4.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

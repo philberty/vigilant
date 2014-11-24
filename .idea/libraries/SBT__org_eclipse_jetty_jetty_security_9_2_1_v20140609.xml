@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SBT: org.eclipse.jetty:jetty-security:9.2.1.v20140609">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.eclipse.jetty/jetty-security/jars/jetty-security-9.2.1.v20140609.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

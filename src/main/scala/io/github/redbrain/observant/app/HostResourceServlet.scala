@@ -1,7 +1,9 @@
 package io.github.redbrain.observant.app
 
+import io.github.redbrain.observant.models.HostsDataModel
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
+import play.api.libs.json.{JsString, JsObject}
 
 class HostResourceServlet extends ObservantStack with JacksonJsonSupport {
 
@@ -13,6 +15,14 @@ class HostResourceServlet extends ObservantStack with JacksonJsonSupport {
   }
 
   get("/keys") {
-    List(1,2,3,4)
+    HostsDataModel.getKeys()
+  }
+
+  get("/data/:key") {
+    val key:String = params("key");
+    JsObject(Seq(
+      "key" -> JsString(key),
+      "data" -> HostsDataModel.getCachedDataForKey(key)
+    ))
   }
 }

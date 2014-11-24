@@ -25,3 +25,9 @@ process monitoring on that server and relays all data up to the server over a sp
 only transport). Once the data hits the server you will see beautiful charts and your data. When your process stops or
 crashes the daemon knows and will stop monitoring, but when you start your app up again magic you will have your stats
 back again. No need to look up process id's.
+
+```bash
+$ ./sbt
+> container:start
+> ~ ;copy-resources;aux-compile
+```

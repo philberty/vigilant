@@ -20,7 +20,7 @@ object ObservantBuild extends Build {
       name := Name,
       version := Version,
       scalaVersion := ScalaVersion,
-      resolvers += Classpaths.typesafeReleases,
+      resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
@@ -31,7 +31,8 @@ object ObservantBuild extends Build {
         "javax.servlet" % "javax.servlet-api" % "3.1.0",
         "org.scalatra" %% "scalatra-json" % "2.3.0",
         "org.json4s"   %% "json4s-jackson" % "3.2.9",
-        "io.netty" % "netty" % "3.9.5.Final"
+        "io.netty" % "netty" % "3.9.5.Final",
+        "com.typesafe.play" %% "play-json" % "2.3.0"
       )
     )
   )

@@ -20,7 +20,8 @@
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/resource_managed/main" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/resource_managed/test" type="java-test-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/resolution-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -79,5 +80,15 @@
     <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.7" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.specs2:classycle:1.4.3" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.specs2:specs2_2.11:2.3.12" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.3.1" level="project" />
+    <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.6" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.11:3.2.10" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.11:3.2.10" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.11:3.2.9" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scalap:2.11.0" level="project" />
+    <orderEntry type="library" name="SBT: org.scalatra:scalatra-json_2.11:2.3.0" level="project" />
+    <orderEntry type="library" name="SBT: io.netty:netty:3.9.5.Final" level="project" />
   </component>
 </module>

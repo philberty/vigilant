@@ -1,13 +1,13 @@
 import os
 import sys
 import json
-import syslog
 import asyncio
 import signal
 import psutil
 import platform
 import datetime
 import traceback
+import logging
 
 from . import StatsDaemon
 from . import StatsDaemonServer
@@ -67,8 +67,8 @@ class StatServerDaemon:
                 message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
             except:
-                syslog.syslog(syslog.LOG_ALERT, str(sys.exc_info()))
-                syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
+                logging.error(str(sys.exc_info()))
+                logging.error(str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
 

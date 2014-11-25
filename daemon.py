@@ -59,7 +59,7 @@ def configureLogging(config):
     try:
         logging.config.fileConfig(config)
     except:
-        sys.exit("invalid config present in [%s] - [%s]" % (config, sys.exc_info()))
+        pass
 
 
 def daemon():

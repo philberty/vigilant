@@ -1,33 +1,39 @@
-Observant
----------
+#Observant
 
-Observant provides application driven, distributed stats/process/log monitoring. The project is made up of several separate
-components the Server with angularjs dashboard, the stats daemon and finally your client applications.
+Observant provides application driven, distributed stats/process/log monitoring.
 
-Imagine starting your application as so:
+##Setup
+
+There are 3 Components for a full setup of Observant:
+
+Stats Daemon (requires python3):
 
 ```python
-def myApplication()
-    ...
-
-import os
-import StatsCore
-
-client = StatsCore.attachOrCreateStatsDaemon()
-client.postWatchPid('myapplication', os.getpid())
-client.close()
-
-myApplication()
+$ sudo pip3 install -r requirements.txt
+$ python3 setup.py install
+$ python3 daemon.py -c etc/observant/observant.cfg --status
+True
+$ python3 daemon.py -c etc/observant/observant.cfg --kill
+$ ./daemon.py -c etc/observant/observant.cfg --status
+Daemon process not alive [/tmp/watchy.pid]
+$ ./daemon.py -c etc/observant/observant.cfg --start
+$ ./daemon.py -c etc/observant/observant.cfg --status
+True
 ```
 
-When you do this this will automatically create or attach to the local daemon on the host server, which in turn does all
-process monitoring on that server and relays all data up to the server over a specified transport (udp is currently the
-only transport). Once the data hits the server you will see beautiful charts and your data. When your process stops or
-crashes the daemon knows and will stop monitoring, but when you start your app up again magic you will have your stats
-back again. No need to look up process id's.
+Scala DataStore uses sbt (requires jdk >= 7):
 
 ```bash
 $ ./sbt
-> container:start
-> ~ ;copy-resources;aux-compile
+> container:start               # start the container
+> ~ ;copy-resources;aux-compile # auto-reload on file changes
+```
+
+Nodejs Expressjs dashboard Front-end
+
+```bash
+$ cd dashboard
+$ npm install
+$ bower install
+$ node ./bin/www
 ```

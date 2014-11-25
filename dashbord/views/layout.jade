@@ -1,7 +1,8 @@
 doctype html
 html
   head
-    title= title
-    link(rel='stylesheet', href='/css/style.css')
+    title= "Observant"
+    link(rel='stylesheet', href='/js/lib/bootstrap/dist/css/bootstrap.min.css')
+    script(src='/js/lib/requirejs/require.js', data-main='/js/observant.js')
   body
     block content

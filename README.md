@@ -53,3 +53,18 @@ $ npm install
 $ bower install
 $ node ./bin/www
 ```
+
+###Project Files
+I use emacs and intellij and this project contains run configurations and setup for doing all development from intellij.
+
+## Creators
+
+**Philip Herron**
+
+- <http://redbrain.co.uk>
+- <https://twitter.com/redzor>
+- <https://github.com/redbrain>
+
+## Copyright and license
+
+Code and documentation copyright 2014 Philip Herron, Code released under [the MIT license](LICENSE). Docs released under Creative Commons.

@@ -1,12 +1,10 @@
-language: java
-jdk:
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
- os:
-   - linux
-   - osx
-script: ./gradlew build
+language: python
+python:
+  - "3.4"
+install: "pip install -r requirements.txt"
+script:
+  - python setup.py build
+  - python daemon_test.py
 notifications:
   notifications:
     email:

@@ -10,4 +10,5 @@ setup(name='StatsCore',
       author_email='herron.philip@googlemail.com',
       url='https://redbrain.github.com/observant',
       packages=['StatsCore'],
+      scripts=['daemon.py']
   )

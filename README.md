@@ -1,6 +1,7 @@
 # ⛨ Observant ⛨
 
-[![Build Status](https://drone.io/github.com/redbrain/observant/status.png)](https://drone.io/github.com/redbrain/observant/latest)
+[![Daemon Build Status](https://travis-ci.org/redbrain/observant.svg?branch=master)](https://travis-ci.org/redbrain/observant)
+[![DataStore Build Status](https://drone.io/github.com/redbrain/observant/status.png)](https://drone.io/github.com/redbrain/observant/latest)
 [![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
 
 Observant provides application driven, distributed stats/process/log monitoring.

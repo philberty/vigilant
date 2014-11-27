@@ -8,7 +8,7 @@ import org.scalatra.json._
 
 case class HostDataPayload(key: String, payload: List[HostsDataModel])
 
-class HostResourceServlet extends ObservantStack with JacksonJsonSupport {
+class HostResourcesServlet extends ObservantStack with JacksonJsonSupport {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 

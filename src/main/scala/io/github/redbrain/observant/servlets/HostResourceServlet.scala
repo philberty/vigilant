@@ -1,5 +1,6 @@
-package io.github.redbrain.observant.app
+package io.github.redbrain.observant.servlets
 
+import io.github.redbrain.observant.app.ObservantStack
 import io.github.redbrain.observant.caches.HostCache
 import io.github.redbrain.observant.models.HostsDataModel
 import org.json4s.{DefaultFormats, Formats}

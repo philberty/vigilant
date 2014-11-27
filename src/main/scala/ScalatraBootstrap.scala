@@ -1,6 +1,7 @@
 import io.github.redbrain.observant.aggregator.TransportType
 import io.github.redbrain.observant.app._
-import io.github.redbrain.observant.configuration.ConfigurationService
+import io.github.redbrain.observant.configuration.Configuration
+import io.github.redbrain.observant.servlets.HostResourceServlet
 import org.scalatra._
 import javax.servlet.ServletContext
 
@@ -12,7 +13,7 @@ class ScalatraBootstrap extends LifeCycle {
   private var _aggregator:TransportType = null
 
   override def init(context: ServletContext) {
-    _aggregator = ConfigurationService.getTransportFromConfiguration()
+    _aggregator = Configuration.getTransportFromConfiguration()
     _aggregator.start()
 
     logger.info("Loading Hosts Servlet")

@@ -1,6 +1,6 @@
 package io.github.redbrain.observant.caches
 
-import io.github.redbrain.observant.configuration.ConfigurationService
+import io.github.redbrain.observant.configuration.Configuration
 import io.github.redbrain.observant.models.HostsDataModel
 
 object HostCache {
@@ -24,7 +24,7 @@ object HostCache {
         _cache += key -> List(data)
       }
       case Some(buffer) => {
-        if (buffer.length >= ConfigurationService.getCacheThreshold()) {
+        if (buffer.length >= Configuration.getCacheThreshold()) {
           _cache += key -> (buffer.drop(1) ::: List(data))
         } else {
           _cache += key -> (buffer ::: List(data))

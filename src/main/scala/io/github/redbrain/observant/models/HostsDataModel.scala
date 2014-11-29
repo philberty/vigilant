@@ -8,11 +8,11 @@ class HostsDataModel(val hostname:String,
                      val usage:Float,
                      val process:Int,
                      val cores:Int,
-                     val memoryTotal:Int,
-                     val memoryUsed:Int,
+                     val memoryTotal:Long,
+                     val memoryUsed:Long,
                      val platform:String,
                      val machine:String,
                      val version:String,
-                     val diskTotal:Int,
-                     val diskFree:Int) {
+                     val diskTotal:Long,
+                     val diskFree:Long) {
 }

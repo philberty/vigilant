@@ -11,7 +11,6 @@ import logging
 
 from . import StatsDaemon
 from . import StatsDaemonServer
-from . import StatsDaemonState
 
 class StatServerDaemon:
     def __init__(self, key, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):

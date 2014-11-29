@@ -8,6 +8,10 @@ import threading
 
 
 class StatsServerUnixSocket(threading.Thread):
+    """
+    This could probably be re-written to use asyncio, and eventually will be.
+    But directly using select works on Linux and Darwin and it works for now.
+    """
     def __init__(self, sock):
         threading.Thread.__init__(self)
         self._sock = sock
@@ -47,12 +51,11 @@ class StatsServerUnixSocket(threading.Thread):
 
     def run(self):
         inputs = [self._socket]
+        _timeout = 1
         self._socket.listen(1)
         try:
             while self._running:
-                (reads, writes, errors) = select.select(
-                    inputs, [], inputs, 1
-                )
+                reads, _, errors = select.select(inputs, [], inputs, _timeout)
                 for i in reads:
                     if i is self._socket:
                         connection, _ = self._socket.accept()

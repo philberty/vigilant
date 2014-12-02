@@ -79,7 +79,7 @@ class StatServerDaemon:
             retval.append(str(i))
         return retval
 
-    def _getStatsForPid(self, pid):
+    def _getStatsForPidWrapper(self, pid):
         p = psutil.Process(pid)
         return {
             'pid': pid,
@@ -97,12 +97,21 @@ class StatServerDaemon:
             'connections': self._stringifyPsutilStatList(p.connections())
         }
 
+    def _getStatsForPid(self, key, pid):
+        try:
+            return self._getStatsForPidWrapper(pid)
+        except:
+            del self._watching[key]
+            raise
+
     @asyncio.coroutine
     def _postHostStats(self):
         while True:
             try:
                 message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+            except psutil.NoSuchProcess:
+                logging.info('Process stopped')
             except:
                 logging.error(str(sys.exc_info()))
                 logging.error(str(traceback.format_exc()))
@@ -114,7 +123,7 @@ class StatServerDaemon:
         while True:
             try:
                 for key in self._watching:
-                    payload = self._getStatsForPid(self._watching[key])
+                    payload = self._getStatsForPid(key, self._watching[key])
                     message = {'key': key, 'host': self._key, 'type': 'pid', 'payload': payload}
                     self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
             except:

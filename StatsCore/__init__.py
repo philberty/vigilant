@@ -27,11 +27,14 @@ def attachOrCreateStatsDaemon(key, transport, pid='/tmp/watchy.pid', sock='/tmp/
     """
     Attach to the system daemon or create it.
 
-    :param key: The key name for the system, usualy the hostname of the system
+    :param key: The key name for the system, usually the hostname of the system
     :param transport: The transport object for the daemon to server
     :param pid: The pid lock file for the daemon
     :param sock: The socket path to communicate on
     :return: StatsCore.StatsDaemon.ClientDaemonConnection object or Exception
     """
-    createStatsDaemon(key, transport, pid=pid, sock=sock)
-    return attchToStatsDaemon(pid=pid, sock=sock)
+    if StatsDaemon.isPidAlive(StatsDaemon.getPidFromLockFile(pid)):
+        return attchToStatsDaemon(pid=pid, sock=sock)
+    else:
+        createStatsDaemon(key, transport, pid=pid, sock=sock)
+        return attchToStatsDaemon(pid=pid, sock=sock)

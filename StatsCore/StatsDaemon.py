@@ -4,10 +4,21 @@ import json
 import time
 import socket
 import signal
+import select
 import daemonize
+import traceback
 
+import syslog
+import logging
+import logging.handlers
+
+from platform import platform
 from . import StatsDaemonState
 
+SYSLOG_DAEMON = '/var/run/syslog' if 'Darwin' in platform() else '/dev/log'
+
+# Please someone get rid of these functions for me!!!
+# :'( they are so disgusting
 def isPidAlive(pid):
     if pid <= 0:
         return False
@@ -46,6 +57,13 @@ class ClientDaemonConnection:
             self._socket.connect(self._sock)
         except:
             raise Exception('Unable to connect to daemon [%s]' % self._sock)
+
+    def _waitForJsonResponse(self, timeout=5):
+        inputs = [self._socket]
+        reads, _, __ = select.select(inputs, [], [], timeout)
+        for i in reads:
+            data = i.recv(1024)
+            return json.loads(data.decode("utf-8"))
 
     def close(self):
         self._socket.close()
@@ -88,6 +106,13 @@ class ClientDaemonConnection:
         message = {'type': 'postLog', 'key': key, 'message': log}
         self._socket.send(json.dumps(message).encode('utf-8'))
 
+    def postDaemonStatusMessage(self):
+        """
+        Send the daemon a message to return the status of it
+        """
+        self._socket.send(json.dumps({'type': 'status'}).encode('utf-8'))
+        return self._waitForJsonResponse()
+
     def postStopDaemon(self):
         """
         Send the daemon a message to stop running
@@ -107,7 +132,16 @@ def _daemonizeStatsDaemon():
     """
     Wrapper to handle the daemonization
     """
-    StatsDaemonState.STATS_DAEMON_SERVER.start()
+    try:
+        my_logger = logging.getLogger('root')
+        my_logger.setLevel(logging.INFO)
+        handler = logging.handlers.SysLogHandler(address=SYSLOG_DAEMON)
+        my_logger.addHandler(handler)
+    except:
+        syslog.syslog(syslog.LOG_ALERT, 'Unable to setup logging [%s]' % str(sys.exc_info()[1]))
+        syslog.syslog(syslog.LOG_ALERT, '%s' % str(traceback.format_exc()))
+    finally:
+        StatsDaemonState.STATS_DAEMON_SERVER.start()
 
 
 def forkStatsDaemon(daemon, timeout=3, lock='/tmp/watchy.pid'):

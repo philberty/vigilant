@@ -22,6 +22,7 @@ def isDaemonRunning(config):
         lock = str(config.get('daemon', 'lock'))
         sock = str(config.get('daemon', 'sock'))
         client = StatsCore.attchToStatsDaemon(pid=lock, sock=sock)
+        print(client.postDaemonStatusMessage())
         client.close()
         return True
     except:

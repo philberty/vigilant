@@ -15,6 +15,12 @@
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/daemon.py" />
     <option name="PARAMETERS" value="-c ./etc/observant/observant.cfg --status" />
     <option name="SHOW_COMMAND_LINE" value="false" />
-    <method />
+    <RunnerSettings RunnerId="PyDebugRunner" />
+    <RunnerSettings RunnerId="PythonRunner" />
+    <ConfigurationWrapper RunnerId="PyDebugRunner" />
+    <ConfigurationWrapper RunnerId="PythonRunner" />
+    <method>
+      <option name="Make" enabled="false" />
+    </method>
   </configuration>
 </component>

@@ -10,6 +10,7 @@ import traceback
 import logging
 
 from . import StatsDaemon
+from . import StatsDaemonState
 from . import StatsDaemonServer
 
 class StatServerDaemon:
@@ -20,8 +21,20 @@ class StatServerDaemon:
         self._loop = None
         self._key = key
         self._server = None
+        self._watching = {}
         if StatsDaemon.isPidAlive(StatsDaemon.getPidFromLockFile(pid)):
             raise Exception('Lock [%s] pid is already alive' % pid)
+
+    @property
+    def transport(self):
+        return self._transport
+
+    @property
+    def status(self):
+        return self._watching
+
+    def watchPid(self, pid, key):
+        self._watching[key] = pid
 
     def _signalParent(self):
         try:
@@ -49,6 +62,7 @@ class StatServerDaemon:
                 'machine': platform.machine(),
                 'version': platform.version(),
                 'cores': psutil.cpu_count(),
+                'cpu_stats': psutil.cpu_percent(interval=1, percpu=True),
                 'usage': psutil.cpu_times_percent().user,
                 'memory_total': psutil.virtual_memory().total,
                 'memory_used': psutil.virtual_memory().used,
@@ -57,6 +71,30 @@ class StatServerDaemon:
                 'timestamp': datetime.datetime.now().isoformat(),
                 'process': len(psutil.pids())
             }
+        }
+
+    def _stringifyPsutilStatList(self, data):
+        retval = []
+        for i in data:
+            retval.append(str(i))
+        return retval
+
+    def _getStatsForPid(self, pid):
+        p = psutil.Process(pid)
+        return {
+            'pid': pid,
+            'name': p.name(),
+            'path': p.exe(),
+            'cwd': p.cwd(),
+            'cmdline': p.cmdline(),
+            'status': p.status(),
+            'user': p.username(),
+            'threads': p.num_threads(),
+            'fds': p.num_fds(),
+            'files': self._stringifyPsutilStatList(p.open_files()),
+            'usage': p.cpu_percent(interval=1),
+            'memory_percent': p.memory_percent(),
+            'connections': self._stringifyPsutilStatList(p.connections())
         }
 
     @asyncio.coroutine
@@ -71,15 +109,31 @@ class StatServerDaemon:
             finally:
                 yield from asyncio.sleep(4)
 
+    @asyncio.coroutine
+    def _postPidStats(self):
+        while True:
+            try:
+                for key in self._watching:
+                    payload = self._getStatsForPid(self._watching[key])
+                    message = {'key': key, 'host': self._key, 'type': 'pid', 'payload': payload}
+                    self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+            except:
+                logging.error(str(sys.exc_info()))
+                logging.error(str(traceback.format_exc()))
+            finally:
+                yield from asyncio.sleep(4)
+
     def _runEventLoop(self):
         try:
             self._loop.run_forever()
         except:
-            pass
+            logging.error(str(sys.exc_info()))
+            logging.error(str(traceback.format_exc()))
         finally:
             self._stopEventLoop()
 
     def start(self):
+        StatsDaemonState.STATS_DAEMON_TRANSPORT = self._transport
         self._server = StatsDaemonServer.StatsServerUnixSocket(self._sock)
         self._transport.initTransport()
         self._loop = asyncio.get_event_loop()
@@ -88,4 +142,5 @@ class StatServerDaemon:
         self._server.start()
         self._loop.add_signal_handler(signal.SIGTERM, self._stopEventLoop)
         asyncio.async(self._postHostStats(), loop=self._loop)
+        asyncio.async(self._postPidStats(), loop=self._loop)
         self._runEventLoop()

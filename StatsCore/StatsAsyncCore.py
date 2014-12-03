@@ -33,6 +33,10 @@ class StatServerDaemon:
     def status(self):
         return self._watching
 
+    @property
+    def host(self):
+        return self._key
+
     def watchPid(self, pid, key):
         self._watching[key] = pid
 

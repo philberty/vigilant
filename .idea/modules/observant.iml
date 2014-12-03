@@ -24,7 +24,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/test-reports" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.4.1 (/usr/local/Cellar/python3/3.4.1_1/bin/python3.4)" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="RUNTIME" name="SBT: ch.qos.logback:logback-classic:1.1.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="SBT: ch.qos.logback:logback-core:1.1.2" level="project" />
@@ -99,6 +99,5 @@
     <orderEntry type="library" name="SBT: org.scala-stm:scala-stm_2.11:0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.11:2.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatra:scalatra-scalatest_2.11:2.3.0" level="project" />
-    <orderEntry type="library" name="Python 3.4.1 (/usr/local/Cellar/python3/3.4.1_1/bin/python3.4) interpreter library" level="application" />
   </component>
 </module>

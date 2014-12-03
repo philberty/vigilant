@@ -33,10 +33,7 @@ class UDPTransport(private val port: Int) extends TransportType {
       }
     })
 
-    bootstrap.setOption("child.tcpNoDelay", true)
-    bootstrap.setOption("child.keepAlive", true)
     bootstrap.bind(new InetSocketAddress(port))
-
     logger.info("UDP Stats transport ready on port [{}]", port)
   }
 }

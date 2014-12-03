@@ -25,4 +25,5 @@ class HostResourcesServlet extends ObservantStack with JacksonJsonSupport {
     val key = params("key")
     HostDataPayload(key, HostCache.getCacheDataForKey(key))
   }
+
 }

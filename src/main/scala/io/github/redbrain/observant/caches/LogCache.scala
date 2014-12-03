@@ -1,14 +1,17 @@
 package io.github.redbrain.observant.caches
 
 import io.github.redbrain.observant.configuration.Configuration
-import io.github.redbrain.observant.models.HostsDataModel
+import io.github.redbrain.observant.models.LogDataModel
 
-object HostCache {
+/**
+ * Created by redbrain on 02/12/2014.
+ */
+object LogCache {
 
-  var head:HostsDataModel = null;
-  private var _cache:Map[String, List[HostsDataModel]] = Map[String, List[HostsDataModel]]()
+  var head:LogDataModel = null
+  private var _cache:Map[String, List[LogDataModel]] = Map[String, List[LogDataModel]]()
 
-  def getCacheDataForKey(key: String): List[HostsDataModel] = {
+  def getCacheDataForKey(key: String): List[LogDataModel] = {
     _cache.get(key) match {
       case None => List()
       case Some(data) => data
@@ -19,7 +22,7 @@ object HostCache {
     _cache.keySet
   }
 
-  def pushDataForKey(key: String, data: HostsDataModel): Unit = {
+  def pushDataForKey(key: String, data: LogDataModel): Unit = {
     head = data
     _cache.get(key) match {
       case None => {

@@ -2,7 +2,7 @@ package io.github.redbrain.observant.aggregator
 
 import java.nio.charset.Charset
 
-import io.github.redbrain.observant.caches.HostCache
+import io.github.redbrain.observant.caches.{ProcessCache, LogCache, HostCache}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ExceptionEvent, MessageEvent, ChannelHandlerContext, SimpleChannelHandler}
 import org.slf4j.LoggerFactory
@@ -20,10 +20,22 @@ object StatsAggregator extends SimpleChannelHandler with ObservantProtocolFactor
     HostCache.pushDataForKey(key, getHostDataModel(json))
   }
 
+  def handleLogMessage(json: JsValue): Unit = {
+    val key:String = (json \ "key").as[String]
+    LogCache.pushDataForKey(key, getLogDataModel(json))
+  }
+
+  def handlePidMessage(json: JsValue): Unit = {
+    val key:String = (json \ "key").as[String]
+    ProcessCache.pushDataForKey(key, getProcessDataModel(json))
+  }
+
   def handleMessage(json: JsValue): Unit = {
     val messageType:String = (json \ "type").as[String]
     messageType match {
       case "host" => handleHostMessage(json)
+      case "log" => handleLogMessage(json)
+      case "pid" => handlePidMessage(json)
       case _ => logger.error("Unhandled message of type [{}]", messageType)
     }
   }
@@ -31,8 +43,6 @@ object StatsAggregator extends SimpleChannelHandler with ObservantProtocolFactor
   override def messageReceived(context: ChannelHandlerContext, e: MessageEvent): Unit = {
     val buffer = e.getMessage().asInstanceOf[ChannelBuffer]
     val value = buffer.toString(Charset.forName("UTF-8"))
-
-    logger.debug(value)
     handleMessage(Json.parse(value))
   }
 

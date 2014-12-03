@@ -1,6 +1,6 @@
 package io.github.redbrain.observant.aggregator
 
-import io.github.redbrain.observant.models.HostsDataModel
+import io.github.redbrain.observant.models.{ProcessDataModel, LogDataModel, HostsDataModel}
 import play.api.libs.json.JsValue
 
 trait ObservantProtocolFactory {
@@ -21,4 +21,13 @@ trait ObservantProtocolFactory {
     new HostsDataModel(hostname,timestamp,usage,process,cores,memoryTotal,memoryUsed,platform,machine,version,diskTotal,diskFree)
   }
 
+  def getLogDataModel(json: JsValue): LogDataModel = {
+    val message = (json \ "payload" \ "message").as[String]
+    val host = (json \ "host").as[String]
+    new LogDataModel(host, message)
+  }
+
+  def getProcessDataModel(json: JsValue): ProcessDataModel = {
+    new ProcessDataModel()
+  }
 }

@@ -130,10 +130,8 @@ class StatServerDaemon:
                 message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
             except:
-                error = str(sys.exc_info())
-                self.log(error)
-                syslog.syslog(syslog.LOG_ALERT, "%s" % error)
-                syslog.syslog(syslog.LOG_ALERT, "%s" % str(traceback.format_exc()))
+                self.log(str(sys.exc_info()))
+                self.log(str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
 
@@ -150,10 +148,8 @@ class StatServerDaemon:
                                    'type': 'pid', 'payload': payload}
                         self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
             except:
-                error = str(sys.exc_info())
-                self.log(error)
-                syslog.syslog(syslog.LOG_ALERT, "%s" % error)
-                syslog.syslog(syslog.LOG_ALERT, "%s" % str(traceback.format_exc()))
+                self.log(str(sys.exc_info()))
+                self.log(str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
 
@@ -161,8 +157,8 @@ class StatServerDaemon:
         try:
             self._loop.run_forever()
         except:
-            logging.error(str(sys.exc_info()))
-            logging.error(str(traceback.format_exc()))
+            self.log(str(sys.exc_info()))
+            self.log(str(traceback.format_exc()))
         finally:
             self._stopEventLoop()
 

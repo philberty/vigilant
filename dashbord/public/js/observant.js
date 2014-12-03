@@ -69,6 +69,8 @@ require.config({
 });
 
 define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "angularScroll", "angularSpinner", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
+    console.log('Hello World')
+
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'duScroll', 'angularSpinner']);
 
     angular.bootstrap(document, ['ObservantApp']);

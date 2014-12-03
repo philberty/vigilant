@@ -9,7 +9,7 @@ trait ObservantProtocolFactory {
     val hostname = (json \ "payload" \ "hostname").as[String]
     val timestamp = (json \ "payload" \ "timestamp").as[String]
     val usage = (json \ "payload" \ "usage").as[Float]
-    val process = (json \ "payload" \ "process").as[Int]
+    val processes = (json \ "payload" \ "processes").as[Int]
     val cores = (json \ "payload" \ "cores").as[Int]
     val memoryTotal = (json \ "payload" \ "memory_total").as[Long]
     val memoryUsed = (json \ "payload" \ "memory_used").as[Long]
@@ -18,7 +18,10 @@ trait ObservantProtocolFactory {
     val version = (json \ "payload" \ "version").as[String]
     val diskTotal = (json \ "payload" \ "disk_total").as[Long]
     val diskFree = (json \ "payload" \ "disk_free").as[Long]
-    new HostsDataModel(hostname,timestamp,usage,process,cores,memoryTotal,memoryUsed,platform,machine,version,diskTotal,diskFree)
+    val stats = (json \ "payload" \ "cpu_stats").as[List[Float]]
+
+    new HostsDataModel(hostname,timestamp,usage,processes,cores,memoryTotal,
+      memoryUsed,platform,machine,version,diskTotal,diskFree,stats)
   }
 
   def getLogDataModel(json: JsValue): LogDataModel = {
@@ -28,6 +31,21 @@ trait ObservantProtocolFactory {
   }
 
   def getProcessDataModel(json: JsValue): ProcessDataModel = {
-    new ProcessDataModel()
+    val host = (json \ "host").as[String]
+    val pid = (json \ "payload" \ "pid").as[Int]
+    val path = (json \ "payload" \ "path").as[String]
+    val cwd = (json \ "payload" \ "cwd").as[String]
+    val cmd = (json \ "payload" \ "cmdline").as[List[String]]
+    val status = (json \ "payload" \ "status").as[String]
+    val user = (json \ "payload" \ "user").as[String]
+    val threads = (json \ "payload" \ "threads").as[Int]
+    val fds = (json \ "payload" \ "fds").as[Int]
+    val ofds = (json \ "payload" \ "files").as[List[String]]
+    val usage = (json \ "payload" \ "usage").as[Float]
+    val memory = (json \ "payload" \ "memory_percent").as[Float]
+    val connections = (json \ "payload" \ "connections").as[List[String]]
+
+    new ProcessDataModel(host, pid, path, cwd, cmd, status, user,
+      threads, fds, ofds, usage, memory, connections)
   }
 }

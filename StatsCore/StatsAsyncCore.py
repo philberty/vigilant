@@ -8,6 +8,7 @@ import platform
 import datetime
 import traceback
 import logging
+import syslog
 
 from . import StatsDaemon
 from . import StatsDaemonState
@@ -25,6 +26,18 @@ class StatServerDaemon:
         if StatsDaemon.isPidAlive(StatsDaemon.getPidFromLockFile(pid)):
             raise Exception('Lock [%s] pid is already alive' % pid)
 
+    def log(self, mess):
+        try:
+            syslog.syslog(syslog.LOG_ALERT, "%s" % mess)
+            message = {'key': self._key + '.StatsDaemon',
+                       'type': 'log',
+                       'host': self._key,
+                       'payload': {'message': mess}
+            }
+            self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+        except:
+            pass
+
     @property
     def transport(self):
         return self._transport
@@ -38,6 +51,8 @@ class StatServerDaemon:
         return self._key
 
     def watchPid(self, pid, key):
+        self.log('Trying to watch pid [%i] for key [%s]' % (pid, key))
+        key = self._key + '.' + key
         self._watching[key] = pid
 
     def _signalParent(self):
@@ -73,7 +88,7 @@ class StatServerDaemon:
                 'disk_total': psutil.disk_usage('/').total,
                 'disk_free': psutil.disk_usage('/').used,
                 'timestamp': datetime.datetime.now().isoformat(),
-                'process': len(psutil.pids())
+                'processes': len(psutil.pids())
             }
         }
 
@@ -96,7 +111,7 @@ class StatServerDaemon:
             'threads': p.num_threads(),
             'fds': p.num_fds(),
             'files': self._stringifyPsutilStatList(p.open_files()),
-            'usage': p.cpu_percent(interval=1),
+            'usage': p.cpu_percent(interval=1) if pid != os.getpid() else 0,
             'memory_percent': p.memory_percent(),
             'connections': self._stringifyPsutilStatList(p.connections())
         }
@@ -104,9 +119,9 @@ class StatServerDaemon:
     def _getStatsForPid(self, key, pid):
         try:
             return self._getStatsForPidWrapper(pid)
-        except:
+        except psutil.NoSuchProcess:
+            self.log('Process [%i] key [%s] has stopped' % (pid, key))
             del self._watching[key]
-            raise
 
     @asyncio.coroutine
     def _postHostStats(self):
@@ -114,25 +129,31 @@ class StatServerDaemon:
             try:
                 message = self._getHostStats()
                 self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
-            except psutil.NoSuchProcess:
-                logging.info('Process stopped')
             except:
-                logging.error(str(sys.exc_info()))
-                logging.error(str(traceback.format_exc()))
+                error = str(sys.exc_info())
+                self.log(error)
+                syslog.syslog(syslog.LOG_ALERT, "%s" % error)
+                syslog.syslog(syslog.LOG_ALERT, "%s" % str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
 
     @asyncio.coroutine
     def _postPidStats(self):
+        i = 0
         while True:
             try:
-                for key in self._watching:
-                    payload = self._getStatsForPid(key, self._watching[key])
-                    message = {'key': key, 'host': self._key, 'type': 'pid', 'payload': payload}
-                    self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+                for key in list(self._watching.keys()):
+                    payload = self._getStatsForPid(key, int(self._watching[key]))
+                    if payload:
+                        message = {'key': key,
+                                   'host': self._key,
+                                   'type': 'pid', 'payload': payload}
+                        self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
             except:
-                logging.error(str(sys.exc_info()))
-                logging.error(str(traceback.format_exc()))
+                error = str(sys.exc_info())
+                self.log(error)
+                syslog.syslog(syslog.LOG_ALERT, "%s" % error)
+                syslog.syslog(syslog.LOG_ALERT, "%s" % str(traceback.format_exc()))
             finally:
                 yield from asyncio.sleep(4)
 
@@ -146,6 +167,7 @@ class StatServerDaemon:
             self._stopEventLoop()
 
     def start(self):
+        self.watchPid(os.getpid(), 'StatsDaemon')
         StatsDaemonState.STATS_DAEMON_TRANSPORT = self._transport
         self._server = StatsDaemonServer.StatsServerUnixSocket(self._sock)
         self._transport.initTransport()

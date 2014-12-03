@@ -37,7 +37,7 @@ $ python3 daemon.py -c etc/observant/observant.cfg --kill
 Scala DataStore uses sbt (requires jdk >= 7):
 
 ```bash
-$ ./sbt
+$ ./sbt # -jvm-debug 5005 for debugging
 > container:start               # start the container
 > ~ ;copy-resources;aux-compile # auto-reload on file changes
 ```

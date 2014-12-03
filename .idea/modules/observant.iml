@@ -99,5 +99,6 @@
     <orderEntry type="library" name="SBT: org.scala-stm:scala-stm_2.11:0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.11:2.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatra:scalatra-scalatest_2.11:2.3.0" level="project" />
+    <orderEntry type="library" name="Python 3.4.1 (/usr/local/Cellar/python3/3.4.1_1/bin/python3.4) interpreter library" level="application" />
   </component>
 </module>

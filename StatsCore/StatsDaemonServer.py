@@ -55,7 +55,8 @@ class StatsServerUnixSocket(threading.Thread):
 
     def _postLogMessage(self, payload):
         try:
-            message = {'key': payload['key'], 'type': 'log',
+            message = {'key': StatsDaemonState.STATS_DAEMON_SERVER.host + '.' + payload['key'],
+                       'type': 'log',
                        'host': StatsDaemonState.STATS_DAEMON_SERVER.host,
                        'payload': {'message': payload['message']}
             }

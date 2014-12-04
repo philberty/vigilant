@@ -1,0 +1,5 @@
+{
+    "datastores": [
+        "http://localhost:8080"
+    ]
+}

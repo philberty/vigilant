@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="dashboard" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="bin/www" working-dir="$PROJECT_DIR$/dashbord/">
+  <configuration default="false" name="dashboard" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="/usr/local/bin/node" path-to-js-file="./node_modules/.bin/supervisor" application-parameters="-- ./bin/www -c dashboard.json -p 8090" working-dir="$PROJECT_DIR$/dashbord/">
     <RunnerSettings RunnerId="Basic" />
     <ConfigurationWrapper RunnerId="Basic" />
     <method />

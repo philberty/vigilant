@@ -7,7 +7,6 @@ import psutil
 import platform
 import datetime
 import traceback
-import logging
 import syslog
 
 from . import StatsDaemon

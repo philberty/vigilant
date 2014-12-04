@@ -1,9 +1,20 @@
 #!/usr/bin/env node
+var fs = require("fs");
+var program = require('commander');
 var debug = require('debug')('dashbord');
 var app = require('../app');
 
-app.set('port', process.env.PORT || 3000);
+program
+  .version('0.1')
+  .usage('-c <config> --port port')
+  .option('-p, --port <port>', 'The Port to listen on', parseInt)
+  .option('-c, --config <config>', 'The json config to run', 'conf')
+  .parse(process.argv)
 
+var config = JSON.parse(fs.readFileSync(program.config, "utf8"));
+app.set('DataStores', config.datastores);
+
+app.set('port', program.port);
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });

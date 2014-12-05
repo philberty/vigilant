@@ -1,6 +1,7 @@
 /**
  * Created by redbrain on 25/11/2014.
  */
+"use strict";
 require.config({
     paths: {
         jquery: [
@@ -69,12 +70,33 @@ require.config({
 });
 
 define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "angularScroll", "angularSpinner", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
-    console.log('Hello World')
 
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'duScroll', 'angularSpinner']);
 
+    app.config(
+        ['$routeProvider',
+            function($routeProvider) {
+                $routeProvider
+                    .when('/about', {
+                        templateUrl: 'templates/about.html',
+                        controller: 'about'
+                    })
+                    .when('/', {
+                        redirectTo: "/about"
+                    })
+                    .otherwise({
+                        redirectTo: '/'
+                    })
+            }
+        ]
+    );
+
+    app.controller('about', function($scope, $http, usSpinnerService) {
+
+    });
+
     angular.bootstrap(document, ['ObservantApp']);
-    //$("div.navbar-fixed-top").autoHidingNavbar();
+    $("div.navbar-fixed-top").autoHidingNavbar();
 
     return app;
 })

@@ -4,9 +4,10 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
+var datastores = ['http://localhost:8080']
+
 router.get('/', function(req, res) {
-    res.send('respond with a resource');
+    res.send();
 });
 
 module.exports = router;

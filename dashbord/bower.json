@@ -13,6 +13,6 @@
 		"angular-bootstrap": "0.11.0",
 		"angular-spinner": "latest",
 		"angular-ui-grid": "3.0.0-rc.16",
-		"interact": "1.1.3"
+		"flat-ui": "latest"
     }
 }

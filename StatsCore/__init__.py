@@ -3,31 +3,32 @@ import os
 from . import StatsDaemon
 from . import StatsAsyncCore
 
-def attchToStatsDaemon(pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
+def attchToStatsDaemon(pid='/tmp/observant.pid', sock='/tmp/observant.sock'):
     """
+    Attach to existing daemon.
 
-    :param pid:
-    :param sock:
-    :return:
+    :param pid: lock file default /tmp/observant.pid
+    :param sock: unix socket path default /tmp/observant.sock
+    :return: returns the StatsCore.StatsDaemon.ClientDaemonConnection
     """
     return StatsDaemon.ClientDaemonConnection(pid=pid, sock=sock)
 
-def createStatsDaemon(key, transport, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
+def createStatsDaemon(transport, pid='/tmp/observant.pid', sock='/tmp/observant.sock'):
     """
+    Create and fork a new Stats Daemon.
 
-    :param key:
-    :param transport:
-    :param pid:
-    :param sock:
+    :param transport: The transport for the daemon to use
+    :param pid: the pid lock file to use
+    :param sock: the unix socket path to listen on
     """
-    daemon = StatsAsyncCore.StatServerDaemon(key, transport, os.getpid(), pid=pid, sock=sock)
+    from socket import gethostname
+    daemon = StatsAsyncCore.StatServerDaemon(gethostname(), transport, os.getpid(), pid=pid, sock=sock)
     StatsDaemon.forkStatsDaemon(daemon, lock=pid)
 
-def attachOrCreateStatsDaemon(key, transport, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
+def attachOrCreateStatsDaemon(transport, pid='/tmp/observant.pid', sock='/tmp/observant.sock'):
     """
     Attach to the system daemon or create it.
 
-    :param key: The key name for the system, usually the hostname of the system
     :param transport: The transport object for the daemon to server
     :param pid: The pid lock file for the daemon
     :param sock: The socket path to communicate on
@@ -36,5 +37,5 @@ def attachOrCreateStatsDaemon(key, transport, pid='/tmp/watchy.pid', sock='/tmp/
     if StatsDaemon.isPidAlive(StatsDaemon.getPidFromLockFile(pid)):
         return attchToStatsDaemon(pid=pid, sock=sock)
     else:
-        createStatsDaemon(key, transport, pid=pid, sock=sock)
+        createStatsDaemon(transport, pid=pid, sock=sock)
         return attchToStatsDaemon(pid=pid, sock=sock)

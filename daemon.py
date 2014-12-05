@@ -50,9 +50,8 @@ def transportFromConfig(config):
 def startDaemon(config):
     lock = str(config.get('daemon', 'lock'))
     sock = str(config.get('daemon', 'sock'))
-    key = str(config.get('daemon', 'key'))
     transport = transportFromConfig(config)
-    client = StatsCore.attachOrCreateStatsDaemon(key, transport, pid=lock, sock=sock)
+    client = StatsCore.attachOrCreateStatsDaemon(transport, pid=lock, sock=sock)
     client.close()
 
 

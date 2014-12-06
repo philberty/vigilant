@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import asyncore
 import asyncio
 import signal
 import psutil
@@ -110,7 +111,7 @@ class StatServerDaemon:
             'threads': p.num_threads(),
             'fds': p.num_fds(),
             'files': self._stringifyPsutilStatList(p.open_files()),
-            'usage': p.cpu_percent(interval=1) if pid != os.getpid() else 0,
+            'usage': p.cpu_percent(interval=1),
             'memory_percent': p.memory_percent(),
             'connections': self._stringifyPsutilStatList(p.connections())
         }
@@ -136,7 +137,6 @@ class StatServerDaemon:
 
     @asyncio.coroutine
     def _postPidStats(self):
-        i = 0
         while True:
             try:
                 for key in list(self._watching.keys()):

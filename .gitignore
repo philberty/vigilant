@@ -49,6 +49,4 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
-# nodejs
-node_modules
-dashbord/public/js/lib/
+StatsBoard/www/js/lib/

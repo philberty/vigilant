@@ -6,10 +6,7 @@ require.config({
     paths: {
         jquery: [
             'https://code.jquery.com/jquery-2.1.1.min',
-            '/js/lib/jquery/dist/jquery'],
-
-        spin: [
-            '/js/lib/spin.js/spin'],
+            '/js/lib/jquery/dist/jquery.min'],
 
         bootstrap: [
             '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min',
@@ -26,15 +23,9 @@ require.config({
             '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min',
             '/js/lib/angular-route/angular-route'],
 
-        angularScroll: [
-            '/js/lib/angular-scroll/angular-scroll'],
-
         angularBootstrap: [
             '//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.min',
-            '/js/lib/angular-bootstrap/ui-bootstrap-tpls'],
-
-        angularSpinner: [
-            '/js/lib/angular-spinner/angular-spinner']
+            '/js/lib/angular-bootstrap/ui-bootstrap-tpls']
     },
     shim: {
         'bootstrapAutoHiding': {
@@ -44,14 +35,6 @@ require.config({
         'bootstrap': {
             deps: ['jquery'],
             exports: 'bootstrap'
-        },
-        'angularScroll': {
-            deps: ['angular'],
-            exports: 'angularScroll'
-        },
-        'angularSpinner': {
-            deps: ['angular', 'spin'],
-            exports: 'angular'
         },
         'angularBootstrap': {
             deps: ['angular'],
@@ -69,20 +52,20 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "angularScroll", "angularSpinner", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
+define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
 
-    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'duScroll', 'angularSpinner']);
+    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', ]);
 
     app.config(
         ['$routeProvider',
             function($routeProvider) {
                 $routeProvider
                     .when('/about', {
-                        templateUrl: 'templates/about.html',
-                        controller: 'about'
+                        templateUrl: 'dashboard.html',
+                        controller: 'dashboard'
                     })
                     .when('/', {
-                        redirectTo: "/about"
+                        redirectTo: "/dashboard"
                     })
                     .otherwise({
                         redirectTo: '/'
@@ -91,8 +74,10 @@ define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "angular
         ]
     );
 
-    app.controller('about', function($scope, $http, usSpinnerService) {
+    app.controller('dashboard', function($scope, $http) {
+        $http.get('/api/state').success(function(data) {
 
+        });
     });
 
     angular.bootstrap(document, ['ObservantApp']);

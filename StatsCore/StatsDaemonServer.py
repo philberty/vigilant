@@ -5,6 +5,7 @@ import select
 import signal
 import logging
 import threading
+import time
 
 from . import StatsDaemonState
 
@@ -114,6 +115,7 @@ class StatsServerUnixSocket(threading.Thread):
                 for i in errors:
                     i.close()
                     inputs.remove(i)
+                time.sleep(_timeout)
         except:
             pass
         finally:

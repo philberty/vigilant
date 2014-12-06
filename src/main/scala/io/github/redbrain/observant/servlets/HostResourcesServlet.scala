@@ -6,6 +6,7 @@ import io.github.redbrain.observant.models.HostsDataModel
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 
+case class HostDataSnap(key: String, payload: HostsDataModel)
 case class HostDataPayload(key: String, payload: List[HostsDataModel])
 
 class HostResourcesServlet extends ObservantStack with JacksonJsonSupport {
@@ -24,6 +25,11 @@ class HostResourcesServlet extends ObservantStack with JacksonJsonSupport {
   get("/data/:key") {
     val key = params("key")
     HostDataPayload(key, HostCache.getCacheDataForKey(key))
+  }
+
+  post("/data/:key") {
+    val key = params("key")
+    HostDataSnap(key, HostCache.getCacheDataForKey(key).head)
   }
 
 }

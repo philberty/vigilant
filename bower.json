@@ -2,17 +2,16 @@
     "name": "Observant",
     "private": true,
     "dependencies": {
-		"requirejs": "latest",
-		"jquery": "latest",
+		"requirejs": "2.1.15",
+		"jquery": "2.1.1",
 		"bootstrap": "~3.2.0",
 		"bootstrap-autohidingnavbar": "1.0.0",
 		"angular": "1.2.23",
 		"angular-route": "1.2.23",
-		"angular-animate": "1.2.23",
-		"angular-scroll": "0.6.2",
 		"angular-bootstrap": "0.11.0",
 		"angular-spinner": "latest",
 		"angular-ui-grid": "3.0.0-rc.16",
-		"flat-ui": "latest"
+		"flat-ui": "latest",
+		"vis": "3.7.1"
     }
 }

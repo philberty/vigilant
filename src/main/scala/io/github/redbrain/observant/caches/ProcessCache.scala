@@ -8,7 +8,6 @@ import io.github.redbrain.observant.models.ProcessDataModel
  */
 object ProcessCache {
 
-  var head:ProcessDataModel = null
   private var _cache:Map[String, List[ProcessDataModel]] = Map[String, List[ProcessDataModel]]()
 
   def getCacheDataForKey(key: String): List[ProcessDataModel] = {
@@ -23,7 +22,6 @@ object ProcessCache {
   }
 
   def pushDataForKey(key: String, data: ProcessDataModel): Unit = {
-    head = data
     _cache.get(key) match {
       case None => {
         _cache += key -> List(data)

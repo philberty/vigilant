@@ -26,6 +26,9 @@ class ScalatraBootstrap extends LifeCycle {
     logger.info("Loading Process Servlet")
     context.mount(new ProcessResourcesServlet, "/procs")
 
+    logger.info("Loading State Servlet")
+    context.mount(new StateResourcesServlet, "/state")
+
     logger.info("Ready...")
   }
 

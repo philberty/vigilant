@@ -54,7 +54,7 @@ require.config({
 
 define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
 
-    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', ]);
+    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap' ]);
 
     app.config(
         ['$routeProvider',

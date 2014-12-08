@@ -8,7 +8,6 @@ import io.github.redbrain.observant.models.LogDataModel
  */
 object LogCache {
 
-  var head:LogDataModel = null
   private var _cache:Map[String, List[LogDataModel]] = Map[String, List[LogDataModel]]()
 
   def getCacheDataForKey(key: String): List[LogDataModel] = {
@@ -23,7 +22,6 @@ object LogCache {
   }
 
   def pushDataForKey(key: String, data: LogDataModel): Unit = {
-    head = data
     _cache.get(key) match {
       case None => {
         _cache += key -> List(data)

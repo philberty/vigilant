@@ -5,7 +5,6 @@ import io.github.redbrain.observant.models.HostsDataModel
 
 object HostCache {
 
-  var head:HostsDataModel = null;
   private var _cache:Map[String, List[HostsDataModel]] = Map[String, List[HostsDataModel]]()
 
   def getCacheDataForKey(key: String): List[HostsDataModel] = {
@@ -20,7 +19,6 @@ object HostCache {
   }
 
   def pushDataForKey(key: String, data: HostsDataModel): Unit = {
-    head = data
     _cache.get(key) match {
       case None => {
         _cache += key -> List(data)

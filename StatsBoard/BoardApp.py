@@ -1,5 +1,7 @@
 import os
 
+import requests
+
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -9,6 +11,7 @@ from flask.ext.cache import Cache
 public = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www')
 app = Flask(__name__, static_folder=public)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+resources = None
 
 @app.errorhandler(404)
 def not_found(error=None):

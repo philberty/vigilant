@@ -3,12 +3,14 @@ import logging
 import traceback
 
 from . import BoardApp
+from . import Resourses
 
 class StatsBoardServer:
     def __init__(self, bind, port, stores):
         self._bind = bind
         self._port = port
         self._stores = stores
+        BoardApp.resources = Resourses.DataStoreResources(self._stores)
 
     def listen(self):
         try:

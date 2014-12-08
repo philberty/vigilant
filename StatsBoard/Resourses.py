@@ -1,6 +1,6 @@
 class DataStoreResources:
-    def __init__(self, datastores):
+    def __init__(self, datastores, proxies={}):
         self._datastores = datastores
 
     def getHostsInfo(self):
-        pass
+        for i in self._datastores:

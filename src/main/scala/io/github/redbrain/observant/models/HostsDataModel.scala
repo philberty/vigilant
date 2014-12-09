@@ -15,6 +15,5 @@ class HostsDataModel(val hostname:String,
                      val version:String,
                      val diskTotal:Long,
                      val diskFree:Long,
-                     val cpuStats:List[Float],
-                     var isAlive:Boolean)
+                     val cpuStats:List[Float])
 {}

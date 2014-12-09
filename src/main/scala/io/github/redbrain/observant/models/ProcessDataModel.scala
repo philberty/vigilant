@@ -15,6 +15,5 @@ class ProcessDataModel(val host:String,
                        val fds:List[String],
                        val usage:Float,
                        val memory:Float,
-                       val connections:List[String],
-                       var isAlive:Boolean)
+                       val connections:List[String])
 {}

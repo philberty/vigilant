@@ -21,13 +21,13 @@ trait ObservantProtocolFactory {
     val stats = (json \ "payload" \ "cpu_stats").as[List[Float]]
 
     new HostsDataModel(hostname,timestamp,usage,processes,cores,memoryTotal,
-      memoryUsed,platform,machine,version,diskTotal,diskFree,stats,true)
+      memoryUsed,platform,machine,version,diskTotal,diskFree,stats)
   }
 
   def getLogDataModel(json: JsValue): LogDataModel = {
     val message = (json \ "payload" \ "message").as[String]
     val host = (json \ "host").as[String]
-    new LogDataModel(host, message, true)
+    new LogDataModel(host, message)
   }
 
   def getProcessDataModel(json: JsValue): ProcessDataModel = {
@@ -46,6 +46,6 @@ trait ObservantProtocolFactory {
     val connections = (json \ "payload" \ "connections").as[List[String]]
 
     new ProcessDataModel(host, pid, path, cwd, cmd, status, user,
-      threads, fds, ofds, usage, memory, connections, true)
+      threads, fds, ofds, usage, memory, connections)
   }
 }

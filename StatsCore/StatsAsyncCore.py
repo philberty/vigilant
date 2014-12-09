@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 import asyncio
 import signal
 import psutil
@@ -33,7 +32,7 @@ class StatServerDaemon:
                        'host': self._key,
                        'payload': {'message': mess}
             }
-            self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+            self._transport.postMessageOnTransport(message)
         except:
             pass
 
@@ -43,7 +42,11 @@ class StatServerDaemon:
 
     @property
     def status(self):
-        return self._watching
+        return {
+            'host': self._key,
+            'transport': self._transport.status(),
+            'watching': self._watching
+        }
 
     @property
     def host(self):
@@ -127,7 +130,7 @@ class StatServerDaemon:
         while True:
             try:
                 message = self._getHostStats()
-                self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+                self._transport.postMessageOnTransport(message)
             except:
                 self.log(str(sys.exc_info()))
                 self.log(str(traceback.format_exc()))
@@ -144,7 +147,7 @@ class StatServerDaemon:
                         message = {'key': key,
                                    'host': self._key,
                                    'type': 'pid', 'payload': payload}
-                        self._transport.postMessageOnTransport(json.dumps(message).encode('utf-8'))
+                        self._transport.postMessageOnTransport(message)
             except:
                 self.log(str(sys.exc_info()))
                 self.log(str(traceback.format_exc()))

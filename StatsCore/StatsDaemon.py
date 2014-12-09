@@ -111,7 +111,11 @@ class ClientDaemonConnection:
         Send the daemon a message to return the status of it
         """
         self._socket.send(json.dumps({'type': 'status'}).encode('utf-8'))
-        return self._waitForJsonResponse()
+        try:
+            resp = self._waitForJsonResponse()
+            return json.dumps(resp, indent=4)
+        except:
+            return None
 
     def postStopDaemon(self):
         """

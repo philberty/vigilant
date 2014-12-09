@@ -61,9 +61,8 @@ class StatsServerUnixSocket(threading.Thread):
                        'host': StatsDaemonState.STATS_DAEMON_SERVER.host,
                        'payload': {'message': payload['message']}
             }
-            serialized = json.dumps(message).encode('utf-8')
             transport = StatsDaemonState.STATS_DAEMON_SERVER.transport
-            transport.postMessageOnTransport(serialized)
+            transport.postMessageOnTransport(message)
         except:
             pass
 

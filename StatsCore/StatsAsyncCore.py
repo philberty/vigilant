@@ -12,13 +12,16 @@ from . import StatsDaemon
 from . import StatsDaemonState
 from . import StatsDaemonServer
 
+from urllib.parse import quote as urlencode
+
+
 class StatServerDaemon:
     def __init__(self, key, transport, sigpid, pid='/tmp/watchy.pid', sock='/tmp/watchy.sock'):
         self._transport = transport
         self._sock = sock
         self._sigpid = sigpid
         self._loop = None
-        self._key = key
+        self._key = urlencode(key)
         self._server = None
         self._watching = {}
         if StatsDaemon.isPidAlive(StatsDaemon.getPidFromLockFile(pid)):
@@ -53,6 +56,7 @@ class StatServerDaemon:
         return self._key
 
     def watchPid(self, pid, key):
+        key = urlencode(key)
         self.log('Trying to watch pid [%i] for key [%s]' % (pid, key))
         key = self._key + '.' + key
         self._watching[key] = pid

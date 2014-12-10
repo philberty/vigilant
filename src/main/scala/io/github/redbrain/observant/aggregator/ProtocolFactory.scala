@@ -3,9 +3,15 @@ package io.github.redbrain.observant.aggregator
 import io.github.redbrain.observant.models.{ProcessDataModel, LogDataModel, HostsDataModel}
 import play.api.libs.json.JsValue
 
-trait ObservantProtocolFactory {
+trait ProtocolFactory {
+
+  def getDateObjectFromTimeStamp(timestamp: String): java.util.Date = {
+    val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    format.parse(timestamp)
+  }
 
   def getHostDataModel(json: JsValue): HostsDataModel = {
+    val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val hostname = (json \ "payload" \ "hostname").as[String]
     val timestamp = (json \ "payload" \ "timestamp").as[String]
     val usage = (json \ "payload" \ "usage").as[Float]
@@ -20,17 +26,19 @@ trait ObservantProtocolFactory {
     val diskFree = (json \ "payload" \ "disk_free").as[Long]
     val stats = (json \ "payload" \ "cpu_stats").as[List[Float]]
 
-    new HostsDataModel(hostname,timestamp,usage,processes,cores,memoryTotal,
-      memoryUsed,platform,machine,version,diskTotal,diskFree,stats)
+    new HostsDataModel(hostname, timestamp, usage, processes, cores, memoryTotal,
+      memoryUsed, platform, machine, version, diskTotal, diskFree, stats, ts)
   }
 
   def getLogDataModel(json: JsValue): LogDataModel = {
+    val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val message = (json \ "payload" \ "message").as[String]
     val host = (json \ "host").as[String]
-    new LogDataModel(host, message)
+    new LogDataModel(host, message, ts)
   }
 
   def getProcessDataModel(json: JsValue): ProcessDataModel = {
+    val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val host = (json \ "host").as[String]
     val pid = (json \ "payload" \ "pid").as[Int]
     val path = (json \ "payload" \ "path").as[String]
@@ -46,6 +54,6 @@ trait ObservantProtocolFactory {
     val connections = (json \ "payload" \ "connections").as[List[String]]
 
     new ProcessDataModel(host, pid, path, cwd, cmd, status, user,
-      threads, fds, ofds, usage, memory, connections)
+      threads, fds, ofds, usage, memory, connections, ts)
   }
 }

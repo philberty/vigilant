@@ -11,7 +11,7 @@ import play.api.libs.json._
 /**
  * Created by redbrain on 24/11/2014.
  */
-object StatsAggregator extends SimpleChannelHandler with ObservantProtocolFactory {
+object StatsAggregator extends SimpleChannelHandler with ProtocolFactory {
 
   val logger =  LoggerFactory.getLogger(getClass)
 

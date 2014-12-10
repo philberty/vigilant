@@ -15,5 +15,6 @@ class ProcessDataModel(val host:String,
                        val fds:List[String],
                        val usage:Float,
                        val memory:Float,
-                       val connections:List[String])
+                       val connections:List[String],
+                       val ts:java.util.Date)
 {}

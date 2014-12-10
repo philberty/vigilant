@@ -1,14 +1,16 @@
 package io.github.redbrain.observant.servlets
 
 import io.github.redbrain.observant.app.ObservantStack
+import io.github.redbrain.observant.configuration.Configuration
 import io.github.redbrain.observant.models.HostsDataModel
 import io.github.redbrain.observant.caches.HostCache
 import org.json4s.{Formats, DefaultFormats}
 import org.scalatra.json.JacksonJsonSupport
 
-case class StateDataPayload(payload: List[HostsDataModel])
+case class StateHost(alive: Boolean, data: HostsDataModel)
+case class StateDataPayload(payload: List[StateHost])
 
-class StateResourcesServlet extends ObservantStack with JacksonJsonSupport {
+class StateResourcesServlet extends ObservantStack with JacksonJsonSupport with DataFactory {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 
@@ -19,11 +21,17 @@ class StateResourcesServlet extends ObservantStack with JacksonJsonSupport {
 
   get("/") {
     val keys = HostCache.getHostKeys()
-    var payload = List[HostsDataModel]()
+    var payload = List[StateHost]()
 
     keys.foreach(key => {
-      payload = payload :+ HostCache.getCacheDataForKey(key).head
-    });
+      val cache = HostCache.getCacheDataForKey(key)
+      val data = cache(cache.length - 1)
+      payload = payload :+ StateHost(
+        isDataAliveForTimeout(
+          data.ts, Configuration.getHostsDataTimeout()
+        ), data
+      )
+    })
 
     StateDataPayload(payload)
   }

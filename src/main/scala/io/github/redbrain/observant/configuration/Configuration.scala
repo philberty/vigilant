@@ -10,8 +10,12 @@ object Configuration {
 
   def getCacheThreshold(): Int = 20
 
-  def getTransportFromConfiguration(): TransportType = {
-    new UDPTransport(8080)
-  }
+  def getHostsDataTimeout(): Int = 30
+
+  def getProcDataTimeout(): Int = 30
+
+  def getLogDataTimeout(): Int = 30
+
+  def getTransportFromConfiguration(): TransportType = new UDPTransport(8080)
 
 }

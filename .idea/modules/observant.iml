@@ -20,9 +20,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/resource_managed/test" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/resolution-cache" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/specs2-reports" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/test-reports" />
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -90,7 +88,6 @@
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.2" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.2" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.3.2" level="project" />
-    <orderEntry type="library" name="SBT: com.typesafe:config:1.2.0" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.play:play-datacommons_2.11:2.3.0" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.play:play-functional_2.11:2.3.0" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.play:play-iteratees_2.11:2.3.0" level="project" />
@@ -99,6 +96,15 @@
     <orderEntry type="library" name="SBT: org.scala-stm:scala-stm_2.11:0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.11:2.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatra:scalatra-scalatest_2.11:2.3.0" level="project" />
-    <orderEntry type="library" name="Python 3.4.1 (/usr/local/Cellar/python3/3.4.1_1/bin/python3.4) interpreter library" level="application" />
+    <orderEntry type="library" name="SBT: com.typesafe:config:1.2.1" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.akka:akka-actor_2.11:2.3.3" level="project" />
+    <orderEntry type="library" name="SBT: commons-pool:commons-pool:1.5.5" level="project" />
+    <orderEntry type="library" name="SBT: org.atmosphere:atmosphere-compat-jbossweb:2.0.1" level="project" />
+    <orderEntry type="library" name="SBT: org.atmosphere:atmosphere-compat-tomcat:2.0.1" level="project" />
+    <orderEntry type="library" name="SBT: org.atmosphere:atmosphere-compat-tomcat7:2.0.1" level="project" />
+    <orderEntry type="library" name="SBT: org.atmosphere:atmosphere-redis:2.1.2" level="project" />
+    <orderEntry type="library" name="SBT: org.atmosphere:atmosphere-runtime:2.1.5" level="project" />
+    <orderEntry type="library" name="SBT: org.scalatra:scalatra-atmosphere_2.11:2.3.0" level="project" />
+    <orderEntry type="library" name="SBT: redis.clients:jedis:2.0.0" level="project" />
   </component>
 </module>

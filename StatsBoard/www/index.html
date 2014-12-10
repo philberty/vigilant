@@ -22,61 +22,40 @@
 <body>
 
 <div class="wrapper">
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                        aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Observant</a>
-            </div>
-            <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Dashboard</a></li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Observant</a>
         </div>
-    </nav>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
 
-    <!-- Body -->
-    <div ng-view></div>
-    <!-- Pushes footer to bottom -->
-    <div class="push"></div>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div><!--/.navbar -->
 
-</div>
-
-<!-- Footer -->
-<div class="bottom-menu">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-2 col-sm-2">
-                <a class="bottom-menu-brand" href="#">Observant</a>
-            </div>
-
-            <div class="col-md-8 col-sm-8">
-                <ul class="bottom-menu-list">
-                </ul>
-            </div>
-
-            <div class="col-md-2 col-sm-2">
-                <ul class="bottom-menu-iconic-list">
-                    <li>
-                        <a class="fui-github" href="https://github.com/redbrain/observant"></a>
-                    </li>
-                    <li>
-                        <a class="fui-twitter" href="https://twitter.com/redzor"></a>
-                    </li>
+    <div class="row-offcanvas row-offcanvas-left">
+        <div id="sidebar" class="sidebar-offcanvas">
+            <div class="col-md-12">
+                <h3>Dashboard</h3>
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="active"><a href="#/dashboard">Dashboard</a></li>
+                    <li><a href="http://redbrain.github.io/observant/">About</a></li>
                 </ul>
             </div>
         </div>
-    </div>
+
+        <div id="main">
+            <div ng-view></div>
+        </div>
+    </div><!--/row-offcanvas -->
+
 </div>
-<!-- /Footer -->
 
 </body>
 </html>

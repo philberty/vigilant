@@ -1,7 +1,5 @@
 import os
 
-import requests
-
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -29,7 +27,7 @@ def index():
 def public(path):
     return app.send_static_file(path)
 
-@cache.cached(timeout=50)
+@cache.cached(timeout=30)
 @app.route("/api/state")
 def state():
-    return jsonify({})
+    return jsonify(resources.getHostsInfo())

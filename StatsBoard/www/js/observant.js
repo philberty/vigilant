@@ -52,9 +52,9 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstrap", "bootstrapAutoHiding"],  function($, angular) {
+define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstrap", "bootstrapAutoHiding"], function($, angular) {
 
-    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap' ]);
+    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap']);
 
     app.config(
         ['$routeProvider',
@@ -75,9 +75,7 @@ define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstr
     );
 
     app.controller('dashboard', function($scope, $http) {
-        $http.get('/api/state').success(function(data) {
 
-        });
     });
 
     angular.bootstrap(document, ['ObservantApp']);

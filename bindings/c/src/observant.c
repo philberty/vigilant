@@ -1,7 +1,3 @@
-
-#include <Python.h>
-
-#include <libobservant.h>
 #include <observant.h>
 
 #include <sys/types.h>

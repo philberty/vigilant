@@ -16,7 +16,7 @@ cdef public int obs_watch_pid(const pid_t pid, const char *key):
     global Daemon
     if Daemon is None:
         return -1
-    Daemon.postWatchPid(key, pid)
+    Daemon.postWatchPid(key.decode('utf-8'), pid)
     return 0
 
 cdef public int obs_stop_watch_pid(const pid_t pid):
@@ -30,14 +30,14 @@ cdef public int obs_stop_watch_key(const char *key):
     global Daemon
     if Daemon is None:
         return -1
-    Daemon.postStopWatchKey(key)
+    Daemon.postStopWatchKey(key.decode('utf-8'))
     return 0
 
 cdef public int obs_post_log_message(const char *key, const char *message):
     global Daemon
     if Daemon is None:
         return -1
-    Daemon.postLogMessageForKey(key. message)
+    Daemon.postLogMessageForKey(key.decode('utf-8'), message.decode('utf-8'))
     return 0
 
 cdef public void obs_detach_daemon():

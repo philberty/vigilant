@@ -9,6 +9,7 @@ setup(name='StatsCore',
       author='Philip Herron',
       author_email='herron.philip@googlemail.com',
       url='https://redbrain.github.com/observant',
-      packages=['StatsCore'],
-      scripts=['daemon.py']
-  )
+      packages=['StatsCore', 'StatsBoard'],
+      package_data={'StatsBoard': ['www']},
+      scripts=['daemon.py', 'dashboard.py']
+)

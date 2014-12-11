@@ -5,15 +5,17 @@
 require.config({
     paths: {
         jquery: [
-            'https://code.jquery.com/jquery-2.1.1.min',
+            '//code.jquery.com/jquery-2.1.1.min',
             '/js/lib/jquery/dist/jquery.min'],
+
+        vis: [
+            '//cdnjs.cloudflare.com/ajax/libs/vis/3.7.1/vis.min',
+            '/js/lib/vis/dist/vis.min'
+        ],
 
         bootstrap: [
             '//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min',
             '/js/lib/bootstrap/dist/js/bootstrap'],
-
-        bootstrapAutoHiding: [
-            '/js/lib/bootstrap-autohidingnavbar/dist/jquery.bootstrap-autohidingnavbar'],
 
         angular: [
             '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min',
@@ -28,9 +30,8 @@ require.config({
             '/js/lib/angular-bootstrap/ui-bootstrap-tpls']
     },
     shim: {
-        'bootstrapAutoHiding': {
-            deps: ['bootstrap'],
-            exports: 'bootstrapAutoHiding'
+        'vis': {
+          exports: 'vis'
         },
         'bootstrap': {
             deps: ['jquery'],
@@ -52,7 +53,7 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstrap", "bootstrapAutoHiding"], function($, angular) {
+define('app', ["jquery", "angular", "", "angularBootstrap", "angularRoute", "bootstrap"], function($, angular, vis) {
 
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap']);
 
@@ -77,9 +78,6 @@ define('app', ["jquery", "angular", "angularBootstrap", "angularRoute", "bootstr
     app.controller('dashboard', function($scope, $http) {
 
     });
-
-    angular.bootstrap(document, ['ObservantApp']);
-    $("div.navbar-fixed-top").autoHidingNavbar();
 
     return app;
 })

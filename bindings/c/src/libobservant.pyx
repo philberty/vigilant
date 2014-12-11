@@ -39,3 +39,7 @@ cdef public int obs_post_log_message(const char *key, const char *message):
         return -1
     Daemon.postLogMessageForKey(key. message)
     return 0
+
+cdef public void obs_detach_daemon():
+    if Daemon:
+        Daemon.close()

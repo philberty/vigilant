@@ -43,6 +43,16 @@ if test x"$CYTHON_CHECK" != x"yes" ; then
    AC_MSG_ERROR([Please install cython])
 fi
 
+AC_CHECK_PROG(PYTHON_CHECK,python3-config,yes)
+if test x"$PYTHON_CHECK" != x"yes" ; then
+   AC_MSG_ERROR([Please install python3-config])
+fi
+
+PYINCS=`python3-config --includes`
+PYLIBS=`python3-config --ldflags`
+AC_SUBST(PYINCS)
+AC_SUBST(PYLIBS)
+
 # Check whether --with-system-type or --without-system-type was given.
 AC_ARG_WITH([system-type],
     [AS_HELP_STRING([--with-system-type],
@@ -63,7 +73,6 @@ AC_DEFINE_UNQUOTED([MACHINE_TYPE], ["$MACHINE_TYPE"],
 
 
 AM_INIT_AUTOMAKE
-AM_SILENT_RULES([yes])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
@@ -75,6 +84,8 @@ echo "   * System type:               $SYSTEM_TYPE"
 echo "   * Host CPU:                  $host_cpu"
 echo "   * C Compiler:                $CC"
 echo "   * CFlags:                    $CFLAGS"
+echo "   * Python Includes:           $PYINCS"
+echo "   * Python Libs:               $PYLIBS"
 echo ""
 echo "---"
 

@@ -1,6 +1,5 @@
 # Created by .gitignore support plugin (hsz.mobi)
 .idea/workspace.xml
-
 build/
 
 ### Python template
@@ -53,3 +52,24 @@ project/plugins/project/
 
 StatsBoard/www/js/lib/
 test.cfg
+
+Makefile.in
+*.la
+*.lo
+*.o
+
+bindings/c/Makefile
+bindings/c/aclocal.m4
+bindings/c/autom4te.cache/
+bindings/c/config.h
+bindings/c/config.h.in
+bindings/c/config.status
+bindings/c/config/*
+bindings/c/configure
+bindings/c/libtool
+bindings/c/src/.deps/
+bindings/c/src/.libs/
+bindings/c/src/Makefile
+bindings/c/src/libobservant.c
+bindings/c/src/libobservant.h
+bindings/c/stamp-h1

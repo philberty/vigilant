@@ -72,5 +72,5 @@ bindings/c/src/.libs/
 bindings/c/src/Makefile
 bindings/c/src/libobservant.c
 bindings/c/src/libobservant.h
-bindings/c/stc/test
+bindings/c/src/test
 bindings/c/stamp-h1

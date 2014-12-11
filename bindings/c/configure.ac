@@ -2,7 +2,9 @@ AC_PREREQ(2.59)
 AC_REVISION($Revision$)
 
 AC_INIT(libobservant, 0.1, https://github.com/redbrain/observant)
+AC_CONFIG_SRCDIR([src/libobservant.pyx])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_AUX_DIR([config])
 AM_SANITY_CHECK
 
 dnl Last slash shouldn't be stripped if prefix=/
@@ -73,7 +75,8 @@ AC_DEFINE_UNQUOTED([MACHINE_TYPE], ["$MACHINE_TYPE"],
 
 
 AM_INIT_AUTOMAKE
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+                src/Makefile])
 AC_OUTPUT
 
 echo "---"

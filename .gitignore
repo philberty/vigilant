@@ -1,6 +1,8 @@
 # Created by .gitignore support plugin (hsz.mobi)
 .idea/workspace.xml
 
+build/
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/

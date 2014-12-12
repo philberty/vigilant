@@ -1,7 +1,7 @@
-package io.github.redbrain.observant.app
+package io.github.redbrain.observant.servlets
 
 import org.scalatra._
-import scalate.ScalateSupport
+import org.scalatra.scalate.ScalateSupport
 
 trait ObservantStack extends ScalatraServlet with ScalateSupport {
 

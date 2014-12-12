@@ -1,7 +1,6 @@
 package io.github.redbrain.observant.servlets
 
-import io.github.redbrain.observant.app.ObservantStack
-import io.github.redbrain.observant.caches.ProcessCache
+import io.github.redbrain.observant.caches.ProcCache
 import io.github.redbrain.observant.configuration.Configuration
 import io.github.redbrain.observant.models.{Liveness, ProcessDataModel}
 import org.json4s.{DefaultFormats, Formats}
@@ -19,12 +18,12 @@ class ProcessResourcesServlet extends ObservantStack with JacksonJsonSupport wit
   }
 
   get("/keys") {
-    ProcessCache.getHostKeys()
+    ProcCache.getHostKeys()
   }
 
   get("/liveness/:key") {
     val key = params("key")
-    val data = ProcessCache.getCacheDataForKey(key)
+    val data = ProcCache.getCacheDataForKey(key)
     Liveness(
       isDataAliveForTimeout(
         data(data.length - 1).ts,
@@ -35,7 +34,7 @@ class ProcessResourcesServlet extends ObservantStack with JacksonJsonSupport wit
 
   get("/rest/:key") {
     val key = params("key")
-    ProcessDataPayload(key, ProcessCache.getCacheDataForKey(key))
+    ProcessDataPayload(key, ProcCache.getCacheDataForKey(key))
   }
 
 }

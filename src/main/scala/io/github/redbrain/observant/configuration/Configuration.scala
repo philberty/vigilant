@@ -1,11 +1,9 @@
 package io.github.redbrain.observant.configuration
 
 import io.github.redbrain.observant.aggregator.TransportType
-import io.github.redbrain.observant.aggregator.udp.UDPTransport
+import io.github.redbrain.observant.aggregator.protocols.tcp.TCPTransport
+import io.github.redbrain.observant.aggregator.protocols.udp.UDPTransport
 
-/**
- * Created by redbrain on 25/11/2014.
- */
 object Configuration {
 
   def getCacheThreshold(): Int = 20
@@ -16,6 +14,9 @@ object Configuration {
 
   def getLogDataTimeout(): Int = 30
 
-  def getTransportFromConfiguration(): TransportType = new UDPTransport(8080)
+  def getTransportFromConfiguration(): TransportType = {
+    //new TCPTransport(8080)
+    new UDPTransport(8080)
+  }
 
 }

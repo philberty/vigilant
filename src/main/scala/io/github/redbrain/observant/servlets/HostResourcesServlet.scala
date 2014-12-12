@@ -1,6 +1,5 @@
 package io.github.redbrain.observant.servlets
 
-import io.github.redbrain.observant.app.ObservantStack
 import io.github.redbrain.observant.caches.HostCache
 import io.github.redbrain.observant.configuration.Configuration
 import io.github.redbrain.observant.models.{Liveness, HostsDataModel}

@@ -2,6 +2,8 @@
 .idea/workspace.xml
 build/
 
+venv
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/

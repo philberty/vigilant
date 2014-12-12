@@ -1,16 +1,11 @@
 package io.github.redbrain.observant.caches
 
 import io.github.redbrain.observant.configuration.Configuration
-import io.github.redbrain.observant.models.ProcessDataModel
 
-/**
- * Created by redbrain on 02/12/2014.
- */
-object ProcessCache {
+trait StatsDataCache[T] {
+  private var _cache:Map[String, List[T]] = Map[String, List[T]]()
 
-  private var _cache:Map[String, List[ProcessDataModel]] = Map[String, List[ProcessDataModel]]()
-
-  def getCacheDataForKey(key: String): List[ProcessDataModel] = {
+  def getCacheDataForKey(key: String): List[T] = {
     _cache.get(key) match {
       case None => List()
       case Some(data) => data
@@ -21,7 +16,7 @@ object ProcessCache {
     _cache.keySet
   }
 
-  def pushDataForKey(key: String, data: ProcessDataModel): Unit = {
+  def pushDataForKey(key: String, data: T): Unit = {
     _cache.get(key) match {
       case None => {
         _cache += key -> List(data)

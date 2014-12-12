@@ -1,12 +1,12 @@
-package io.github.redbrain.observant.aggregator.udp
+package io.github.redbrain.observant.aggregator.protocols.udp
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
-import io.github.redbrain.observant.aggregator.{TransportType, StatsAggregator}
+import io.github.redbrain.observant.aggregator.{StatsAggregator, TransportType}
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap
-import org.jboss.netty.channel.{Channels, ChannelPipelineFactory, ChannelPipeline}
 import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
+import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory, Channels}
 import org.slf4j.LoggerFactory
 
 /**
@@ -18,13 +18,13 @@ class UDPTransport(private val port: Int) extends TransportType {
   private var bootstrap: ConnectionlessBootstrap = null
   private val logger = LoggerFactory.getLogger(getClass)
 
-  def close(): Unit = {
+  override def close(): Unit = {
     factory.shutdown()
     bootstrap.shutdown()
     logger.info("UDP Stats transport shutdown on port [{}]", port)
   }
 
-  def start(): Unit = {
+  override def start(): Unit = {
     factory = new NioDatagramChannelFactory(Executors.newCachedThreadPool())
     bootstrap = new ConnectionlessBootstrap(factory)
     bootstrap.setPipelineFactory(new ChannelPipelineFactory() {

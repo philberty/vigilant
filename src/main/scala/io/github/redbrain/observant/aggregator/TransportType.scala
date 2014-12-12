@@ -6,9 +6,9 @@ package io.github.redbrain.observant.aggregator
 trait TransportType {
 
   /* Non-blocking function to start the transport */
-  def start();
+  def start()
 
   /* Function to dealloc the transport */
-  def close();
+  def close()
 
 }

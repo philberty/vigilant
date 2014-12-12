@@ -4,8 +4,7 @@ from urllib.parse import quote as urlencode
 
 
 class DataStoreResources:
-    def __init__(self, datastores, proxies={}):
-        self._proxies = proxies
+    def __init__(self, datastores):
         self._datastores = datastores
 
     def getHostsInfo(self):

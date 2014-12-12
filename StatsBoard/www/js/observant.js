@@ -1,7 +1,3 @@
-/**
- * Created by redbrain on 25/11/2014.
- */
-"use strict";
 require.config({
     paths: {
         jquery: [
@@ -18,11 +14,11 @@ require.config({
             '/js/lib/bootstrap/dist/js/bootstrap'],
 
         angular: [
-            '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min',
+            //'//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min',
             '/js/lib/angular/angular'],
 
         angularRoute: [
-            '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min',
+            //'//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min',
             '/js/lib/angular-route/angular-route'],
 
         angularBootstrap: [
@@ -53,31 +49,16 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "", "angularBootstrap", "angularRoute", "bootstrap"], function($, angular, vis) {
+define('app', ["jquery", "angular", "vis", "angularBootstrap", "angularRoute", "bootstrap"], function($, angular, vis) {
 
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap']);
 
-    app.config(
-        ['$routeProvider',
-            function($routeProvider) {
-                $routeProvider
-                    .when('/about', {
-                        templateUrl: 'dashboard.html',
-                        controller: 'dashboard'
-                    })
-                    .when('/', {
-                        redirectTo: "/dashboard"
-                    })
-                    .otherwise({
-                        redirectTo: '/'
-                    })
-            }
-        ]
-    );
 
-    app.controller('dashboard', function($scope, $http) {
 
+    angular.bootstrap(document, ['ObservantApp']);
+    $('[data-toggle=offcanvas]').click(function() {
+        $('.row-offcanvas').toggleClass('active');
     });
 
     return app;
-})
+});

@@ -5,6 +5,7 @@ import traceback
 from . import BoardApp
 from . import Resourses
 
+
 class StatsBoardServer:
     def __init__(self, bind, port, stores):
         self._bind = bind

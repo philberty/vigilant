@@ -6,24 +6,10 @@ import io.github.redbrain.observant.models.{LogDataModel, ProcessDataModel, Host
 /**
  * Created by redbrain on 15/12/2014.
  */
-trait Backend extends StatsObserver {
+trait Backend {
 
-  def start(): Unit = {
-    StatsAggregator.registerHostStatObsever(this)
-    StatsAggregator.registerLogStatObserver(this)
-    StatsAggregator.registerProcStatObserver(this)
-  }
+  def start()
 
-  def stop(): Unit = {
-    StatsAggregator.unregisterHostStatObserver(this)
-    StatsAggregator.unregisterLogStatObserver(this)
-    StatsAggregator.unregisterProcStatObserver(this)
-  }
-
-  override def observedHostStat(data: HostsDataModel): Unit = {}
-
-  override def observedProcStats(data: ProcessDataModel): Unit = {}
-
-  override def observedLogStat(data: LogDataModel): Unit = {}
+  def stop()
 
 }

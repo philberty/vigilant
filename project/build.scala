@@ -35,7 +35,8 @@ object ObservantBuild extends Build {
         "javax.servlet" % "javax.servlet-api" % "3.1.0",
         "org.json4s"   %% "json4s-jackson" % "3.2.9",
         "io.netty" % "netty" % "3.9.5.Final",
-        "com.typesafe.play" %% "play-json" % "2.3.0"
+        "com.typesafe.play" %% "play-json" % "2.3.0",
+        "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23"
       )
     )
   )

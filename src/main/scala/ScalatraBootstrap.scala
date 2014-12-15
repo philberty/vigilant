@@ -17,6 +17,7 @@ class ScalatraBootstrap extends LifeCycle {
     _aggregator.start()
     logger.info("Stats Aggregator Ready")
 
+
     logger.info("Loading Hosts Servlet")
     context.mount(new HostResourcesServlet, "/hosts")
 

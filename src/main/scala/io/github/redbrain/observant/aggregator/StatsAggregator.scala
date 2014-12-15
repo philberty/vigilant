@@ -63,7 +63,7 @@ object StatsAggregator extends SimpleChannelHandler with ProtocolFactory {
     hostsObservers += observer
   }
 
-  def unregisterHostStatsObserver(observer: StatsObserver): Unit = {
+  def unregisterHostStatObserver(observer: StatsObserver): Unit = {
     hostsObservers -= observer
   }
 

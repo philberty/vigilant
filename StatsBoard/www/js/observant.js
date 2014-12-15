@@ -14,11 +14,11 @@ require.config({
             '/js/lib/bootstrap/dist/js/bootstrap'],
 
         angular: [
-            //'//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min',
+            '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min',
             '/js/lib/angular/angular'],
 
         angularRoute: [
-            //'//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min',
+            '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-route.min',
             '/js/lib/angular-route/angular-route'],
 
         angularBootstrap: [

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="SBT: org.ow2.asm:asm-util:4.1">
-    <CLASSES>
-      <root url="jar://$USER_HOME$/.ivy2/cache/org.ow2.asm/asm-util/jars/asm-util-4.1.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

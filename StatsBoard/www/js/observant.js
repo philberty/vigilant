@@ -49,11 +49,41 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "vis", "angularBootstrap", "angularRoute", "bootstrap"], function($, angular, vis) {
-
+define('app', ["jquery", "angular", "vis", "angularBootstrap", "angularRoute", "bootstrap"], function($, angular) {
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap']);
 
+    app.config(
+        ['$routeProvider',
+            function($routeProvider) {
+                $routeProvider
+                    .when('/dashboard', {
+                        templateUrl: 'dashboard.html',
+                        controller: 'dashboard'
+                    })
+                    .when('/', {
+                        redirectTo: "/dashboard"
+                    })
+                    .otherwise({
+                        redirectTo: '/'
+                    })
+            }
+        ]
+    );
 
+    app.controller('dashboard', function($scope, $http, $interval) {
+        var state = function () {
+            $http.get('/api/state').success(function(data) {
+                $scope.datastores = []
+                for(var key in data){
+                    $scope.datastores.push(key);
+                    $scope[key] = data.key;
+                }
+            });
+        };
+
+        state();
+        $interval(state, 5000);
+    });
 
     angular.bootstrap(document, ['ObservantApp']);
     $('[data-toggle=offcanvas]').click(function() {

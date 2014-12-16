@@ -10,7 +10,8 @@ class DataStoreResources:
     def getHostsInfo(self):
         response = {}
         for i in self._datastores:
-            state = i + '/state'
+            state = i + '/api/state'
             resp = requests.get(state)
-            response[urlencode(str(i))] = resp.json()
+            if resp.ok:
+                response[urlencode(str(i))] = resp.json()
         return response

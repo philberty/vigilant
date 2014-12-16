@@ -20,7 +20,8 @@ object ObservantBuild extends Build {
       name := Name,
       version := Version,
       scalaVersion := ScalaVersion,
-      resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
+      resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
+      resolvers += "Akka Repo" at "http://repo.akka.io/repository",
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
@@ -28,15 +29,16 @@ object ObservantBuild extends Build {
         "org.scalatra" %% "scalatra-json" % ScalatraVersion,
         "org.scalatra" %% "scalatra-specs2" % ScalatraVersion % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
-        "org.eclipse.jetty" % "jetty-webapp" % "9.1.5.v20140505" % "container",
-        "org.eclipse.jetty" % "jetty-plus" % "9.1.5.v20140505" % "container",
-        "org.eclipse.jetty" % "jetty-websocket" % "8.1.10.v20130312" % "container",
+
         "ch.qos.logback" % "logback-classic" % "1.1.2" % "runtime",
-        "javax.servlet" % "javax.servlet-api" % "3.1.0",
-        "org.json4s"   %% "json4s-jackson" % "3.2.9",
+
+        "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106" % "container",
+        "org.eclipse.jetty" % "jetty-websocket" % "8.1.8.v20121106" % "container;provided",
+        "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar")),
+
         "io.netty" % "netty" % "3.9.5.Final",
-        "com.typesafe.play" %% "play-json" % "2.3.0",
-        "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23"
+        "org.json4s"   %% "json4s-jackson" % "3.2.9",
+        "com.typesafe.play" %% "play-json" % "2.3.0"
       )
     )
   )

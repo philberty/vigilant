@@ -25,9 +25,6 @@ class ScalatraBootstrap extends LifeCycle {
     logger.info("Loading data Servlet")
     context.mount(new StatsApiServlet, "/api")
 
-    logger.info("Loading State Servlet")
-    context.mount(new DataStoreStateServlet, "/state")
-
     logger.info("Ready...")
   }
 

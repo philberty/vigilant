@@ -11,6 +11,7 @@ trait ProtocolFactory {
   }
 
   def getHostDataModel(json: JsValue): HostsDataModel = {
+    val key = (json \ "key").as[String]
     val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val hostname = (json \ "payload" \ "hostname").as[String]
     val timestamp = (json \ "payload" \ "timestamp").as[String]
@@ -26,18 +27,20 @@ trait ProtocolFactory {
     val diskFree = (json \ "payload" \ "disk_free").as[Long]
     val stats = (json \ "payload" \ "cpu_stats").as[List[Float]]
 
-    new HostsDataModel(hostname, timestamp, usage, processes, cores, memoryTotal,
+    new HostsDataModel(key, hostname, timestamp, usage, processes, cores, memoryTotal,
       memoryUsed, platform, machine, version, diskTotal, diskFree, stats, ts)
   }
 
   def getLogDataModel(json: JsValue): LogDataModel = {
+    val key = (json \ "key").as[String]
     val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val message = (json \ "payload" \ "message").as[String]
     val host = (json \ "host").as[String]
-    new LogDataModel(host, message, ts)
+    new LogDataModel(key, host, message, ts)
   }
 
   def getProcessDataModel(json: JsValue): ProcessDataModel = {
+    val key = (json \ "key").as[String]
     val ts = getDateObjectFromTimeStamp((json \ "ts").as[String])
     val host = (json \ "host").as[String]
     val pid = (json \ "payload" \ "pid").as[Int]
@@ -53,7 +56,7 @@ trait ProtocolFactory {
     val memory = (json \ "payload" \ "memory_percent").as[Float]
     val connections = (json \ "payload" \ "connections").as[List[String]]
 
-    new ProcessDataModel(host, pid, path, cwd, cmd, status, user,
+    new ProcessDataModel(key, host, pid, path, cwd, cmd, status, user,
       threads, fds, ofds, usage, memory, connections, ts)
   }
 }

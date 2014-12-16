@@ -48,15 +48,15 @@ object StatsAggregator extends SimpleChannelHandler with ProtocolFactory {
   }
 
   override def messageReceived(context: ChannelHandlerContext, e: MessageEvent): Unit = {
-    val buffer = e.getMessage().asInstanceOf[ChannelBuffer]
+    val buffer = e.getMessage.asInstanceOf[ChannelBuffer]
     val value = buffer.toString(Charset.forName("UTF-8"))
-    logger.debug(value)
+    logger.info(value)
     handleMessage(Json.parse(value))
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) = {
-    logger.error(e.getCause.getLocalizedMessage())
-    e.getChannel().close()
+    logger.error(e.getCause.getLocalizedMessage)
+    e.getChannel.close()
   }
 
   def registerHostStatObsever(observer: StatsObserver): Unit = {

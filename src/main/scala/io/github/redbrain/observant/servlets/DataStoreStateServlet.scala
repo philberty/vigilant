@@ -9,7 +9,7 @@ import org.scalatra.json.JacksonJsonSupport
 case class StateHost(alive: Boolean, data: HostsDataModel)
 case class StateDataPayload(payload: List[StateHost])
 
-class StateResourcesServlet extends ObservantStack with JacksonJsonSupport with DataFactory {
+class DataStoreStateServlet extends ObservantStack with JacksonJsonSupport with DataFactory {
 
   protected implicit val jsonFormats: Formats = DefaultFormats
 

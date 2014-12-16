@@ -13,22 +13,20 @@ class ScalatraBootstrap extends LifeCycle {
   private var _aggregator:TransportType = null
 
   override def init(context: ServletContext) {
+    Configuration.loadConfiguration()
+    logger.info("Configuration Loaded")
+
     _aggregator = Configuration.getTransportFromConfiguration()
-    _aggregator.start()
     logger.info("Stats Aggregator Ready")
 
+    _aggregator.start()
+    logger.info("Aggregator Started")
 
-    logger.info("Loading Hosts Servlet")
-    context.mount(new HostResourcesServlet, "/hosts")
-
-    logger.info("Loading Logs Servlet")
-    context.mount(new LogResourcesServlet, "/logs")
-
-    logger.info("Loading Process Servlet")
-    context.mount(new ProcessResourcesServlet, "/procs")
+    logger.info("Loading data Servlet")
+    context.mount(new StatsApiServlet, "/api")
 
     logger.info("Loading State Servlet")
-    context.mount(new StateResourcesServlet, "/state")
+    context.mount(new DataStoreStateServlet, "/state")
 
     logger.info("Ready...")
   }

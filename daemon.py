@@ -2,7 +2,6 @@
 
 import sys
 import logging
-import logging.config
 
 import optparse
 import StatsCore
@@ -38,11 +37,15 @@ def killDaemon(config):
 
 
 def transportFromConfig(config):
-    transport = str(config.get('server', 'transport'))
+    transport = str(config.get('transport', 'type'))
     if transport == 'udp':
-        host = str(config.get('server', 'host'))
-        port = int(config.get('server', 'port'))
+        host = str(config.get('transport', 'host'))
+        port = int(config.get('transport', 'port'))
         return SimpleTransports.UDPStatsTransport(host=host, port=port)
+    elif transport == 'tcp':
+        host = str(config.get('transport', 'host'))
+        port = int(config.get('transport', 'port'))
+        return SimpleTransports.TCPStatsTransport(host=host, port=port)
     else:
         raise Exception('Invalid transport in configuration')
 
@@ -56,6 +59,8 @@ def startDaemon(config):
 
 
 def configureLogging(config):
+    import logging.config
+
     try:
         logging.config.fileConfig(config)
     except:

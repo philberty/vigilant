@@ -6,6 +6,10 @@ import io.github.redbrain.observant.aggregator.protocols.udp.UDPTransport
 
 object Configuration {
 
+  def loadConfiguration(): Unit = {
+
+  }
+
   def getCacheThreshold(): Int = 20
 
   def getHostsDataTimeout(): Int = 30

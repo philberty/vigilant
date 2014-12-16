@@ -15,6 +15,8 @@
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/daemon.py" />
     <option name="PARAMETERS" value="-c etc/observant/observant.cfg --kill" />
     <option name="SHOW_COMMAND_LINE" value="false" />
+    <RunnerSettings RunnerId="PythonRunner" />
+    <ConfigurationWrapper RunnerId="PythonRunner" />
     <method>
       <option name="Make" enabled="false" />
     </method>

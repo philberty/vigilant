@@ -2,7 +2,7 @@ package io.github.redbrain.observant.caches
 
 import io.github.redbrain.observant.configuration.Configuration
 
-trait StatsDataCache[T] {
+trait MapCache[T] {
   private var _cache:Map[String, List[T]] = Map[String, List[T]]()
 
   def getCacheDataForKey(key: String): List[T] = {

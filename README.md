@@ -1,9 +1,5 @@
-# ⛨ Observant ⛨
-
-[![Build Status](https://travis-ci.org/redbrain/observant.svg?branch=master)](https://travis-ci.org/redbrain/observant)
-[![Build Status](https://drone.io/github.com/redbrain/observant/status.png)](https://drone.io/github.com/redbrain/observant/latest)
+# Observant
 [![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
-[![Coverage Status](https://img.shields.io/coveralls/redbrain/observant.svg)](https://coveralls.io/r/redbrain/observant)
 
 Observant provides application driven, distributed stats/process/log monitoring.
 
@@ -27,11 +23,17 @@ $ ./daemon.py -c etc/observant/observant.cfg --start
 
 # Make sure it is running
 $ ./daemon.py -c etc/observant/observant.cfg --status
-{}
+{
+    "transport": "UDP Transport localhost:8080",
+    "watching": {
+        "Philips-MacBook-Pro.local.StatsDaemon": 914
+    },
+    "host": "Philips-MacBook-Pro.local"
+}
 True
 
 # kill the daemon gracefully
-$ python3 daemon.py -c etc/observant/observant.cfg --kill
+$ ./daemon.py -c etc/observant/observant.cfg --kill
 ```
 
 Scala DataStore uses sbt (requires jdk >= 7):
@@ -42,14 +44,11 @@ $ ./sbt # -jvm-debug 5005 for debugging
 > ~ ;copy-resources;aux-compile # auto-reload on file changes
 ```
 
-Nodejs Expressjs dashboard Front-end
+Flask Angularjs Dashbaord
 
 ```bash
-$ brew install node
-$ cd dashboard
-$ npm install
 $ bower install
-$ node ./bin/www
+$ ./dashboard.py -c etc/observant/observant.cfg
 ```
 
 ###Project Files
@@ -65,4 +64,4 @@ I use emacs and intellij and this project contains run configurations and setup 
 
 ## Copyright and license
 
-Code and documentation copyright 2014 Philip Herron, Code released under [the MIT license](LICENSE). Docs released under Creative Commons.
+Code and documentation copyright 2014-2015 Philip Herron, Code released under [the MIT license](LICENSE). Docs released under Creative Commons.

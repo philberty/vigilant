@@ -2,8 +2,8 @@ package io.github.redbrain.observant.caches
 
 import io.github.redbrain.observant.models._
 
-object HostCache extends StatsDataCache[HostsDataModel] {}
+object HostCache extends MapCache[HostsDataModel] {}
 
-object LogCache extends StatsDataCache[LogDataModel] {}
+object LogCache extends MapCache[LogDataModel] {}
 
-object ProcCache extends StatsDataCache[ProcessDataModel] {}
+object ProcCache extends MapCache[ProcessDataModel] {}

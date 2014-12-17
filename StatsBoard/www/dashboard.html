@@ -1,1 +1,44 @@
-<p>Hello World</p>
+<div class="container">
+
+    <div id="visualization"></div>
+    <hr>
+
+    <div ng-repeat="store in datastores">
+
+        <h6>{{store.name}}</h6>
+        <div class="row">
+            <div ng-repeat="host in data[store.key].payload" class="col-md-4">
+
+                <a href="/derp">
+                    <div class="tile">
+                        <div class="row">
+                            {{host.data.key}}
+
+                            <hr/>
+                            <div class="container-fluid">Machine: <i>{{host.data.machine}}</i></div>
+                            <div class="container-fluid">Cores: <i>{{host.data.cores}}</i></div>
+                            <div class="container-fluid">Processes: <i>{{host.data.process}}</i></div>
+
+                            <div class="container-fluid"><i>{{host.data.platform}}</i></div>
+                            <hr/>
+
+                            <div class="container-fluid">
+                                <i>Usage</i>
+                                <progressbar ng-attr-value="host.data.usage"></progressbar>
+                            </div>
+
+                            <div class="container-fluid">
+                                <i>Memory</i>
+                                <progressbar ng-attr-value="host.data.memoryUsed" ng-attr-max="host.data.memoryTotal" type="warning"></progressbar>
+                            </div>
+
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+        <hr/>
+    </div>
+
+</div>

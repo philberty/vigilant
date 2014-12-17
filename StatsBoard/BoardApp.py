@@ -27,7 +27,11 @@ def index():
 def public(path):
     return app.send_static_file(path)
 
-@cache.cached(timeout=30)
 @app.route("/api/state")
 def state():
     return jsonify(resources.getHostsInfo())
+
+@app.route("/api/host/keys")
+def hostKeys():
+    store = request.args.get('store')
+    return jsonify(resources.getHostKeysForStore(store))

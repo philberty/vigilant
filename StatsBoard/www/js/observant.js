@@ -59,11 +59,16 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
     function($, angular, vis)
 {
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'angular-loading-bar']);
+    var promise = null;
 
     app.config(
         ['$routeProvider',
             function($routeProvider) {
                 $routeProvider
+		    .when('/host', {
+			templateUrl: 'host.html',
+			controller: 'host'
+		    })
                     .when('/dashboard', {
                         templateUrl: 'dashboard.html',
                         controller: 'dashboard'
@@ -79,6 +84,11 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
     );
 
     app.controller('dashboard', function($scope, $http, $interval) {
+	if (promise) {
+	    $interval.cancel(promise);
+	    promise = null;
+	}
+
         var state = function () {
             $http.get('/api/state').success(function(data) {
                 $scope.data = data;
@@ -92,7 +102,20 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
             });
         };
         state();
-        $interval(state, 5000);
+        promise = $interval(state, 5000);
+    });
+
+    app.controller('host', function($scope, $http, $interval, $routeParams) {
+	if (promise) {
+	    $interval.cancel(promise);
+	    promise = null;
+	}
+
+	var store = encodeURI($routeParams.store);
+	var host = encodeURI($routeParams.key);
+
+	console.log(host);
+	console.log(store);
     });
 
     angular.bootstrap(document, ['ObservantApp']);

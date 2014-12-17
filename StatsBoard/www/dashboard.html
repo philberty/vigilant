@@ -1,18 +1,17 @@
-<div class="container">
-
-    <div id="visualization"></div>
-    <hr>
+<div class="container-fluid">
 
     <div ng-repeat="store in datastores">
 
-        <h6>{{store.name}}</h6>
+        <h6>{{store.name}} - Hosts</h6>
+	<hr/>
+
         <div class="row">
             <div ng-repeat="host in data[store.key].payload" class="col-md-4">
 
-                <a href="/derp">
+                <a href="#/host?store={{store.key}}&key={{host.data.key}}">
                     <div class="tile">
                         <div class="row">
-                            {{host.data.key}}
+                            <strong>{{host.data.key}}</strong>
 
                             <hr/>
                             <div class="container-fluid">Machine: <i>{{host.data.machine}}</i></div>

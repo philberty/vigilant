@@ -1,7 +1,5 @@
 import requests
 
-from urllib.parse import quote as urlencode
-
 
 class DataStoreResources:
     def __init__(self, datastores):
@@ -13,5 +11,9 @@ class DataStoreResources:
             state = i + '/api/state'
             resp = requests.get(state)
             if resp.ok:
-                response[urlencode(str(i))] = resp.json()
+                response[str(i)] = resp.json()
         return response
+
+    def getHostKeysForStore(self, store):
+        resp = requests.get(store + '/api/host/keys')
+        return {'store': store, 'keys': resp.json()}

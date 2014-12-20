@@ -1,25 +1,50 @@
-<div class="container-fluid">
+<div class="row-fluid">
 
     <div ng-repeat="store in datastores">
 
-        <h6>{{store.name}} - Hosts</h6>
-	<hr/>
+        <h4>{{store.name}}</h4>
+	    <hr/>
 
-        <div class="row">
-            <div ng-repeat="host in data[store.key].payload" class="col-md-4">
+        <div class="container-fluid">
+            <div ng-repeat="host in data[store.key].payload" class="col-xs-12 col-md-4">
 
                 <a href="#/host?store={{store.key}}&key={{host.data.key}}">
                     <div class="tile">
-                        <div class="row">
+                        <div class="row-fluid">
                             <strong>{{host.data.key}}</strong>
+                            <div class="container-fluid"><small>{{host.data.platform}}</small></div>
 
-                            <hr/>
-                            <div class="container-fluid">Machine: <i>{{host.data.machine}}</i></div>
-                            <div class="container-fluid">Cores: <i>{{host.data.cores}}</i></div>
-                            <div class="container-fluid">Processes: <i>{{host.data.process}}</i></div>
+                            <div class = container-fluid>
+                                <div class="col-md-6">Status:</div>
+                                <div class="col-md-4-offset-2">
+                                    <div ng-if="host.alive">
+                                        <span class="label label-success">Online</span>
+                                    </div>
+                                    <div ng-if="!host.alive">
+                                        <span class="label label-danger">Offline</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <div class="container-fluid"><i>{{host.data.platform}}</i></div>
-                            <hr/>
+                            <div class="container-fluid">
+                                <div class="col-md-6">Machine:</div>
+                                <div class="col-md-6"><i>{{host.data.machine}}</i></div>
+                            </div>
+
+                            <div class="container-fluid">
+                                <div class="col-md-6">Cores:</div>
+                                <div class="col-md-6"><i>{{host.data.cores}}</i></div>
+                            </div>
+
+                            <div class="container-fluid">
+                                <div class="col-md-6">Memory:</div>
+                                <div class="col-md-6"><i>{{host.data.memoryTotal/1024/1024/1024}}G</i></div>
+                            </div>
+
+                            <div class="container-fluid">
+                                <div class="col-md-6">Processes:</div>
+                                <div class="col-md-6"><i>{{host.data.process}}</i></div>
+                            </div>
 
                             <div class="container-fluid">
                                 <i>Usage</i>

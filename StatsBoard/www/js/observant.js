@@ -59,16 +59,14 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
     function($, angular, vis)
 {
     var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'angular-loading-bar']);
-    var promise = null;
-
     app.config(
         ['$routeProvider',
             function($routeProvider) {
                 $routeProvider
-		    .when('/host', {
-			templateUrl: 'host.html',
-			controller: 'host'
-		    })
+		            .when('/host', {
+			            templateUrl: 'host.html',
+			            controller: 'host'
+		            })
                     .when('/dashboard', {
                         templateUrl: 'dashboard.html',
                         controller: 'dashboard'
@@ -84,16 +82,11 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
     );
 
     app.controller('dashboard', function($scope, $http, $interval) {
-	if (promise) {
-	    $interval.cancel(promise);
-	    promise = null;
-	}
-
-        var state = function () {
-            $http.get('/api/state').success(function(data) {
+        var state = function() {
+            $http.get('/api/state').success(function (data) {
                 $scope.data = data;
                 $scope.datastores = [];
-                for(var key in data) $scope.datastores.push(
+                for (var key in data) $scope.datastores.push(
                     {
                         key: key,
                         name: decodeURIComponent(key)
@@ -102,20 +95,39 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
             });
         };
         state();
-        promise = $interval(state, 5000);
+        var promise = $interval(state, 4000);
+        $scope.$on("$destroy", function(){
+            $interval.cancel(promise);
+        });
     });
 
-    app.controller('host', function($scope, $http, $interval, $routeParams) {
-	if (promise) {
-	    $interval.cancel(promise);
-	    promise = null;
-	}
+    app.controller('host', function($scope, $http, $interval, $route, $routeParams) {
+	    var store = encodeURI($routeParams.store);
+	    var host = encodeURI($routeParams.key);
+        var sock = null;
 
-	var store = encodeURI($routeParams.store);
-	var host = encodeURI($routeParams.key);
+        $http.get('/api/host/' + host + '?store=' + store).success(function (data) {
+            console.log(data)
 
-	console.log(host);
-	console.log(store);
+            if (data.alive) {
+                // realtime
+                if (store.substring(0, 7) == "http://") {
+                    store = store.substring(7, store.length);
+                }
+
+                sock = new WebSocket("ws://" + store + "/api/host/sock/" + host);
+                sock.onmessage = function (event) {
+                    var data = $.parseJSON(event.data);
+                    console.log(data);
+                };
+            } else {
+                // quick display
+            }
+        });
+
+        $scope.$on("$destroy", function(){
+            if (sock) { sock.close (); }
+        });
     });
 
     angular.bootstrap(document, ['ObservantApp']);

@@ -1,5 +1,7 @@
 import os
 
+from . import Resourses
+
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -29,9 +31,14 @@ def public(path):
 
 @app.route("/api/state")
 def state():
-    return jsonify(resources.getHostsInfo())
+    return jsonify(resources.get_cluster_state())
 
 @app.route("/api/host/keys")
 def hostKeys():
     store = request.args.get('store')
-    return jsonify(resources.getHostKeysForStore(store))
+    return jsonify(Resourses.get_host_keys_from_store(store))
+
+@app.route("/api/host/<key>")
+def hostStat(key):
+    store = request.args.get('store')
+    return jsonify(Resourses.get_host_stat_from_store(store, key))

@@ -58,34 +58,46 @@ class StatsApiServlet extends ObservantStack with JacksonJsonSupport with Sessio
   get("/host/liveness/:key") {
     val key = params("key")
     val data = HostCache.getCacheDataForKey(key)
-    Liveness(
-      isDataAliveForTimeout(
-        data(data.length - 1).ts,
-        Configuration.getHostsDataTimeout()
+    if (data.length == 0) {
+      Liveness(false)
+    } else {
+      Liveness(
+        isDataAliveForTimeout(
+          data(data.length - 1).ts,
+          Configuration.getHostsDataTimeout()
+        )
       )
-    )
+    }
   }
 
   get("/proc/liveness/:key") {
     val key = params("key")
     val data = ProcCache.getCacheDataForKey(key)
-    Liveness(
-      isDataAliveForTimeout(
-        data(data.length - 1).ts,
-        Configuration.getHostsDataTimeout()
+    if (data.length == 0) {
+      Liveness(false)
+    } else {
+      Liveness(
+        isDataAliveForTimeout(
+          data(data.length - 1).ts,
+          Configuration.getHostsDataTimeout()
+        )
       )
-    )
+    }
   }
 
   get("/logs/liveness/:key") {
     val key = params("key")
     val data = LogCache.getCacheDataForKey(key)
-    Liveness(
-      isDataAliveForTimeout(
-        data(data.length - 1).ts,
-        Configuration.getHostsDataTimeout()
+    if (data.length == 0) {
+      Liveness(false)
+    } else {
+      Liveness(
+        isDataAliveForTimeout(
+          data(data.length - 1).ts,
+          Configuration.getHostsDataTimeout()
+        )
       )
-    )
+    }
   }
 
   get("/host/rest/:key") {

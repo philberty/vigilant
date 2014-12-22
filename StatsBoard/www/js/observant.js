@@ -106,11 +106,149 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
 	    var host = encodeURI($routeParams.key);
         var sock = null;
 
+        $scope.host = host;
+        $scope.store = store;
+
         $http.get('/api/host/' + host + '?store=' + store).success(function (data) {
-            console.log(data)
+
+            $scope.platform = data.payload.payload[0].platform;
+            $scope.hostname = data.payload.payload[0].hostname;
+            $scope.version = data.payload.payload[0].version;
+            $scope.machine = data.payload.payload[0].machine;
+            $scope.pids = data.payload.payload[0].process;
+            $scope.cores = data.payload.payload[0].cores;
+            $scope.usage = Math.round(data.payload.payload[0].usage);
+            $scope.memory = Math.round(data.payload.payload[0].memoryUsed/1024/1024);
+
+            // create a graph2d with an (currently empty) dataset
+            var usageContainer = document.getElementById('usage');
+            var memoryContainer = document.getElementById('memory');
+            var cpuContainer = document.getElementById('cpu');
+
+            var usageDataSet = new vis.DataSet();
+            var memoryDataSet = new vis.DataSet();
+            var cpuDataSet = new vis.DataSet();
+            var cpuGroups = new vis.DataSet();
+
+            for (var i in data.payload.payload[0].cpuStats) {
+                cpuGroups.add({
+                    id: i,
+                    content: 'Core ' + (parseInt(i) + 1),
+                    options: {
+                        drawPoints: {
+                            style: 'circle' // square, circle
+                        }
+                    }
+                });
+            }
+
+            var usageOptions = {
+                start: vis.moment().add(-30, 'seconds'), // changed so its faster
+                end: vis.moment(),
+                dataAxis: {
+                    customRange: {
+                        left: {
+                            min:0, max: 100
+                        }
+                    }
+                },
+                drawPoints: {
+                    style: 'circle' // square, circle
+                },
+                shaded: {
+                    orientation: 'bottom' // top, bottom
+                },
+                dataAxis: {
+                    title: {
+                        left: {
+                            text: "Percentage Usage"
+                        }
+                    }
+                }
+            };
+
+            var memoryOptions = {
+                start: vis.moment().add(-30, 'seconds'), // changed so its faster
+                end: vis.moment(),
+                dataAxis: {
+                    customRange: {
+                        left: {
+                            min:0, max: data.payload.payload[0].memoryTotal/1024/1024
+                        }
+                    }
+                },
+                drawPoints: {
+                    style: 'circle' // square, circle
+                },
+                shaded: {
+                    orientation: 'bottom' // top, bottom
+                },
+                dataAxis: {
+                    title: {
+                        left: {
+                            text: "Memory Usage (mb)"
+                        }
+                    }
+                }
+            };
+
+            var cpuOptions = {
+                legend: true,
+                start: vis.moment().add(-30, 'seconds'), // changed so its faster
+                end: vis.moment(),
+                dataAxis: {
+                    customRange: {
+                        left: {
+                            min:0, max: 100
+                        }
+                    },
+                    title: {
+                        left: {
+                            text: "Percentage Usage"
+                        }
+                    }
+                }
+            };
+
+            var usageGraph = new vis.Graph2d(usageContainer, usageDataSet, usageOptions);
+            var memoryGraph = new vis.Graph2d(memoryContainer, memoryDataSet, memoryOptions);
+            var cpuGraph = new vis.Graph2d(cpuContainer, cpuDataSet, cpuGroups, cpuOptions);
+
+            function renderStepUsage() {
+                // move the window (you can think of different strategies).
+                var now = vis.moment();
+                var range = usageGraph.getWindow();
+                var interval = range.end - range.start;
+
+                // continuously move the window
+                usageGraph.setWindow(now - interval, now, {animate: false});
+                requestAnimationFrame(renderStepUsage);
+            }
+            function renderStepMemory() {
+                // move the window (you can think of different strategies).
+                var now = vis.moment();
+                var range = memoryGraph.getWindow();
+                var interval = range.end - range.start;
+
+                // continuously move the window
+                memoryGraph.setWindow(now - interval, now, {animate: false});
+                requestAnimationFrame(renderStepMemory);
+            }
+            function renderStepCpu() {
+                // move the window (you can think of different strategies).
+                var now = vis.moment();
+                var range = cpuGraph.getWindow();
+                var interval = range.end - range.start;
+
+                // continuously move the window
+                cpuGraph.setWindow(now - interval, now, {animate: false});
+                requestAnimationFrame(renderStepCpu);
+            }
 
             if (data.alive) {
-                // realtime
+                renderStepUsage();
+                renderStepMemory();
+                renderStepCpu();
                 if (store.substring(0, 7) == "http://") {
                     store = store.substring(7, store.length);
                 }
@@ -118,10 +256,44 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                 sock = new WebSocket("ws://" + store + "/api/host/sock/" + host);
                 sock.onmessage = function (event) {
                     var data = $.parseJSON(event.data);
-                    console.log(data);
+
+                    $scope.pids = data.process;
+                    $scope.usage = Math.round(data.usage);
+                    $scope.memory = Math.round(data.memoryUsed/1024/1024);
+
+                    usageDataSet.add({
+                        x: data.ts,
+                        y: data.usage
+                    });
+                    memoryDataSet.add({
+                        x: data.ts,
+                        y: data.memoryUsed/1024/1024
+                    });
+                    for (var cpu in data.cpuStats) {
+                        cpuDataSet.add({
+                            x: data.ts,
+                            y: data.cpuStats[cpu],
+                            group: cpu
+                        });
+                    };
+
+                    // remove all data points which are no longer visible
+                    var removeOldData = function(graph, dataset) {
+                        var range = graph.getWindow();
+                        var interval = range.end - range.start;
+                        var oldIds = dataset.getIds({
+                            filter: function (item) {
+                                return item.x < range.start - interval;
+                            }
+                        });
+                        dataset.remove(oldIds);
+                    };
+                    removeOldData(cpuGraph, cpuDataSet);
+                    removeOldData(memoryGraph, memoryDataSet);
+                    removeOldData(usageGraph, usageDataSet);
                 };
             } else {
-                // quick display
+
             }
         });
 

@@ -1,7 +1,41 @@
-<div class="row-fluid">
+<div class="container-fluid">
+    <h4>{{store}} - {{host}}</h4>
+    <hr/>
 
-    <div class="col-md-6">
-        <div id="visualization"></div>
+    <div class="container-fluid">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Usage (%)</th>
+                    <th>Cores</th>
+                    <th>Memory (mb)</th>
+                    <th>Processes</th>
+                    <th>Machine</th>
+                    <th>Platform</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{usage}}</td>
+                    <td>{{cores}}</td>
+                    <td>{{memory}}</td>
+                    <td>{{pids}}</td>
+                    <td>{{machine}}</td>
+                    <td>{{platform}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <br/>
+    <div class="container-fluid">
+        <div id="usage" class="col-md-6 col-xs-12"></div>
+        <div id="memory" class="col-md-6 col-xs-12"></div>
+    </div>
+    <br/>
+    <div class="container-fluid"><div id="cpu" class="col-md-12 col-xs-12"></div></div>
+    <br/>
 
 </div>

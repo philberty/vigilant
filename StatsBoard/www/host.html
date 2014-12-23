@@ -1,5 +1,6 @@
 <div class="container-fluid">
-    <h4>{{store}} - {{host}}</h4>
+
+    <h4>{{host}}</h4>
     <hr/>
 
     <div class="container-fluid">
@@ -37,5 +38,31 @@
     <br/>
     <div class="container-fluid"><div id="cpu" class="col-md-12 col-xs-12"></div></div>
     <br/>
+
+    <hr/>
+    <h4>Processes</h4>
+
+    <hr/>
+    <div class="container-fluid">
+
+        <div ng-repeat="proc in procs">
+
+            <div class="col-md-4">
+                <a href="#/proc/{{proc.payload.key}}?store={{store}}&key={{host}}">
+                    <div class="tile">
+                        {{proc.payload.key}}
+                        <div ng-if="proc.alive">
+                            <span class="label label-success">Online</span>
+                        </div>
+                        <div ng-if="!proc.alive">
+                            <span class="label label-danger">Offline</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
 
 </div>

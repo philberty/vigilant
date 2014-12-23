@@ -42,3 +42,8 @@ def hostKeys():
 def hostStat(key):
     store = request.args.get('store')
     return jsonify(Resourses.get_host_stat_from_store(store, key))
+
+@app.route("/api/host/procs/<key>")
+def hostProcState(key):
+    store = request.args.get('store')
+    return jsonify(Resourses.get_host_proc_state_from_store(store, key))

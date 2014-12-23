@@ -50,7 +50,6 @@ object StatsAggregator extends SimpleChannelHandler with ProtocolFactory {
   override def messageReceived(context: ChannelHandlerContext, e: MessageEvent): Unit = {
     val buffer = e.getMessage.asInstanceOf[ChannelBuffer]
     val value = buffer.toString(Charset.forName("UTF-8"))
-    logger.info(value)
     handleMessage(Json.parse(value))
   }
 

@@ -26,8 +26,10 @@ class StatsApiServlet extends ObservantStack with JacksonJsonSupport with Sessio
     contentType = formats("json")
   }
 
+  // --- --- --- ---
+
   get("/state") {
-    val keys = HostCache.getHostKeys()
+    val keys = HostCache.getKeys()
     var payload = List[StateHost]()
 
     keys.foreach(key => {
@@ -43,17 +45,21 @@ class StatsApiServlet extends ObservantStack with JacksonJsonSupport with Sessio
     StateDataPayload(payload)
   }
 
+  // --- --- --- ---
+
   get("/host/keys") {
-    HostCache.getHostKeys()
+    HostCache.getKeys()
   }
 
   get("/proc/keys") {
-    ProcCache.getHostKeys()
+    ProcCache.getKeys()
   }
 
   get("/logs/keys") {
-    LogCache.getHostKeys()
+    LogCache.getKeys()
   }
+
+  // --- --- --- ---
 
   get("/host/liveness/:key") {
     val key = params("key")
@@ -100,20 +106,74 @@ class StatsApiServlet extends ObservantStack with JacksonJsonSupport with Sessio
     }
   }
 
+  // --- --- --- ---
+
+  get("/host/procs/:key") {
+    val key = params("key")
+    ProcCache.getProcessesRunningOnHost(key)
+  }
+
+  // --- --- --- ---
+
   get("/host/rest/:key") {
     val key = params("key")
     HostDataPayload(key, HostCache.getCacheDataForKey(key))
   }
+
+  post("/host/rest/:key") {
+    val key = params("key")
+    HostCache.getCacheDataForKey(key)(0)
+  }
+
+  delete("/host/rest/:key") {
+    val key = params("key")
+    val data = HostCache.getCacheDataForKey(key)
+    if (!isDataAliveForTimeout(data(data.length - 1).ts, Configuration.getHostsDataTimeout())) {
+      HostCache.deleteKey(key)
+    }
+  }
+
+  // --- --- --- ---
 
   get("/proc/rest/:key") {
     val key = params("key")
     ProcessDataPayload(key, ProcCache.getCacheDataForKey(key))
   }
 
+  post("/proc/rest/:key") {
+    val key = params("key")
+    ProcCache.getCacheDataForKey(key)(0)
+  }
+
+  delete("/proc/rest/:key") {
+    val key = params("key")
+    val data = ProcCache.getCacheDataForKey(key)
+    if (!isDataAliveForTimeout(data(data.length - 1).ts, Configuration.getProcDataTimeout())) {
+      ProcCache.deleteKey(key)
+    }
+  }
+
+  // --- --- --- ---
+
   get("/logs/rest/:key") {
     val key = params("key")
     LogDataPayload(key, LogCache.getCacheDataForKey(key))
   }
+
+  post("/logs/rest/:key") {
+    val key = params("key")
+    LogCache.getCacheDataForKey(key)(0)
+  }
+
+  delete("/logs/rest/:key") {
+    val key = params("key")
+    val data = LogCache.getCacheDataForKey(key)
+    if (!isDataAliveForTimeout(data(data.length - 1).ts, Configuration.getLogDataTimeout())) {
+      LogCache.deleteKey(key)
+    }
+  }
+
+  // --- --- --- ---
 
   atmosphere("/host/sock/:key") {
     new AtmosphereStatsClientMonitor(params("key"), StatType.HOST) {
@@ -139,4 +199,5 @@ class StatsApiServlet extends ObservantStack with JacksonJsonSupport with Sessio
     }
   }
 
+  // --- --- --- ---
 }

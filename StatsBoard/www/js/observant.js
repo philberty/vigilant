@@ -67,6 +67,10 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
 			            templateUrl: 'host.html',
 			            controller: 'host'
 		            })
+                    .when('/proc/:process', {
+                        templateUrl: 'proc.html',
+                        controller: 'proc'
+                    })
                     .when('/dashboard', {
                         templateUrl: 'dashboard.html',
                         controller: 'dashboard'
@@ -80,6 +84,44 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
             }
         ]
     );
+
+    var usageOptions = {
+        start: vis.moment().add(-30, 'seconds'), // changed so its faster
+        end: vis.moment(),
+        dataAxis: {
+            customRange: {
+                left: {
+                    min:0, max: 100
+                }
+            }
+        },
+        drawPoints: {
+            style: 'circle' // square, circle
+        },
+        shaded: {
+            orientation: 'bottom' // top, bottom
+        },
+        dataAxis: {
+            title: {
+                left: {
+                    text: "Percentage Usage"
+                }
+            }
+        },
+        zoomMax: 100000,
+        zoomMin: 100000
+    };
+    // remove all data points which are no longer visible
+    var removeOldData = function(graph, dataset) {
+        var range = graph.getWindow();
+        var interval = range.end - range.start;
+        var oldIds = dataset.getIds({
+            filter: function (item) {
+                return item.x < range.start - interval;
+            }
+        });
+        dataset.remove(oldIds);
+    };
 
     app.controller('dashboard', function($scope, $http, $interval) {
         var state = function() {
@@ -101,13 +143,44 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
         });
     });
 
-    app.controller('host', function($scope, $http, $interval, $route, $routeParams) {
-	    var store = encodeURI($routeParams.store);
-	    var host = encodeURI($routeParams.key);
-        var sock = null;
+    app.controller('proc', function($scope, $http, $interval, $route, $routeParams) {
+        var store = encodeURI($routeParams.store);
+        var host = encodeURI($routeParams.key);
+        var proc = $routeParams.process;
 
         $scope.host = host;
         $scope.store = store;
+        $scope.proc = proc;
+
+        var sock = null;
+        var sockAddr = null;
+        if (store.substring(0, 7) == "http://") {
+            sockAddr = store.substring(7, store.length);
+        }
+
+        
+
+        $scope.$on("$destroy", function(){
+            if (sock) { sock.close(); }
+        });
+    });
+
+    app.controller('host', function($scope, $http, $interval, $route, $routeParams) {
+	    var store = encodeURI($routeParams.store);
+	    var host = encodeURI($routeParams.key);
+        $scope.host = host;
+        $scope.store = store;
+
+        var sock = null;
+        var sockAddr = null;
+        if (store.substring(0, 7) == "http://") {
+            sockAddr = store.substring(7, store.length);
+        }
+
+        $scope.host = host;
+        $scope.store = store;
+        $scope.isWatchingProc = false;
+        $scope.watchProc = function(proc) {};
 
         $http.get('/api/host/' + host + '?store=' + store).success(function (data) {
 
@@ -142,31 +215,6 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                 });
             }
 
-            var usageOptions = {
-                start: vis.moment().add(-30, 'seconds'), // changed so its faster
-                end: vis.moment(),
-                dataAxis: {
-                    customRange: {
-                        left: {
-                            min:0, max: 100
-                        }
-                    }
-                },
-                drawPoints: {
-                    style: 'circle' // square, circle
-                },
-                shaded: {
-                    orientation: 'bottom' // top, bottom
-                },
-                dataAxis: {
-                    title: {
-                        left: {
-                            text: "Percentage Usage"
-                        }
-                    }
-                }
-            };
-
             var memoryOptions = {
                 start: vis.moment().add(-30, 'seconds'), // changed so its faster
                 end: vis.moment(),
@@ -189,7 +237,9 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                             text: "Memory Usage (mb)"
                         }
                     }
-                }
+                },
+                zoomMax: 100000,
+                zoomMin: 100000
             };
 
             var cpuOptions = {
@@ -207,7 +257,9 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                             text: "Percentage Usage"
                         }
                     }
-                }
+                },
+                zoomMax: 100000,
+                zoomMin: 100000
             };
 
             var usageGraph = new vis.Graph2d(usageContainer, usageDataSet, usageOptions);
@@ -249,11 +301,8 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                 renderStepUsage();
                 renderStepMemory();
                 renderStepCpu();
-                if (store.substring(0, 7) == "http://") {
-                    store = store.substring(7, store.length);
-                }
 
-                sock = new WebSocket("ws://" + store + "/api/host/sock/" + host);
+                sock = new WebSocket("ws://" + sockAddr + "/api/host/sock/" + host);
                 sock.onmessage = function (event) {
                     var data = $.parseJSON(event.data);
 
@@ -277,28 +326,19 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                         });
                     };
 
-                    // remove all data points which are no longer visible
-                    var removeOldData = function(graph, dataset) {
-                        var range = graph.getWindow();
-                        var interval = range.end - range.start;
-                        var oldIds = dataset.getIds({
-                            filter: function (item) {
-                                return item.x < range.start - interval;
-                            }
-                        });
-                        dataset.remove(oldIds);
-                    };
                     removeOldData(cpuGraph, cpuDataSet);
                     removeOldData(memoryGraph, memoryDataSet);
                     removeOldData(usageGraph, usageDataSet);
                 };
-            } else {
-
             }
         });
 
+        $http.get('/api/host/procs/' + host + '?store=' + store).success(function (data) {
+            $scope.procs = data.payload;
+        });
+
         $scope.$on("$destroy", function(){
-            if (sock) { sock.close (); }
+            if (sock) { sock.close(); }
         });
     });
 

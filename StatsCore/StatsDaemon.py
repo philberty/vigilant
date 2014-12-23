@@ -98,9 +98,9 @@ class ClientDaemonConnection:
 
     def postLogMessageForKey(self, key, log):
         """
-        Send the daemon a log message to handle against a key
+        Send the daemon a log message to handle against a proc key
 
-        :param key: key to post log message against
+        :param key: proc key to post log message against
         :param log: the string log message
         """
         message = {'type': 'postLog', 'key': key, 'message': log}

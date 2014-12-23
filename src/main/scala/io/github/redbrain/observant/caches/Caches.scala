@@ -6,4 +6,16 @@ object HostCache extends MapCache[HostsDataModel] {}
 
 object LogCache extends MapCache[LogDataModel] {}
 
-object ProcCache extends MapCache[ProcessDataModel] {}
+object ProcCache extends MapCache[ProcessDataModel] {
+
+  def getProcessesRunningOnHost(key: String): List[String] = {
+    var procsRunningOnHost:List[String] = List[String]()
+    getKeys().foreach(p => {
+      val data = getCacheDataForKey(p)
+      if ((data.length > 0) && (data(0).host == key)) {
+        procsRunningOnHost ::= data(0).key
+      }
+    })
+    procsRunningOnHost
+  }
+}

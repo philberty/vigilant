@@ -12,8 +12,12 @@ trait MapCache[T] {
     }
   }
 
-  def getHostKeys(): Set[String] = {
+  def getKeys(): Set[String] = {
     _cache.keySet
+  }
+
+  def deleteKey(key: String): Unit = {
+    _cache -= key
   }
 
   def pushDataForKey(key: String, data: T): Unit = {

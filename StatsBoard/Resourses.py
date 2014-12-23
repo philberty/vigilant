@@ -1,3 +1,4 @@
+import sys
 import requests
 
 
@@ -17,7 +18,25 @@ def get_host_keys_from_store(store):
         resp = requests.get(store + '/api/host/keys')
         response = {'store': store, 'keys': resp.json()}
     except:
-        response = {}
+        response = {'store': store, 'error': str(sys.exc_info()[1])}
+    finally:
+        return response
+
+
+def get_host_proc_state_from_store(store, host):
+    try:
+        resp = requests.get(store + '/api/host/procs/' + host)
+        payload = []
+        for i in resp.json():
+            resp = requests.post(store + '/api/proc/rest/' + i)
+            alive = requests.get(store + '/api/proc/liveness/' + i)
+            payload.append({
+                'alive': alive.json()['alive'],
+                'payload': resp.json()
+            })
+        response = {'store': store, 'payload': payload}
+    except:
+        response = {'store': store, 'error': str(sys.exc_info()[1])}
     finally:
         return response
 

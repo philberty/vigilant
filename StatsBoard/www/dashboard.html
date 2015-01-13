@@ -1,6 +1,10 @@
 <div class="row-fluid">
 
-    <div ng-repeat="store in datastores">
+    <div ng-if="!valid">
+         
+    </div>
+
+    <div ng-if="valid" ng-repeat="store in datastores">
 
         <h4>{{store.name}}</h4>
 	    <hr/>

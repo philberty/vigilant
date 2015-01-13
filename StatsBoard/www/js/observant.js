@@ -27,12 +27,20 @@ require.config({
 
         angularLoadingBar: [
             '/js/lib/angular-loading-bar/build/loading-bar.min'
+        ],
+
+        angularUiGrid: [
+            '/js/lib/angular-ui-grid/ui-grid.min'
         ]
     },
     shim: {
         'bootstrap': {
             deps: ['jquery'],
             exports: 'bootstrap'
+        },
+        'angularUiGrid': {
+            deps: ['angular'],
+            exports: 'angularUiGrid'
         },
         'angularLoadingBar': {
             deps: ['angular'],
@@ -54,11 +62,10 @@ require.config({
     deps: ['app']
 });
 
-define('app', ["jquery", "angular", "vis", "angularBootstrap",
-                "angularRoute", "angularLoadingBar", "bootstrap"],
+define('app', ["jquery", "angular", "vis", "angularBootstrap", "angularRoute", "angularLoadingBar", "angularUiGrid", "bootstrap"],
     function($, angular, vis)
 {
-    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'angular-loading-bar']);
+    var app = angular.module("ObservantApp", ['ngRoute', 'ui.bootstrap', 'ui.grid', 'angular-loading-bar']);
     app.config(
         ['$routeProvider',
             function($routeProvider) {
@@ -104,7 +111,7 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
         dataAxis: {
             title: {
                 left: {
-                    text: "Percentage Usage"
+                    text: "Usage (%)"
                 }
             }
         },
@@ -123,24 +130,31 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
         dataset.remove(oldIds);
     };
 
-    app.controller('dashboard', function($scope, $http, $interval) {
-        var state = function() {
-            $http.get('/api/state').success(function (data) {
-                $scope.data = data;
-                $scope.datastores = [];
-                for (var key in data) $scope.datastores.push(
-                    {
-                        key: key,
-                        name: decodeURIComponent(key)
-                    }
-                );
+    app.controller('dashboard', function($scope, $http, $interval, $routeParams) {
+        var store = encodeURI($routeParams.store);
+        if (store == 'undefined') {
+            $scope.valid = false;
+        } else {
+            $scope.valid = true;
+            var state = function () {
+                $http.get('/api/state?store=' + store).success(function (data) {
+                    $scope.valid = true;
+                    $scope.data = data;
+                    $scope.datastores = [];
+                    for (var key in data) $scope.datastores.push(
+                        {
+                            key: key,
+                            name: decodeURIComponent(key)
+                        }
+                    );
+                });
+            };
+            state();
+            var promise = $interval(state, 4000);
+            $scope.$on("$destroy", function () {
+                $interval.cancel(promise);
             });
-        };
-        state();
-        var promise = $interval(state, 4000);
-        $scope.$on("$destroy", function(){
-            $interval.cancel(promise);
-        });
+        }
     });
 
     app.controller('proc', function($scope, $http, $interval, $route, $routeParams) {
@@ -158,7 +172,90 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
             sockAddr = store.substring(7, store.length);
         }
 
-        
+        $scope.procData = [];
+
+        $http.get('/api/proc/' + proc + '?store=' + store).success(function (data) {
+
+            // create a graph2d with an (currently empty) dataset
+            var usageContainer = document.getElementById('usage');
+            var memoryContainer = document.getElementById('memory');
+
+            var usageDataSet = new vis.DataSet();
+            var memoryDataSet = new vis.DataSet();
+
+            var memoryOptions = {
+                start: vis.moment().add(-30, 'seconds'), // changed so its faster
+                end: vis.moment(),
+                dataAxis: {
+                    customRange: {
+                        left: {
+                            min:0, max: 100
+                        }
+                    }
+                },
+                drawPoints: {
+                    style: 'circle' // square, circle
+                },
+                shaded: {
+                    orientation: 'bottom' // top, bottom
+                },
+                dataAxis: {
+                    title: {
+                        left: {
+                            text: "Memory Usage (%)"
+                        }
+                    }
+                },
+                zoomMax: 100000,
+                zoomMin: 100000
+            };
+
+            var usageGraph = new vis.Graph2d(usageContainer, usageDataSet, usageOptions);
+            var memoryGraph = new vis.Graph2d(memoryContainer, memoryDataSet, memoryOptions);
+
+            function renderStepUsage() {
+                // move the window (you can think of different strategies).
+                var now = vis.moment();
+                var range = usageGraph.getWindow();
+                var interval = range.end - range.start;
+
+                // continuously move the window
+                usageGraph.setWindow(now - interval, now, {animate: false});
+                requestAnimationFrame(renderStepUsage);
+            }
+            function renderStepMemory() {
+                // move the window (you can think of different strategies).
+                var now = vis.moment();
+                var range = memoryGraph.getWindow();
+                var interval = range.end - range.start;
+
+                // continuously move the window
+                memoryGraph.setWindow(now - interval, now, {animate: false});
+                requestAnimationFrame(renderStepMemory);
+            }
+
+            if (data.alive) {
+                renderStepUsage();
+                renderStepMemory();
+
+                sock = new WebSocket("ws://" + sockAddr + "/api/proc/sock/" + proc);
+                sock.onmessage = function (event) {
+                    var data = $.parseJSON(event.data);
+
+                    usageDataSet.add({
+                        x: data.ts,
+                        y: data.usage
+                    });
+                    memoryDataSet.add({
+                        x: data.ts,
+                        y: data.memory
+                    });
+
+                    removeOldData(usageGraph, usageDataSet);
+                    removeOldData(memoryGraph, memoryDataSet);
+                }
+            }
+        });
 
         $scope.$on("$destroy", function(){
             if (sock) { sock.close(); }
@@ -184,14 +281,14 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
 
         $http.get('/api/host/' + host + '?store=' + store).success(function (data) {
 
-            $scope.platform = data.payload.payload[0].platform;
-            $scope.hostname = data.payload.payload[0].hostname;
-            $scope.version = data.payload.payload[0].version;
-            $scope.machine = data.payload.payload[0].machine;
-            $scope.pids = data.payload.payload[0].process;
-            $scope.cores = data.payload.payload[0].cores;
-            $scope.usage = Math.round(data.payload.payload[0].usage);
-            $scope.memory = Math.round(data.payload.payload[0].memoryUsed/1024/1024);
+            $scope.platform = data.payload.platform;
+            $scope.hostname = data.payload.hostname;
+            $scope.version = data.payload.version;
+            $scope.machine = data.payload.machine;
+            $scope.pids = data.payload.process;
+            $scope.cores = data.payload.cores;
+            $scope.usage = Math.round(data.payload.usage);
+            $scope.memory = Math.round(data.payload.memoryUsed/1024/1024);
 
             // create a graph2d with an (currently empty) dataset
             var usageContainer = document.getElementById('usage');
@@ -203,7 +300,7 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
             var cpuDataSet = new vis.DataSet();
             var cpuGroups = new vis.DataSet();
 
-            for (var i in data.payload.payload[0].cpuStats) {
+            for (var i in data.payload.cpuStats) {
                 cpuGroups.add({
                     id: i,
                     content: 'Core ' + (parseInt(i) + 1),
@@ -221,7 +318,7 @@ define('app', ["jquery", "angular", "vis", "angularBootstrap",
                 dataAxis: {
                     customRange: {
                         left: {
-                            min:0, max: data.payload.payload[0].memoryTotal/1024/1024
+                            min:0, max: data.payload.memoryTotal/1024/1024
                         }
                     }
                 },

@@ -11,7 +11,6 @@ from flask.ext.cache import Cache
 public = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www')
 app = Flask(__name__, static_folder=public)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-resources = None
 
 @app.errorhandler(404)
 def not_found(error=None):
@@ -31,7 +30,8 @@ def public(path):
 
 @app.route("/api/state")
 def state():
-    return jsonify(resources.get_cluster_state())
+    store = request.args.get('store')
+    return jsonify(Resourses.get_cluster_state(store))
 
 @app.route("/api/host/keys")
 def hostKeys():
@@ -47,3 +47,8 @@ def hostStat(key):
 def hostProcState(key):
     store = request.args.get('store')
     return jsonify(Resourses.get_host_proc_state_from_store(store, key))
+
+@app.route("/api/proc/<key>")
+def procState(key):
+    store = request.args.get('store')
+    return jsonify(Resourses.get_proc_stat_from_store(store, key))

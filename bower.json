@@ -10,6 +10,7 @@
     "angular-bootstrap": "0.11.0",
     "flat-ui": "latest",
     "vis": "3.7.1",
-    "angular-loading-bar": "~0.6.0"
+    "angular-loading-bar": "~0.6.0",
+    "angular-ui-grid": "~3.0.0-rc.16"
   }
 }

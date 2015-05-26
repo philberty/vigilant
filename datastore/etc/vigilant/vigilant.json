@@ -1,0 +1,26 @@
+{
+    "transport": {
+        "type": "udp",
+        "host": "localhost",
+        "port": 8080
+    },
+
+    "triggers": {
+      "notification_threshold": 120
+    },
+
+    "database": {
+      "jdbc": "jdbc:h2:./vigilant"
+    },
+
+    "twillo": {
+        "account_sid": "",
+        "auth_token": "",
+        "from": ""
+    },
+
+    "email": {
+      "smtp_server": "localhost",
+      "from": "notifications@vigilantlabs.co.uk"
+    }
+}

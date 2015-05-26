@@ -1,0 +1,71 @@
+<div class="row">
+
+    <div class="container">
+
+        <h4>Hosts - {{store}}</h4>
+        <hr/>
+
+        <div ng-repeat="host in hosts" class="col-xs-12 col-md-4">
+
+            <a href="#/host/{{host.key}}?store={{store}}">
+
+                <div class="tile">
+                    <div class="row-fluid">
+                        <strong>{{host.key}}</strong>
+                        <div class="container-fluid">
+                            <small>{{host.platform}}</small>
+                        </div>
+
+                        <div class = container-fluid>
+                            <div class="col-md-6">Status:</div>
+                            <div class="col-md-4-offset-2">
+                                <div ng-if="host.alive">
+                                    <span class="label label-success">Online</span>
+                                </div>
+                                <div ng-if="!host.alive">
+                                    <span class="label label-danger">Offline</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container-fluid">
+                            <div class="col-md-6">Machine:</div>
+                            <div class="col-md-6"><i>{{host.payload.machine}}</i></div>
+                        </div>
+
+                        <div class="container-fluid">
+                            <div class="col-md-6">Cores:</div>
+                            <div class="col-md-6"><i>{{host.payload.cores}}</i></div>
+                        </div>
+
+                        <div class="container-fluid">
+                            <div class="col-md-6">Processes:</div>
+                            <div class="col-md-6"><i>{{host.payload.process}}</i></div>
+                        </div>
+
+                        <div ng-if="host.alive" class="container-fluid">
+                            <i>Usage</i>
+                            <progressbar ng-attr-value="host.payload.usage"></progressbar>
+                        </div>
+
+                        <div ng-if="host.alive" class="container-fluid">
+                            <i>Memory</i>
+                            <progressbar ng-attr-value="host.payload.memoryUsed" ng-attr-max="host.payload.memoryTotal" type="warning"></progressbar>
+                        </div>
+
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <div class="container">
+        <h4>Cluster Model</h4>
+        <hr/>
+        <div id="cluster"></div>
+    </div>
+
+
+
+</div>

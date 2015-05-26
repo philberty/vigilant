@@ -1,0 +1,12 @@
+{
+  "transport": {
+    "type": "udp",
+    "host": "server1.vigilantlabs.co.uk",
+    "port": 8080
+  },
+
+  "daemon": {
+    "sock": "/tmp/vigilant.sock",
+    "lock": "/tmp/vigilant.pid"
+  }
+}

@@ -1,0 +1,26 @@
+body, html, .row-offcanvas {
+    height: 100%;
+}
+
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+#cluster {
+    width: 100%;
+    height: 500px;
+    border: 1px solid lightgray;
+    background-color:#222222;
+}
+
+.host_grid {
+    width: 100%;
+    height: 80px;
+    text-align: center;
+}
+
+.centered{
+    margin: 0 auto;
+}
+

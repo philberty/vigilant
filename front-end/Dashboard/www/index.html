@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vigilant Dashboard</title>
+
+    <link href="/js/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/js/lib/angular-loading-bar/build/loading-bar.min.css" rel="stylesheet">
+    <link href="/js/lib/angular-ui-grid/ui-grid.min.css" rel="stylesheet">
+    <link href="/js/lib/vis/dist/vis.min.css" rel="stylesheet">
+    <link href="/css/vigilant.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Vigilant</a>
+    </div>
+    <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+        </ul>
+    </div><!--/.nav-collapse -->
+</div><!--/.navbar -->
+
+    <div id="main">
+        <div ng-view></div>
+    </div>
+
+<script data-main="/js/require-config.js" src="/js/lib/requirejs/require.js"></script>
+
+</body>
+</html>

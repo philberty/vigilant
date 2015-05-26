@@ -1,0 +1,7 @@
+{
+  "name": "Vigilant",
+  "private": true,
+  "dependencies": {
+      "swagger-ui": "latest"
+  }
+}

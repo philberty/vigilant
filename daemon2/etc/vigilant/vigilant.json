@@ -1,0 +1,13 @@
+{
+  "transport": {
+    "type": "udp",
+    "host": "localhost",
+    "port": 8080
+  },
+
+  "daemon": {
+    "type": "unix",
+    "sock": "/tmp/vigilant.sock",
+    "lock": "/tmp/vigilant.pid"
+  }
+}

@@ -14,6 +14,10 @@ The proof-of-concept daemon, this is being re-written in C/C++ to increase porta
 simplicity of language bindings. Currently because this is written in Python3 Node bindings require
 python3 to be installed which isn't very elegant.
 
+## Daemon 2
+
+This is a WIP new Daemon written in C/C++ to increase the protability and simplicity of adding simple dependancies.
+
 ## Datastore
 
 The scala data-store listens for the real-time data and in turn provides a rest-api for working with

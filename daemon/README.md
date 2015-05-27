@@ -1,6 +1,4 @@
 # Vigilant Daemon
-[![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
-[![Build Status](https://travis-ci.org/VigilantLabs/vigilant-daemon.svg)](https://travis-ci.org/VigilantLabs/vigilant-daemon)
 
 This is the user agent daemon required to aggregate stats on each host for n-applications
 
@@ -10,7 +8,7 @@ Stats Daemon (requires python3):
 
 ```python
 $ brew install python3
-$ sudo pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 $ python3 setup.py install
 ```
 
@@ -18,10 +16,10 @@ Simple Daemon.py manager usage
 
 ```python
 # Start the Daemon
-$ ./daemon.py -c etc/observant/observant.cfg --start
+$ ./daemon.py -c etc/vigilant/vigilant.json --start
 
 # Make sure it is running
-$ ./daemon.py -c etc/observant/observant.cfg --status
+$ ./daemon.py -c etc/vigilant/vigilant.json --status
 {
     "transport": "UDP Transport localhost:8080",
     "watching": {
@@ -32,17 +30,14 @@ $ ./daemon.py -c etc/observant/observant.cfg --status
 True
 
 # kill the daemon gracefully
-$ ./daemon.py -c etc/observant/observant.cfg --kill
+$ ./daemon.py -c etc/vigilant/vigilant.json --kill
 ```
 
-## Creators
 
-**Philip Herron**
+## Configuration
 
-- <http://redbrain.co.uk>
-- <https://twitter.com/redzor>
-- <https://github.com/redbrain>
+The configuration is meant to be as simple as possible.
 
-## Copyright and license
+ * Transport Section defines the data-store location and protocol type currently only udp is supported by the data-store
+ * Daemon Section defines the lock and unix-socket path to use for the daemon.
 
-Code and documentation copyright 2014-2015 Philip Herron, Code released under [the MIT license](LICENSE). Docs released under Creative Commons.

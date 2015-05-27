@@ -1,6 +1,4 @@
-# Vigilant Front-end
-[![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
-
+# Front-end
 Front-end Webapp for Vigilant
 
 ##Setup
@@ -8,24 +6,36 @@ Front-end Webapp for Vigilant
 Flask Angularjs Dashbaord
 
 ```bash
-$ pip3 install requirements.txt
 $ bower install
+$ pip3 install requirements.txt
 
 # development
 $ ./dashboard.py
 
-# optional nginx development
+# optional nginx local development
 $ ./nginx.sh
 ```
 
-## Creators
+## Nginx real deployment
 
-**Philip Herron**
+Nginx configuration:
 
-- <http://redbrain.co.uk>
-- <https://twitter.com/redzor>
-- <https://github.com/redbrain>
+```bash
+$ cat /etc/nginx/sites-available/default
+server {
+    listen 80;
+    server_name dashboard.vigilantlabs.co.uk;
 
-## Copyright and license
+    location / { try_files $uri @yourapplication; }
+    location @yourapplication {
+    include uwsgi_params;
+        uwsgi_pass unix:/tmp/uwsgi.sock;
+    }
+}
+```
 
-Code and documentation copyright 2014-2015 Philip Herron, Code released under [the MIT license](LICENSE). Docs released under Creative Commons.
+Run the app.
+
+```bash
+$ sudo uwsgi -s /tmp/uwsgi.sock -w dashboard:app --chown-socket www-data:www-data --uid www-data --gid www-data
+```

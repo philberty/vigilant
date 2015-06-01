@@ -1,8 +1,6 @@
-[logo]: 
-
 # Vigilant
-[![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
 [![Build Status](http://jenkins.vigilantlabs.co.uk/buildStatus/icon?job=Vigilant)](http://jenkins.vigilantlabs.co.uk/job/Vigilant/)
+[![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
 
 Vigilant provides application driven stats monitoring. When you integrate your application
 with the Daemon bindings/library every time your application starts a daemon is created and

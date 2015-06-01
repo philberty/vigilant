@@ -8,6 +8,9 @@ all other processes will attach to this daemon sending watch/log/alert messages 
 are delivered to a datastore. Because your own applications know their pid (od.getpid()) you no
 longer need to manage your monitoring with runner scripts.
 
+## Tutorial
+
+Setup tutorial can be found here https://github.com/redbrain/vigilant/wiki/QuickSetup
 
 ## Daemon
 

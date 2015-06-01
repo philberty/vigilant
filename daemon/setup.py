@@ -8,5 +8,5 @@ setup(name='vigilant-daemon',
       author='Philip Herron',
       author_email='herron.philip@googlemail.com',
       packages=['Daemon'],
-      scripts=['daemon.py', 'taily.py']
+      scripts=['daemon.py']
 )

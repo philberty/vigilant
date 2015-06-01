@@ -1,3 +1,5 @@
+[logo]: 
+
 # Vigilant
 [![MIT License](http://b.repl.ca/v1/License-MIT-red.png)](LICENSE)
 [![Build Status](http://jenkins.vigilantlabs.co.uk/buildStatus/icon?job=Vigilant)](http://jenkins.vigilantlabs.co.uk/job/Vigilant/)

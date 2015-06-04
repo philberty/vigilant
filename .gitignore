@@ -1,8 +1,11 @@
-# Created by .gitignore support plugin (hsz.mobi)
+.DS_Store
+
 .idea
 build/
 
 venv
+
+front-end/Dashboard/www/js/lib/
 
 ### Python template
 # Byte-compiled / optimized / DLL files

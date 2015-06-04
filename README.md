@@ -10,7 +10,101 @@ longer need to manage your monitoring with runner scripts.
 
 ## Tutorial
 
-Setup tutorial can be found here https://github.com/redbrain/vigilant/wiki/QuickSetup
+Detailed Setup tutorial can be found here https://github.com/redbrain/vigilant/wiki/QuickSetup
+
+## Deps
+
+You will require Open/Oracle JDK >= 1.7, Python >= 3.4, Bower.
+
+Mac OSX
+```bash
+# download orcale jdk.
+$ brew install python3 npm
+$ npm install -g bower
+```
+
+Ubuntu
+
+```bash
+$ sudo apt-get install default-jdk python3.4 nodejs
+$ npm install -g bower
+```
+
+### Setup Daemon Agent
+
+Currently daemon2 is a WIP and not ready but Daemon is proof of concept. It requires python >= 3.4
+
+```bash
+$ cd daemon
+$ sudo pip3 install -r requirements.txt
+$ ./daemon.py -c etc/vigilant/vigilant.json --start
+```
+
+Editing the vigilant.json declares where data is sent and the protocol. Currently only udp is supported by the datastore.
+And i aim to keep using UDP as the main protocol. And use ack's for alerts/triggers from code to ensure they are sent.
+
+Using --stop or --status will stop the daemon or show status of what the agent is watching and sending the data to respectively.
+
+### Setup Datastore
+
+Once an agent is running the data needs to be recieved. The datastore will accept all the data and provide functionality over it.
+Written in Scala requires jdk >= 1.7.
+
+```bash
+$ cd datastore
+$ bower install
+$ cd etc/vigilant
+$ export VIGILANT_HOME=`pwd`
+$ cd -
+$ ./sbt
+> compile
+> test
+> container:start
+```
+
+Currently deploying the .war onto jetty or tomcat runner the websocket api doesnt work. Editing the vigilant configuration:
+
+```javascript
+    "transport": {
+        "type": "udp",
+        "host": "localhost",
+        "port": 8080
+    },
+
+    "triggers": {
+      "notification_threshold": 120 // How often should notifications be send if data continues to activate triggers. To stop notification spam.
+    },
+
+    "database": {
+      "jdbc": "jdbc:h2:./vigilant" // FIXME
+    },
+
+    "twillo": {
+        "account_sid": "", # twillo details to enable twillo notifications
+        "auth_token": "",
+        "from": ""
+    },
+
+    "email": {
+      "smtp_server": "localhost", # email details doesnt handle tls/ssl like gmail.com
+      "from": "someone@email.com"
+    }
+}
+```
+
+View swagger api documentation: http://localhost:8080/api and use /api-doc as the location to the documenation.
+
+### Front-end
+
+The front-end webapp is a seperate project abstracting datastores.
+
+```bash
+$ sudo pip3 install -r requirements.txt
+$ bower install
+$ ./dashboard.py
+```
+
+Go to http://localhost:5000/#/dashboard?store=http://localhost:8080
 
 ## Daemon
 

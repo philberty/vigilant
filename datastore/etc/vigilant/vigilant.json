@@ -21,6 +21,6 @@
 
     "email": {
       "smtp_server": "localhost",
-      "from": "notifications@vigilantlabs.co.uk"
+      "from": "someone@email.com"
     }
 }

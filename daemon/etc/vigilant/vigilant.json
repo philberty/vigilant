@@ -1,7 +1,7 @@
 {
   "transport": {
     "type": "udp",
-    "host": "server1.vigilantlabs.co.uk",
+    "host": "localhost",
     "port": 8080
   },
 

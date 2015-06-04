@@ -70,6 +70,7 @@ $ ./sbt
 Currently deploying the .war onto jetty or tomcat runner the websocket api doesnt work. Editing the vigilant configuration:
 
 ```javascript
+{
     "transport": {
         "type": "udp",
         "host": "localhost",
@@ -98,6 +99,8 @@ Currently deploying the .war onto jetty or tomcat runner the websocket api doesn
 ```
 
 View swagger api documentation: http://localhost:8080/api and use /api-doc as the location to the documenation.
+
+![Overview](/screenshots/overview.png "Overview")
 
 ### Front-end
 

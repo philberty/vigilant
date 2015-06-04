@@ -10,11 +10,8 @@ longer need to manage your monitoring with runner scripts.
 
 ## Screenshots
 
-![alt text][overview]
-![alt text][real-time]
-
-[overview]: images/overview.png
-[real-time]: images/real-time.png
+![Overview](/images/overview.png "Overview")
+![Real-Time](/images/real-time.png "Real-Time")
 
 ## Tutorial
 

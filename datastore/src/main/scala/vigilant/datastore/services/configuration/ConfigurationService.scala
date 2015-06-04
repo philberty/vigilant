@@ -15,8 +15,12 @@ object ConfigurationService {
 
   def load_configuration_from_file(filepath: String) = {
     _configuration = Json.parse(Files.readAllBytes(Paths.get(filepath)))
-    configure_email
-    configure_twillo
+    try {
+      configure_email
+      configure_twillo
+    } catch {
+      case _ =>
+    }
   }
 
   def configure_twillo = {

@@ -12,6 +12,13 @@ pushd _builds
 BUILD_DIR=`pwd`
 popd
 
+wget https://github.com/HardySimpson/zlog/archive/latest-stable.tar.gz
+tar zxvf latest-stable.tar.gz
+pushd zlog-latest-stable
+make PREFIX=$BUILD_DIR
+make install PREFIX=$BUILD_DIR
+popd
+
 wget ftp://ftp.mirrorservice.org/pub/i-scream/libstatgrab/libstatgrab-0.91.tar.gz
 tar zxvf libstatgrab-0.91.tar.gz
 pushd libstatgrab-0.91

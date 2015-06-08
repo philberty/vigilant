@@ -5,12 +5,15 @@
 Vigilant provides application driven stats monitoring. When you integrate your application
 with the Daemon bindings/library every time your application starts a daemon is created and
 all other processes will attach to this daemon sending watch/log/alert messages which in turn
-are delivered to a datastore. Because your own applications know their pid (od.getpid()) you no
+are delivered to a datastore. Because your own applications know their pid (os.getpid()) you no
 longer need to manage your monitoring with runner scripts.
 
 ## Screenshots
 
+Dynamic cluster model visualized using vis.js.
 ![Overview](/screenshots/overview.png "Overview")
+
+Real-time graphs using the web-socket api using vis.js.
 ![Real-Time](/screenshots/real-time.png "Real-Time")
 
 ## Tutorial

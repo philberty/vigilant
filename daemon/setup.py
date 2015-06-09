@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='vigilant-daemon',
-      version='0.2',
+      version='0.3',
       description='Data aggregation daemon',
       author='Philip Herron',
       author_email='herron.philip@googlemail.com',

@@ -53,6 +53,17 @@ And i aim to keep using UDP as the main protocol. And use ack's for alerts/trigg
 
 Using --stop or --status will stop the daemon or show status of what the agent is watching and sending the data to respectively.
 
+Watch another process:
+
+```bash
+$ ps aux | grep -i spotify | grep -v grep
+redbrain        54243   0.0  0.7  3465888  59412   ??  S     4:32pm   4:06.33 /Applications/Spotify.app/Contents/MacOS/Spotify
+
+$ ./daemon.py -c etc/vigilant/vigilant.json --watch spotify:54243
+```
+
+If the process dies vigilant will stop watching the process automatically.
+
 ### Setup Datastore
 
 Once an agent is running the data needs to be recieved. The datastore will accept all the data and provide functionality over it.

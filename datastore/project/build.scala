@@ -5,7 +5,7 @@ import sbt._
 object VigilantBuild extends Build {
   val Organization = "io.github.redbrain"
   val Name = "vigilant"
-  val Version = "0.3.0-SNAPSHOT"
+  val Version = "0.4.0-SNAPSHOT"
   val ScalaVersion = "2.11.6"
   val ScalatraVersion = "2.3.0"
 

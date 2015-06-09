@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='vigilant-www',
-      version='0.3',
+      version='0.4',
       description='Front-end webapp to vigilant',
       author='Philip Herron',
       author_email='herron.philip@googlemail.com',
